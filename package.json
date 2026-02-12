@@ -1,0 +1,30 @@
+{
+  "name": "rugby-stats-board",
+  "version": "1.0.0",
+  "description": "Rugby Statistics Board with Dual Display Support",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.rugby.statsboard",
+    "productName": "Rugby Stats Board",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!dist",
+      "!node_modules"
+    ]
+  }
+}

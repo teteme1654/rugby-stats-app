@@ -1,0 +1,253 @@
+const { app, BrowserWindow, ipcMain, dialog, screen } = require('electron');
+const path = require('path');
+const fs = require('fs');
+
+let mainWindow = null;
+let displayWindow = null;
+let matchData = {
+  hostTeam: { name: 'ホームチーム', logo: '', color: '#FF0000' },
+  awayTeam: { name: 'アウェイチーム', logo: '', color: '#0000FF' },
+  score: { host: 0, away: 0 },
+  stats: {
+    host: { tries: 0, conversions: 0, penaltyGoals: 0, dropGoals: 0 },
+    away: { tries: 0, conversions: 0, penaltyGoals: 0, dropGoals: 0 }
+  },
+  players: {
+    host: [],
+    away: []
+  },
+  substitutions: []
+};
+
+function createMainWindow() {
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width, height } = primaryDisplay.workAreaSize;
+
+  mainWindow = new BrowserWindow({
+    width: 1200,
+    height: 800,
+    x: 0,
+    y: 0,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js')
+    },
+    title: 'Rugby Stats - 管理画面'
+  });
+
+  mainWindow.loadFile('control.html');
+  mainWindow.webContents.openDevTools(); // 開発者ツールを開く
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+    if (displayWindow) {
+      displayWindow.close();
+    }
+  });
+}
+
+function createDisplayWindow() {
+  const displays = screen.getAllDisplays();
+  const externalDisplay = displays.find((display) => {
+    return display.bounds.x !== 0 || display.bounds.y !== 0;
+  }) || displays[0];
+
+  displayWindow = new BrowserWindow({
+    x: externalDisplay.bounds.x,
+    y: externalDisplay.bounds.y,
+    fullscreen: true,
+    frame: false,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js')
+    },
+    title: 'Rugby Stats - 表示画面'
+  });
+
+  displayWindow.loadFile('display.html');
+  displayWindow.webContents.openDevTools(); // 開発者ツールを開く
+  displayWindow.on('closed', () => {
+    displayWindow = null;
+  });
+}
+
+app.whenReady().then(() => {
+  createMainWindow();
+  createDisplayWindow();
+});
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});
+
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createMainWindow();
+  }
+});
+
+// IPC Handlers
+
+// データ取得
+ipcMain.handle('get-match-data', () => {
+  return matchData;
+});
+
+// スコア更新
+ipcMain.handle('update-score', (event, team, value) => {
+  matchData.score[team] = parseInt(value) || 0;
+  updateDisplay();
+  return matchData;
+});
+
+// 統計更新
+ipcMain.handle('update-stats', (event, team, stat, value) => {
+  matchData.stats[team][stat] = parseInt(value) || 0;
+  updateDisplay();
+  return matchData;
+});
+
+// チーム情報更新
+ipcMain.handle('update-team', (event, team, field, value) => {
+  matchData[team][field] = value;
+  updateDisplay();
+  return matchData;
+});
+
+// ロゴ画像読み込み
+ipcMain.handle('load-logo', async (event, team) => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openFile'],
+    filters: [
+      { name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'svg'] }
+    ]
+  });
+
+  if (result.canceled) {
+    return null;
+  }
+
+  try {
+    const filePath = result.filePaths[0];
+    const logoUrl = 'file://' + filePath;
+    matchData[team].logo = logoUrl;
+    updateDisplay();
+    return logoUrl;
+  } catch (error) {
+    console.error('ロゴ読み込みエラー:', error);
+    return null;
+  }
+});
+
+// CSV読み込み
+ipcMain.handle('load-csv', async (event, team) => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openFile'],
+    filters: [
+      { name: 'CSV Files', extensions: ['csv'] }
+    ]
+  });
+
+  if (result.canceled) {
+    return null;
+  }
+
+  try {
+    const filePath = result.filePaths[0];
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const lines = content.split('\n').filter(line => line.trim());
+    const players = [];
+
+    // ヘッダー行をスキップして処理
+    for (let i = 1; i < lines.length; i++) {
+      const parts = lines[i].split(',').map(p => p.trim());
+      if (parts.length >= 2) {
+        players.push({
+          number: parts[0],
+          name: parts[1],
+          position: parts[2] || ''
+        });
+      }
+    }
+
+    matchData.players[team] = players;
+    updateDisplay();
+    return players;
+  } catch (error) {
+    console.error('CSV読み込みエラー:', error);
+    return null;
+  }
+});
+
+// 選手交代
+ipcMain.handle('substitute-player', (event, team, outNumber, inNumber) => {
+  try {
+    const sub = {
+      team,
+      out: outNumber,
+      in: inNumber,
+      time: new Date().toISOString()
+    };
+    matchData.substitutions.push(sub);
+    
+    // 実際の選手データを更新
+    const players = matchData.players[team];
+    if (!players || players.length === 0) {
+      throw new Error(`${team}チームの選手データが読み込まれていません`);
+    }
+    
+    const outPlayerIndex = players.findIndex(p => p.number === outNumber);
+    const inPlayerIndex = players.findIndex(p => p.number === inNumber);
+    
+    if (outPlayerIndex === -1) {
+      throw new Error(`背番号${outNumber}の選手が見つかりません`);
+    }
+    if (inPlayerIndex === -1) {
+      throw new Error(`背番号${inNumber}の選手が見つかりません`);
+    }
+    
+    const outPlayer = players[outPlayerIndex];
+    const inPlayer = players[inPlayerIndex];
+    
+    // OUT選手とIN選手を入れ替える
+    // OUT選手の位置に：IN選手の背番号 + OUT選手のポジション + IN選手の名前
+    players[outPlayerIndex] = { 
+      number: inNumber,              // IN選手の背番号そのまま
+      position: outPlayer.position,  // OUT選手のポジション維持
+      name: inPlayer.name            // IN選手の名前
+    };
+    
+    // IN選手の位置に：OUT選手の背番号 + IN選手のポジション + OUT選手の名前
+    players[inPlayerIndex] = {
+      number: outNumber,             // OUT選手の背番号
+      position: inPlayer.position,   // IN選手のポジション維持
+      name: outPlayer.name           // OUT選手の名前
+    };
+    
+    updateDisplay();
+    return { success: true, substitutions: matchData.substitutions };
+  } catch (error) {
+    console.error('選手交代エラー:', error);
+    throw error;
+  }
+});
+
+// 表示画面を更新
+function updateDisplay() {
+  if (displayWindow && !displayWindow.isDestroyed()) {
+    displayWindow.webContents.send('update-data', matchData);
+  }
+}
+
+// 表示画面の開閉
+ipcMain.handle('toggle-display', () => {
+  if (displayWindow && !displayWindow.isDestroyed()) {
+    displayWindow.close();
+    displayWindow = null;
+  } else {
+    createDisplayWindow();
+  }
+});
