@@ -104,12 +104,6 @@
       font-weight: 700;
     }
 
-    .score-row.total {
-      border-top: 3px solid rgba(255,255,255,0.3);
-      padding-top: 5px;
-      margin-top: 5px;
-    }
-
     .score-label {
       font-size: 0.8em;
       color: rgba(255,255,255,0.7);
@@ -304,17 +298,13 @@
             <span class="score-label">後半</span>
             <span class="score-value" id="hostSecondHalfScore">12</span>
           </div>
-          <div class="score-row total">
-            <span class="score-label">合計</span>
-            <span class="score-value" id="hostScore">24</span>
-          </div>
         </div>
 
         <!-- 中央メインスコア -->
         <div class="main-score">
-          <div class="score" id="hostMainScore">24</div>
+          <div class="score" id="hostScore">24</div>
           <div class="score-separator">-</div>
-          <div class="score" id="awayMainScore">17</div>
+          <div class="score" id="awayScore">17</div>
         </div>
 
         <!-- アウェイ側スコア -->
@@ -324,9 +314,6 @@
           </div>
           <div class="score-row">
             <span class="score-value" id="awaySecondHalfScore">7</span>
-          </div>
-          <div class="score-row total">
-            <span class="score-value" id="awayScore">17</span>
           </div>
         </div>
       </div>
