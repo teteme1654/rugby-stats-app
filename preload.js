@@ -28,8 +28,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // スコアボードの開閉
   toggleScoreboard: () => ipcRenderer.invoke('toggle-scoreboard'),
   
+  // クロマキースコアボードの開閉
+  toggleScoreboardChromakey: () => ipcRenderer.invoke('toggle-scoreboard-chromakey'),
+  
   // スコアボードを閉じる
   closeScoreboard: () => ipcRenderer.invoke('close-scoreboard'),
+  
+  // クロマキースコアボードを閉じる
+  closeScoreboardChromakey: () => ipcRenderer.invoke('close-scoreboard-chromakey'),
   
   // 常に最前面表示の切り替え
   setAlwaysOnTop: (windowType, flag) => ipcRenderer.invoke('set-always-on-top', windowType, flag),

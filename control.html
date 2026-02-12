@@ -394,6 +394,7 @@
       <div class="quick-actions">
         <button class="action-btn" onclick="toggleDisplayWindow()">📺 表示画面 ON/OFF</button>
         <button class="action-btn" onclick="toggleScoreboardWindow()">🎬 透過スコアボード ON/OFF</button>
+        <button class="action-btn" onclick="toggleScoreboardChromakeyWindow()">🎥 クロマキースコアボード ON/OFF</button>
         <button class="action-btn secondary" onclick="resetMatch()">🔄 試合リセット</button>
       </div>
       <div class="status-bar">
@@ -639,6 +640,11 @@
     // スコアボードの開閉
     async function toggleScoreboardWindow() {
       await window.electronAPI.toggleScoreboard();
+    }
+
+    // クロマキースコアボードの開閉
+    async function toggleScoreboardChromakeyWindow() {
+      await window.electronAPI.toggleScoreboardChromakey();
     }
 
     // 試合リセット

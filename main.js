@@ -5,6 +5,7 @@ const fs = require('fs');
 let mainWindow = null;
 let displayWindow = null;
 let scoreboardWindow = null;
+let scoreboardChromakeyWindow = null;
 let matchData = {
   hostTeam: { name: 'ホームチーム', logo: '', color: '#FF0000' },
   awayTeam: { name: 'アウェイチーム', logo: '', color: '#0000FF' },
@@ -107,6 +108,43 @@ function createScoreboardWindow() {
   scoreboardWindow.webContents.openDevTools(); // 開発者ツールを開く
   scoreboardWindow.on('closed', () => {
     scoreboardWindow = null;
+  });
+}
+
+function createScoreboardChromakeyWindow() {
+  const displays = screen.getAllDisplays();
+  
+  // 3台目のモニターがあればそこに、なければメインディスプレイに配置
+  let targetDisplay = displays[0];
+  if (displays.length >= 3) {
+    targetDisplay = displays[2];
+  }
+
+  const displayWidth = targetDisplay.bounds.width;
+  const displayHeight = targetDisplay.bounds.height;
+  const scoreboardHeight = 150; // スコアボードの高さ
+
+  scoreboardChromakeyWindow = new BrowserWindow({
+    width: displayWidth,
+    height: scoreboardHeight,
+    x: targetDisplay.bounds.x,
+    y: targetDisplay.bounds.y + displayHeight - scoreboardHeight, // 画面最下部に配置
+    frame: false,
+    transparent: false, // クロマキー版は不透明
+    alwaysOnTop: true,
+    resizable: false, // リサイズ不可
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js')
+    },
+    title: 'Rugby Stats - クロマキースコアボード'
+  });
+
+  scoreboardChromakeyWindow.loadFile('scoreboard-chromakey.html');
+  scoreboardChromakeyWindow.webContents.openDevTools(); // 開発者ツールを開く
+  scoreboardChromakeyWindow.on('closed', () => {
+    scoreboardChromakeyWindow = null;
   });
 }
 
@@ -300,6 +338,9 @@ function updateDisplay() {
   if (scoreboardWindow && !scoreboardWindow.isDestroyed()) {
     scoreboardWindow.webContents.send('update-data', matchData);
   }
+  if (scoreboardChromakeyWindow && !scoreboardChromakeyWindow.isDestroyed()) {
+    scoreboardChromakeyWindow.webContents.send('update-data', matchData);
+  }
 }
 
 // 表示画面の開閉
@@ -322,6 +363,16 @@ ipcMain.handle('toggle-scoreboard', () => {
   }
 });
 
+// クロマキースコアボードの開閉
+ipcMain.handle('toggle-scoreboard-chromakey', () => {
+  if (scoreboardChromakeyWindow && !scoreboardChromakeyWindow.isDestroyed()) {
+    scoreboardChromakeyWindow.close();
+    scoreboardChromakeyWindow = null;
+  } else {
+    createScoreboardChromakeyWindow();
+  }
+});
+
 // スコアボードを閉じる
 ipcMain.handle('close-scoreboard', () => {
   if (scoreboardWindow && !scoreboardWindow.isDestroyed()) {
@@ -330,9 +381,20 @@ ipcMain.handle('close-scoreboard', () => {
   }
 });
 
+// クロマキースコアボードを閉じる
+ipcMain.handle('close-scoreboard-chromakey', () => {
+  if (scoreboardChromakeyWindow && !scoreboardChromakeyWindow.isDestroyed()) {
+    scoreboardChromakeyWindow.close();
+    scoreboardChromakeyWindow = null;
+  }
+});
+
 // 常に最前面表示の切り替え
 ipcMain.handle('set-always-on-top', (event, windowType, flag) => {
   if (windowType === 'scoreboard' && scoreboardWindow && !scoreboardWindow.isDestroyed()) {
     scoreboardWindow.setAlwaysOnTop(flag);
+  }
+  if (windowType === 'scoreboard-chromakey' && scoreboardChromakeyWindow && !scoreboardChromakeyWindow.isDestroyed()) {
+    scoreboardChromakeyWindow.setAlwaysOnTop(flag);
   }
 });
