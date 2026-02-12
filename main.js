@@ -4,6 +4,7 @@ const fs = require('fs');
 
 let mainWindow = null;
 let displayWindow = null;
+let scoreboardWindow = null;
 let matchData = {
   hostTeam: { name: 'ホームチーム', logo: '', color: '#FF0000' },
   awayTeam: { name: 'アウェイチーム', logo: '', color: '#0000FF' },
@@ -69,6 +70,39 @@ function createDisplayWindow() {
   displayWindow.webContents.openDevTools(); // 開発者ツールを開く
   displayWindow.on('closed', () => {
     displayWindow = null;
+  });
+}
+
+function createScoreboardWindow() {
+  const displays = screen.getAllDisplays();
+  
+  // 3台目のモニターがあればそこに、なければメインディスプレイに配置
+  let targetDisplay = displays[0];
+  if (displays.length >= 3) {
+    targetDisplay = displays[2];
+  }
+
+  scoreboardWindow = new BrowserWindow({
+    width: 1200,
+    height: 200,
+    x: targetDisplay.bounds.x + 100,
+    y: targetDisplay.bounds.y + 100,
+    frame: false,
+    transparent: true,
+    alwaysOnTop: true,
+    resizable: true,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js')
+    },
+    title: 'Rugby Stats - 透過スコアボード'
+  });
+
+  scoreboardWindow.loadFile('scoreboard.html');
+  scoreboardWindow.webContents.openDevTools(); // 開発者ツールを開く
+  scoreboardWindow.on('closed', () => {
+    scoreboardWindow = null;
   });
 }
 
@@ -259,6 +293,9 @@ function updateDisplay() {
   if (displayWindow && !displayWindow.isDestroyed()) {
     displayWindow.webContents.send('update-data', matchData);
   }
+  if (scoreboardWindow && !scoreboardWindow.isDestroyed()) {
+    scoreboardWindow.webContents.send('update-data', matchData);
+  }
 }
 
 // 表示画面の開閉
@@ -268,5 +305,30 @@ ipcMain.handle('toggle-display', () => {
     displayWindow = null;
   } else {
     createDisplayWindow();
+  }
+});
+
+// スコアボードの開閉
+ipcMain.handle('toggle-scoreboard', () => {
+  if (scoreboardWindow && !scoreboardWindow.isDestroyed()) {
+    scoreboardWindow.close();
+    scoreboardWindow = null;
+  } else {
+    createScoreboardWindow();
+  }
+});
+
+// スコアボードを閉じる
+ipcMain.handle('close-scoreboard', () => {
+  if (scoreboardWindow && !scoreboardWindow.isDestroyed()) {
+    scoreboardWindow.close();
+    scoreboardWindow = null;
+  }
+});
+
+// 常に最前面表示の切り替え
+ipcMain.handle('set-always-on-top', (event, windowType, flag) => {
+  if (windowType === 'scoreboard' && scoreboardWindow && !scoreboardWindow.isDestroyed()) {
+    scoreboardWindow.setAlwaysOnTop(flag);
   }
 });

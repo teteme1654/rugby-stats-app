@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rugby Stats - 透過スコアボード</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial Black', 'Arial', sans-serif;
+      background: transparent;
+      color: white;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      -webkit-app-region: drag; /* ウィンドウをドラッグ可能に */
+    }
+
+    .scoreboard-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      background: linear-gradient(135deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.75) 100%);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      margin: 20px;
+      gap: 30px;
+      -webkit-app-region: no-drag; /* 内部要素はドラッグ不可 */
+    }
+
+    .team-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex: 1;
+    }
+
+    .team-section.away {
+      flex-direction: row-reverse;
+    }
+
+    .team-logo {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .team-info {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .team-section.away .team-info {
+      align-items: flex-end;
+    }
+
+    .team-name {
+      font-size: 1.8em;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+      color: var(--team-color, #ffffff);
+    }
+
+    .team-stats {
+      font-size: 0.9em;
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 600;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+    }
+
+    .score-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 10px 30px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .score {
+      font-size: 4em;
+      font-weight: 900;
+      color: white;
+      text-shadow: 3px 3px 10px rgba(0,0,0,0.9);
+      min-width: 80px;
+      text-align: center;
+    }
+
+    .score-separator {
+      font-size: 4em;
+      color: rgba(255, 255, 255, 0.5);
+      font-weight: 900;
+    }
+
+    /* チームカラーのアクセント */
+    .team-section.host .team-name {
+      color: var(--host-color, #ff6b35);
+    }
+
+    .team-section.away .team-name {
+      color: var(--away-color, #4a90e2);
+    }
+
+    .team-section.host .team-logo {
+      border-color: var(--host-color, #ff6b35);
+      box-shadow: 0 0 20px var(--host-color, #ff6b35);
+    }
+
+    .team-section.away .team-logo {
+      border-color: var(--away-color, #4a90e2);
+      box-shadow: 0 0 20px var(--away-color, #4a90e2);
+    }
+
+    /* ウィンドウコントロール */
+    .window-controls {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      gap: 10px;
+      z-index: 1000;
+      -webkit-app-region: no-drag;
+    }
+
+    .control-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      backdrop-filter: blur(5px);
+      transition: all 0.3s;
+    }
+
+    .control-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+
+    .control-btn.close {
+      background: rgba(255, 59, 48, 0.8);
+    }
+
+    .control-btn.close:hover {
+      background: rgba(255, 59, 48, 1);
+    }
+  </style>
+</head>
+<body>
+  <div class="window-controls">
+    <button class="control-btn" onclick="toggleAlwaysOnTop()" title="最前面表示切替">📌</button>
+    <button class="control-btn close" onclick="closeWindow()" title="閉じる">✕</button>
+  </div>
+
+  <div class="scoreboard-container">
+    <!-- ホームチーム -->
+    <div class="team-section host">
+      <img src="" alt="" class="team-logo" id="hostLogo" onerror="this.style.display='none'">
+      <div class="team-info">
+        <div class="team-name" id="hostName">HOME TEAM</div>
+        <div class="team-stats">
+          TRY:<span id="hostTries">0</span> 
+          CG:<span id="hostConversions">0</span> 
+          PG:<span id="hostPG">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- スコア -->
+    <div class="score-section">
+      <div class="score" id="hostScore">0</div>
+      <div class="score-separator">-</div>
+      <div class="score" id="awayScore">0</div>
+    </div>
+
+    <!-- アウェイチーム -->
+    <div class="team-section away">
+      <img src="" alt="" class="team-logo" id="awayLogo" onerror="this.style.display='none'">
+      <div class="team-info">
+        <div class="team-name" id="awayName">AWAY TEAM</div>
+        <div class="team-stats">
+          TRY:<span id="awayTries">0</span> 
+          CG:<span id="awayConversions">0</span> 
+          PG:<span id="awayPG">0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentData = null;
+    let isAlwaysOnTop = true;
+
+    async function loadData() {
+      try {
+        currentData = await window.electronAPI.getMatchData();
+        updateDisplay(currentData);
+      } catch (error) {
+        console.error('データ読み込みエラー:', error);
+      }
+    }
+
+    window.electronAPI.onUpdateData((data) => {
+      currentData = data;
+      updateDisplay(data);
+    });
+
+    function updateDisplay(data) {
+      if (!data) return;
+
+      // CSS変数でチームカラーを設定
+      document.documentElement.style.setProperty('--host-color', data.hostTeam.color || '#ff6b35');
+      document.documentElement.style.setProperty('--away-color', data.awayTeam.color || '#4a90e2');
+
+      // ホームチーム
+      document.getElementById('hostName').textContent = data.hostTeam.name.toUpperCase();
+      document.getElementById('hostScore').textContent = data.score.host;
+      document.getElementById('hostTries').textContent = data.stats.host.tries;
+      document.getElementById('hostConversions').textContent = data.stats.host.conversions;
+      document.getElementById('hostPG').textContent = data.stats.host.penaltyGoals;
+      
+      const hostLogo = document.getElementById('hostLogo');
+      if (data.hostTeam.logo) {
+        hostLogo.src = data.hostTeam.logo;
+        hostLogo.style.display = 'block';
+      }
+
+      // アウェイチーム
+      document.getElementById('awayName').textContent = data.awayTeam.name.toUpperCase();
+      document.getElementById('awayScore').textContent = data.score.away;
+      document.getElementById('awayTries').textContent = data.stats.away.tries;
+      document.getElementById('awayConversions').textContent = data.stats.away.conversions;
+      document.getElementById('awayPG').textContent = data.stats.away.penaltyGoals;
+      
+      const awayLogo = document.getElementById('awayLogo');
+      if (data.awayTeam.logo) {
+        awayLogo.src = data.awayTeam.logo;
+        awayLogo.style.display = 'block';
+      }
+    }
+
+    async function toggleAlwaysOnTop() {
+      isAlwaysOnTop = !isAlwaysOnTop;
+      await window.electronAPI.setAlwaysOnTop('scoreboard', isAlwaysOnTop);
+    }
+
+    async function closeWindow() {
+      await window.electronAPI.closeScoreboard();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadData();
+    });
+  </script>
+</body>
+</html>

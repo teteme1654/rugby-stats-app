@@ -25,6 +25,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // 表示画面の開閉
   toggleDisplay: () => ipcRenderer.invoke('toggle-display'),
   
+  // スコアボードの開閉
+  toggleScoreboard: () => ipcRenderer.invoke('toggle-scoreboard'),
+  
+  // スコアボードを閉じる
+  closeScoreboard: () => ipcRenderer.invoke('close-scoreboard'),
+  
+  // 常に最前面表示の切り替え
+  setAlwaysOnTop: (windowType, flag) => ipcRenderer.invoke('set-always-on-top', windowType, flag),
+  
   // データ更新イベントのリスナー（表示画面用）
   onUpdateData: (callback) => ipcRenderer.on('update-data', (event, data) => callback(data))
 });
+
