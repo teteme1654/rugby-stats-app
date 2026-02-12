@@ -314,10 +314,18 @@
 
       // 背景ロゴを設定（クリティカル修正）
       const bgLogo = document.getElementById('backgroundLogo');
-      if (bgLogo && data.hostTeam.logo) {
-        bgLogo.style.backgroundImage = 'url("' + data.hostTeam.logo + '")';
-        bgLogo.style.display = 'block';
-        console.log('背景ロゴ設定:', data.hostTeam.logo);
+      if (bgLogo) {
+        if (data.hostTeam.logo) {
+          bgLogo.style.backgroundImage = `url("${data.hostTeam.logo}")`;
+          bgLogo.style.display = 'block';
+          console.log('背景ロゴ設定成功:', data.hostTeam.logo);
+        } else {
+          bgLogo.style.backgroundImage = 'none';
+          bgLogo.style.display = 'none';
+          console.log('背景ロゴ未設定（ロゴURLが空です）');
+        }
+      } else {
+        console.error('backgroundLogo要素が見つかりません');
       }
 
       // ホームチームヘッダーにカラーを適用

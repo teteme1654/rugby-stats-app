@@ -573,6 +573,13 @@
         if (logoUrl) {
           const inputId = team === 'hostTeam' ? 'hostTeamLogo' : 'awayTeamLogo';
           document.getElementById(inputId).value = logoUrl;
+          
+          // 表示画面を更新するために明示的にupdateTeamを呼び出す
+          await window.electronAPI.updateTeam(team, 'logo', logoUrl);
+          
+          // UIを最新の状態に更新
+          await loadData();
+          
           alert('ロゴ画像を読み込みました');
         }
       } catch (error) {

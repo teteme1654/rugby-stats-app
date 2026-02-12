@@ -134,6 +134,7 @@ ipcMain.handle('load-logo', async (event, team) => {
     const filePath = result.filePaths[0];
     const logoUrl = 'file://' + filePath;
     matchData[team].logo = logoUrl;
+    console.log(`ロゴ設定完了: ${team} -> ${logoUrl}`);
     updateDisplay();
     return logoUrl;
   } catch (error) {
