@@ -132,11 +132,29 @@ ipcMain.handle('load-logo', async (event, team) => {
 
   try {
     const filePath = result.filePaths[0];
-    const logoUrl = 'file://' + filePath;
-    matchData[team].logo = logoUrl;
-    console.log(`ロゴ設定完了: ${team} -> ${logoUrl}`);
+    
+    // 画像ファイルをBase64エンコードして読み込む
+    const imageBuffer = fs.readFileSync(filePath);
+    const base64Image = imageBuffer.toString('base64');
+    
+    // ファイル拡張子からMIMEタイプを判定
+    const ext = path.extname(filePath).toLowerCase();
+    let mimeType = 'image/png';
+    if (ext === '.jpg' || ext === '.jpeg') {
+      mimeType = 'image/jpeg';
+    } else if (ext === '.gif') {
+      mimeType = 'image/gif';
+    } else if (ext === '.svg') {
+      mimeType = 'image/svg+xml';
+    }
+    
+    // Data URI形式に変換
+    const dataUri = `data:${mimeType};base64,${base64Image}`;
+    
+    matchData[team].logo = dataUri;
+    console.log(`ロゴ設定完了: ${team} -> Data URI (${base64Image.length} bytes)`);
     updateDisplay();
-    return logoUrl;
+    return dataUri;
   } catch (error) {
     console.error('ロゴ読み込みエラー:', error);
     return null;
