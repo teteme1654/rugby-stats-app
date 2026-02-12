@@ -25,65 +25,49 @@
 
     .scoreboard-container {
       display: flex;
-      align-items: center;
+      align-items: stretch;
       justify-content: space-between;
-      padding: 20px 60px;
       width: 100%;
-      background: linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(20,20,30,0.85) 100%);
-      backdrop-filter: blur(10px);
-      box-shadow: 
-        0 -4px 30px rgba(0,0,0,0.5),
-        inset 0 1px 0 rgba(255,255,255,0.1);
-      gap: 40px;
+      height: 100%;
       position: relative;
       -webkit-app-region: no-drag; /* 内部要素はドラッグ不可 */
-      border-top: 3px solid;
-      border-image: linear-gradient(90deg, 
-        var(--host-color, #ff6b35) 0%, 
-        rgba(255,255,255,0.3) 50%, 
-        var(--away-color, #4a90e2) 100%) 1;
-    }
-    
-    .scoreboard-container::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
       background: linear-gradient(90deg, 
-        var(--host-color, #ff6b35) 0%, 
-        transparent 20%,
-        transparent 80%, 
-        var(--away-color, #4a90e2) 100%);
-      opacity: 0.8;
+        var(--host-color, #d32f2f) 0%, 
+        var(--host-color, #d32f2f) 35%,
+        rgba(50,50,60,0.95) 35%,
+        rgba(50,50,60,0.95) 65%,
+        var(--away-color, #1976d2) 65%,
+        var(--away-color, #1976d2) 100%
+      );
     }
 
     .team-section {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 15px;
       flex: 1;
+      padding: 15px 30px;
+      justify-content: flex-start;
     }
 
     .team-section.away {
       flex-direction: row-reverse;
+      justify-content: flex-start;
     }
 
     .team-logo {
-      width: 80px;
-      height: 80px;
+      width: 70px;
+      height: 70px;
       object-fit: contain;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
       padding: 8px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      border: 3px solid rgba(255, 255, 255, 0.2);
     }
 
     .team-info {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 0px;
     }
 
     .team-section.away .team-info {
@@ -91,63 +75,61 @@
     }
 
     .team-name {
-      font-size: 1.8em;
+      font-size: 1.6em;
       font-weight: 900;
       text-transform: uppercase;
       letter-spacing: 1px;
-      text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
-      color: var(--team-color, #ffffff);
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.5);
+      color: white;
     }
 
     .team-stats {
-      font-size: 0.9em;
-      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.8em;
+      color: rgba(255, 255, 255, 0.85);
       font-weight: 600;
-      text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+      display: none; /* 統計情報を非表示 */
     }
 
     .score-section {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 20px;
-      padding: 10px 30px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 15px;
-      border: 2px solid rgba(255, 255, 255, 0.2);
+      padding: 0 40px;
+      min-width: 280px;
     }
 
     .score {
-      font-size: 4em;
+      font-size: 4.5em;
       font-weight: 900;
       color: white;
-      text-shadow: 3px 3px 10px rgba(0,0,0,0.9);
-      min-width: 80px;
+      text-shadow: 3px 3px 10px rgba(0,0,0,0.7);
+      min-width: 90px;
       text-align: center;
     }
 
     .score-separator {
       font-size: 4em;
-      color: rgba(255, 255, 255, 0.5);
+      color: rgba(255, 255, 255, 0.7);
       font-weight: 900;
     }
 
     /* チームカラーのアクセント */
     .team-section.host .team-name {
-      color: var(--host-color, #ff6b35);
+      color: white;
     }
 
     .team-section.away .team-name {
-      color: var(--away-color, #4a90e2);
+      color: white;
     }
 
     .team-section.host .team-logo {
-      border-color: var(--host-color, #ff6b35);
-      box-shadow: 0 0 20px var(--host-color, #ff6b35);
+      background: rgba(255, 255, 255, 0.2);
     }
 
     .team-section.away .team-logo {
-      border-color: var(--away-color, #4a90e2);
-      box-shadow: 0 0 20px var(--away-color, #4a90e2);
+      background: rgba(255, 255, 255, 0.2);
     }
 
     /* ウィンドウコントロール */
