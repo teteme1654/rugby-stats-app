@@ -501,11 +501,22 @@
 
       document.getElementById('hostName').textContent = data.hostTeam.name.toUpperCase();
       document.getElementById('hostScore').textContent = data.score.host;
-      document.getElementById('hostTries').textContent = data.stats.host.tries;
-      document.getElementById('hostConversions').textContent = data.stats.host.conversions;
-      document.getElementById('hostPG').textContent = data.stats.host.penaltyGoals;
-      document.getElementById('hostDG').textContent = data.stats.host.dropGoals || 0;
-      document.getElementById('hostPT').textContent = data.stats.host.penaltyTries || 0;
+      
+      // 前半/後半スコア
+      document.getElementById('hostFirstHalfScore').textContent = data.halfScores.first.host;
+      document.getElementById('hostSecondHalfScore').textContent = data.halfScores.second.host;
+      
+      // 前半/後半統計
+      document.getElementById('hostTriesFirst').textContent = data.stats.host.first.tries;
+      document.getElementById('hostTriesSecond').textContent = data.stats.host.second.tries;
+      document.getElementById('hostConversionsFirst').textContent = data.stats.host.first.conversions;
+      document.getElementById('hostConversionsSecond').textContent = data.stats.host.second.conversions;
+      document.getElementById('hostPGFirst').textContent = data.stats.host.first.penaltyGoals;
+      document.getElementById('hostPGSecond').textContent = data.stats.host.second.penaltyGoals;
+      document.getElementById('hostDGFirst').textContent = data.stats.host.first.dropGoals || 0;
+      document.getElementById('hostDGSecond').textContent = data.stats.host.second.dropGoals || 0;
+      document.getElementById('hostPTFirst').textContent = data.stats.host.first.penaltyTries || 0;
+      document.getElementById('hostPTSecond').textContent = data.stats.host.second.penaltyTries || 0;
       
       const hostLogo = document.getElementById('hostLogo');
       if (data.hostTeam.logo) {
@@ -520,11 +531,23 @@
 
       document.getElementById('awayName').textContent = data.awayTeam.name.toUpperCase();
       document.getElementById('awayScore').textContent = data.score.away;
-      document.getElementById('awayTries').textContent = data.stats.away.tries;
-      document.getElementById('awayConversions').textContent = data.stats.away.conversions;
-      document.getElementById('awayPG').textContent = data.stats.away.penaltyGoals;
-      document.getElementById('awayDG').textContent = data.stats.away.dropGoals || 0;
-      document.getElementById('awayPT').textContent = data.stats.away.penaltyTries || 0;
+      
+      // 前半/後半スコア
+      document.getElementById('awayFirstHalfScore').textContent = data.halfScores.first.away;
+      document.getElementById('awaySecondHalfScore').textContent = data.halfScores.second.away;
+      
+      // 前半/後半統計
+      document.getElementById('awayTriesFirst').textContent = data.stats.away.first.tries;
+      document.getElementById('awayTriesSecond').textContent = data.stats.away.second.tries;
+      document.getElementById('awayConversionsFirst').textContent = data.stats.away.first.conversions;
+      document.getElementById('awayConversionsSecond').textContent = data.stats.away.second.conversions;
+      document.getElementById('awayPGFirst').textContent = data.stats.away.first.penaltyGoals;
+      document.getElementById('awayPGSecond').textContent = data.stats.away.second.penaltyGoals;
+      document.getElementById('awayDGFirst').textContent = data.stats.away.first.dropGoals || 0;
+      document.getElementById('awayDGSecond').textContent = data.stats.away.second.dropGoals || 0;
+      document.getElementById('awayPTFirst').textContent = data.stats.away.first.penaltyTries || 0;
+      document.getElementById('awayPTSecond').textContent = data.stats.away.second.penaltyTries || 0;
+
       
       const awayLogo = document.getElementById('awayLogo');
       if (data.awayTeam.logo) {

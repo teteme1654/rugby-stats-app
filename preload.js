@@ -4,11 +4,20 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // データ取得
   getMatchData: () => ipcRenderer.invoke('get-match-data'),
   
+  // 前半/後半切り替え
+  switchHalf: (half) => ipcRenderer.invoke('switch-half', half),
+  
   // スコア更新
   updateScore: (team, value) => ipcRenderer.invoke('update-score', team, value),
   
+  // 前半/後半スコア更新
+  updateHalfScore: (half, team, value) => ipcRenderer.invoke('update-half-score', half, team, value),
+  
   // 統計更新
   updateStats: (team, stat, value) => ipcRenderer.invoke('update-stats', team, stat, value),
+  
+  // 前半/後半統計更新
+  updateHalfStats: (half, team, stat, value) => ipcRenderer.invoke('update-half-stats', half, team, stat, value),
   
   // チーム情報更新
   updateTeam: (team, field, value) => ipcRenderer.invoke('update-team', team, field, value),

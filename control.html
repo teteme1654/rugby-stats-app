@@ -412,11 +412,14 @@
     };
 
     // 前半/後半切り替え
-    function switchHalf(half) {
+    async function switchHalf(half) {
       currentHalf = half;
       document.getElementById('currentHalfDisplay').textContent = half === 'first' ? '前半' : '後半';
       document.getElementById('halfBtn1').style.background = half === 'first' ? '#667eea' : '#6c757d';
       document.getElementById('halfBtn2').style.background = half === 'second' ? '#667eea' : '#6c757d';
+      
+      // サーバー側にも通知
+      await window.electronAPI.switchHalf(half);
     }
 
     // スコア加算
@@ -443,18 +446,17 @@
           break;
       }
       
-      // 統計を更新
-      const displayId = `${team}${statKey === 'tries' ? 'Tries' : statKey === 'conversions' ? 'Conversions' : statKey === 'penaltyGoals' ? 'PG' : 'DG'}Display`;
-      const currentStat = parseInt(document.getElementById(displayId).textContent);
-      await window.electronAPI.updateStats(team, statKey, currentStat + 1);
+      // 現在のデータを取得
+      const data = await window.electronAPI.getMatchData();
+      
+      // 前半/後半の統計を更新
+      const currentStat = data.stats[team][currentHalf][statKey];
+      await window.electronAPI.updateHalfStats(currentHalf, team, statKey, currentStat + 1);
       
       // 前半/後半スコアを更新
       halfScores[currentHalf][team] += points;
       document.getElementById(`${team}${currentHalf === 'first' ? 'First' : 'Second'}HalfScore`).textContent = halfScores[currentHalf][team];
-      
-      // 合計スコアを更新
-      const totalScore = halfScores.first[team] + halfScores.second[team];
-      await window.electronAPI.updateScore(team, totalScore);
+      await window.electronAPI.updateHalfScore(currentHalf, team, halfScores[currentHalf][team]);
       
       // 表示を更新
       await loadData();

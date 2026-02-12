@@ -10,15 +10,28 @@ let matchData = {
   hostTeam: { name: 'ホームチーム', logo: '', color: '#FF0000' },
   awayTeam: { name: 'アウェイチーム', logo: '', color: '#0000FF' },
   score: { host: 0, away: 0 },
+  halfScores: {
+    first: { host: 0, away: 0 },
+    second: { host: 0, away: 0 }
+  },
   stats: {
-    host: { tries: 0, conversions: 0, penaltyGoals: 0, dropGoals: 0 },
-    away: { tries: 0, conversions: 0, penaltyGoals: 0, dropGoals: 0 }
+    host: { 
+      tries: 0, conversions: 0, penaltyGoals: 0, dropGoals: 0,
+      first: { tries: 0, conversions: 0, penaltyGoals: 0, dropGoals: 0 },
+      second: { tries: 0, conversions: 0, penaltyGoals: 0, dropGoals: 0 }
+    },
+    away: { 
+      tries: 0, conversions: 0, penaltyGoals: 0, dropGoals: 0,
+      first: { tries: 0, conversions: 0, penaltyGoals: 0, dropGoals: 0 },
+      second: { tries: 0, conversions: 0, penaltyGoals: 0, dropGoals: 0 }
+    }
   },
   players: {
     host: [],
     away: []
   },
-  substitutions: []
+  substitutions: [],
+  currentHalf: 'first' // 'first' or 'second'
 };
 
 function createMainWindow() {
@@ -172,6 +185,13 @@ ipcMain.handle('get-match-data', () => {
   return matchData;
 });
 
+// 前半/後半切り替え
+ipcMain.handle('switch-half', (event, half) => {
+  matchData.currentHalf = half;
+  updateDisplay();
+  return matchData;
+});
+
 // スコア更新
 ipcMain.handle('update-score', (event, team, value) => {
   matchData.score[team] = parseInt(value) || 0;
@@ -179,9 +199,27 @@ ipcMain.handle('update-score', (event, team, value) => {
   return matchData;
 });
 
+// 前半/後半スコア更新
+ipcMain.handle('update-half-score', (event, half, team, value) => {
+  matchData.halfScores[half][team] = parseInt(value) || 0;
+  // 合計スコアも更新
+  matchData.score[team] = matchData.halfScores.first[team] + matchData.halfScores.second[team];
+  updateDisplay();
+  return matchData;
+});
+
 // 統計更新
 ipcMain.handle('update-stats', (event, team, stat, value) => {
   matchData.stats[team][stat] = parseInt(value) || 0;
+  updateDisplay();
+  return matchData;
+});
+
+// 前半/後半統計更新
+ipcMain.handle('update-half-stats', (event, half, team, stat, value) => {
+  matchData.stats[team][half][stat] = parseInt(value) || 0;
+  // 合計も更新
+  matchData.stats[team][stat] = matchData.stats[team].first[stat] + matchData.stats[team].second[stat];
   updateDisplay();
   return matchData;
 });
