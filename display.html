@@ -86,8 +86,52 @@
     .score-section {
       display: flex;
       align-items: center;
-      gap: 30px;
+      gap: 40px;
       padding: 0 40px;
+    }
+
+    .score-column {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.8em;
+      font-weight: 700;
+    }
+
+    .score-row.total {
+      border-top: 3px solid rgba(255,255,255,0.3);
+      padding-top: 5px;
+      margin-top: 5px;
+    }
+
+    .score-label {
+      font-size: 0.8em;
+      color: rgba(255,255,255,0.7);
+      min-width: 50px;
+    }
+
+    .score-value {
+      font-size: 1.2em;
+      color: white;
+      font-weight: 900;
+      min-width: 60px;
+      text-align: right;
+    }
+
+    .score-column.away .score-value {
+      text-align: left;
+    }
+
+    .main-score {
+      display: flex;
+      align-items: center;
+      gap: 20px;
     }
 
     .score {
@@ -167,22 +211,58 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 30px;
-      min-width: 300px;
+      gap: 20px;
+      min-width: 400px;
+    }
+
+    .stats-header {
+      display: grid;
+      grid-template-columns: 120px 100px 120px;
+      gap: 20px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .stats-col {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stats-col.host-stats {
+      justify-content: flex-end;
+    }
+
+    .stats-col.away-stats {
+      justify-content: flex-start;
+    }
+
+    .stats-col.stat-names {
+      justify-content: center;
+    }
+
+    .half-label {
+      font-size: 0.9em;
+      color: rgba(255,255,255,0.6);
+      font-weight: 600;
+      min-width: 45px;
+      text-align: center;
     }
 
     .stat-row {
       display: grid;
-      grid-template-columns: 80px 100px 80px;
+      grid-template-columns: 120px 100px 120px;
+      gap: 20px;
       align-items: center;
-      gap: 10px;
-      font-size: 3em;
+      font-size: 2.5em;
       font-weight: 900;
     }
 
-    .stat-value.host {
-      color: var(--host-color, #ff6b35);
-      text-align: left;
+    .stat-value {
+      color: white;
+      min-width: 45px;
+      text-align: center;
     }
 
     .stat-label {
@@ -190,11 +270,7 @@
       text-align: center;
       font-size: 1em;
       letter-spacing: 2px;
-    }
-
-    .stat-value.away {
-      color: var(--away-color, #4a90e2);
-      text-align: right;
+      font-weight: 900;
     }
 
     @keyframes fadeIn {
@@ -218,9 +294,41 @@
       </div>
 
       <div class="score-section">
-        <div class="score" id="hostScore">24</div>
-        <div class="score-separator">-</div>
-        <div class="score" id="awayScore">17</div>
+        <!-- ホーム側スコア -->
+        <div class="score-column host">
+          <div class="score-row">
+            <span class="score-label">前半</span>
+            <span class="score-value" id="hostFirstHalfScore">12</span>
+          </div>
+          <div class="score-row">
+            <span class="score-label">後半</span>
+            <span class="score-value" id="hostSecondHalfScore">12</span>
+          </div>
+          <div class="score-row total">
+            <span class="score-label">合計</span>
+            <span class="score-value" id="hostScore">24</span>
+          </div>
+        </div>
+
+        <!-- 中央メインスコア -->
+        <div class="main-score">
+          <div class="score" id="hostMainScore">24</div>
+          <div class="score-separator">-</div>
+          <div class="score" id="awayMainScore">17</div>
+        </div>
+
+        <!-- アウェイ側スコア -->
+        <div class="score-column away">
+          <div class="score-row">
+            <span class="score-value" id="awayFirstHalfScore">10</span>
+          </div>
+          <div class="score-row">
+            <span class="score-value" id="awaySecondHalfScore">7</span>
+          </div>
+          <div class="score-row total">
+            <span class="score-value" id="awayScore">17</span>
+          </div>
+        </div>
       </div>
 
       <div class="team-header away">
@@ -233,30 +341,92 @@
       <div class="players-column host" id="hostPlayersList"></div>
 
       <div class="stats-panel">
-        <div class="stat-row">
-          <div class="stat-value host" id="hostTries">3</div>
-          <div class="stat-label">TRY</div>
-          <div class="stat-value away" id="awayTries">2</div>
+        <!-- ヘッダー行 -->
+        <div class="stats-header">
+          <div class="stats-col host-stats">
+            <span class="half-label">前半</span>
+            <span class="half-label">後半</span>
+          </div>
+          <div class="stats-col stat-names"></div>
+          <div class="stats-col away-stats">
+            <span class="half-label">前半</span>
+            <span class="half-label">後半</span>
+          </div>
         </div>
+
+        <!-- TRY -->
         <div class="stat-row">
-          <div class="stat-value host" id="hostConversions">3</div>
-          <div class="stat-label">CG</div>
-          <div class="stat-value away" id="awayConversions">2</div>
+          <div class="stats-col host-stats">
+            <span class="stat-value" id="hostTriesFirst">2</span>
+            <span class="stat-value" id="hostTriesSecond">1</span>
+          </div>
+          <div class="stats-col stat-names">
+            <span class="stat-label">TRY</span>
+          </div>
+          <div class="stats-col away-stats">
+            <span class="stat-value" id="awayTriesFirst">1</span>
+            <span class="stat-value" id="awayTriesSecond">1</span>
+          </div>
         </div>
+
+        <!-- CG -->
         <div class="stat-row">
-          <div class="stat-value host" id="hostPG">1</div>
-          <div class="stat-label">PG</div>
-          <div class="stat-value away" id="awayPG">1</div>
+          <div class="stats-col host-stats">
+            <span class="stat-value" id="hostConversionsFirst">2</span>
+            <span class="stat-value" id="hostConversionsSecond">1</span>
+          </div>
+          <div class="stats-col stat-names">
+            <span class="stat-label">CG</span>
+          </div>
+          <div class="stats-col away-stats">
+            <span class="stat-value" id="awayConversionsFirst">1</span>
+            <span class="stat-value" id="awayConversionsSecond">1</span>
+          </div>
         </div>
+
+        <!-- PG -->
         <div class="stat-row">
-          <div class="stat-value host" id="hostDG">0</div>
-          <div class="stat-label">DG</div>
-          <div class="stat-value away" id="awayDG">0</div>
+          <div class="stats-col host-stats">
+            <span class="stat-value" id="hostPGFirst">1</span>
+            <span class="stat-value" id="hostPGSecond">0</span>
+          </div>
+          <div class="stats-col stat-names">
+            <span class="stat-label">PG</span>
+          </div>
+          <div class="stats-col away-stats">
+            <span class="stat-value" id="awayPGFirst">1</span>
+            <span class="stat-value" id="awayPGSecond">0</span>
+          </div>
         </div>
+
+        <!-- DG -->
         <div class="stat-row">
-          <div class="stat-value host" id="hostPT">0</div>
-          <div class="stat-label">PT</div>
-          <div class="stat-value away" id="awayPT">0</div>
+          <div class="stats-col host-stats">
+            <span class="stat-value" id="hostDGFirst">0</span>
+            <span class="stat-value" id="hostDGSecond">0</span>
+          </div>
+          <div class="stats-col stat-names">
+            <span class="stat-label">DG</span>
+          </div>
+          <div class="stats-col away-stats">
+            <span class="stat-value" id="awayDGFirst">0</span>
+            <span class="stat-value" id="awayDGSecond">0</span>
+          </div>
+        </div>
+
+        <!-- PT -->
+        <div class="stat-row">
+          <div class="stats-col host-stats">
+            <span class="stat-value" id="hostPTFirst">0</span>
+            <span class="stat-value" id="hostPTSecond">0</span>
+          </div>
+          <div class="stats-col stat-names">
+            <span class="stat-label">PT</span>
+          </div>
+          <div class="stats-col away-stats">
+            <span class="stat-value" id="awayPTFirst">0</span>
+            <span class="stat-value" id="awayPTSecond">0</span>
+          </div>
         </div>
       </div>
 
