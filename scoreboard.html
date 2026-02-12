@@ -18,6 +18,8 @@
       overflow: hidden;
       width: 100vw;
       height: 100vh;
+      display: flex;
+      align-items: flex-end;
       -webkit-app-region: drag; /* ウィンドウをドラッグ可能に */
     }
 
@@ -25,14 +27,36 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 20px 40px;
-      background: linear-gradient(135deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.75) 100%);
+      padding: 20px 60px;
+      width: 100%;
+      background: linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(20,20,30,0.85) 100%);
       backdrop-filter: blur(10px);
-      border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-      margin: 20px;
-      gap: 30px;
+      box-shadow: 
+        0 -4px 30px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,255,255,0.1);
+      gap: 40px;
+      position: relative;
       -webkit-app-region: no-drag; /* 内部要素はドラッグ不可 */
+      border-top: 3px solid;
+      border-image: linear-gradient(90deg, 
+        var(--host-color, #ff6b35) 0%, 
+        rgba(255,255,255,0.3) 50%, 
+        var(--away-color, #4a90e2) 100%) 1;
+    }
+    
+    .scoreboard-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, 
+        var(--host-color, #ff6b35) 0%, 
+        transparent 20%,
+        transparent 80%, 
+        var(--away-color, #4a90e2) 100%);
+      opacity: 0.8;
     }
 
     .team-section {
@@ -135,6 +159,12 @@
       gap: 10px;
       z-index: 1000;
       -webkit-app-region: no-drag;
+      opacity: 0.6;
+      transition: opacity 0.3s;
+    }
+    
+    .window-controls:hover {
+      opacity: 1;
     }
 
     .control-btn {

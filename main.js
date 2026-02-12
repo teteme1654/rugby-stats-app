@@ -82,15 +82,19 @@ function createScoreboardWindow() {
     targetDisplay = displays[2];
   }
 
+  const displayWidth = targetDisplay.bounds.width;
+  const displayHeight = targetDisplay.bounds.height;
+  const scoreboardHeight = 150; // スコアボードの高さ
+
   scoreboardWindow = new BrowserWindow({
-    width: 1200,
-    height: 200,
-    x: targetDisplay.bounds.x + 100,
-    y: targetDisplay.bounds.y + 100,
+    width: displayWidth,
+    height: scoreboardHeight,
+    x: targetDisplay.bounds.x,
+    y: targetDisplay.bounds.y + displayHeight - scoreboardHeight, // 画面最下部に配置
     frame: false,
     transparent: true,
     alwaysOnTop: true,
-    resizable: true,
+    resizable: false, // リサイズ不可
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
