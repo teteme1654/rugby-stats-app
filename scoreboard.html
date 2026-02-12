@@ -31,14 +31,7 @@
       height: 100%;
       position: relative;
       -webkit-app-region: no-drag; /* 内部要素はドラッグ不可 */
-      background: linear-gradient(90deg, 
-        var(--host-color, #d32f2f) 0%, 
-        var(--host-color, #d32f2f) 25%,
-        rgba(50,50,60,0.95) 40%,
-        rgba(50,50,60,0.95) 60%,
-        var(--away-color, #1976d2) 75%,
-        var(--away-color, #1976d2) 100%
-      );
+      background: transparent; /* 背景を透過に */
     }
 
     .team-section {
@@ -48,11 +41,25 @@
       flex: 1;
       padding: 15px 30px;
       justify-content: flex-start;
+      background: var(--team-bg, rgba(50,50,60,0.95));
+    }
+    
+    .team-section.host {
+      background: linear-gradient(90deg, 
+        var(--host-color, #d32f2f) 0%, 
+        var(--host-color, #d32f2f) 60%,
+        transparent 100%
+      );
     }
 
     .team-section.away {
       flex-direction: row-reverse;
       justify-content: flex-start;
+      background: linear-gradient(270deg, 
+        var(--away-color, #1976d2) 0%, 
+        var(--away-color, #1976d2) 60%,
+        transparent 100%
+      );
     }
 
     .team-logo {
@@ -98,6 +105,7 @@
       gap: 20px;
       padding: 0 40px;
       min-width: 280px;
+      background: rgba(50,50,60,0.95);
     }
 
     .score {
