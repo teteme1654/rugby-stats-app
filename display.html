@@ -308,24 +308,33 @@
     function updateDisplay(data) {
       if (!data) return;
 
+      console.log('=== updateDisplay 呼び出し ===');
+      console.log('全データ:', data);
+      console.log('ホームチーム:', data.hostTeam);
+      console.log('ホームチームロゴ:', data.hostTeam.logo);
+
       // CSS変数でチームカラーを設定
       document.documentElement.style.setProperty('--host-color', data.hostTeam.color || '#ff6b35');
       document.documentElement.style.setProperty('--away-color', data.awayTeam.color || '#4a90e2');
 
       // 背景ロゴを設定（クリティカル修正）
       const bgLogo = document.getElementById('backgroundLogo');
+      console.log('backgroundLogo要素:', bgLogo);
+      
       if (bgLogo) {
         if (data.hostTeam.logo) {
           bgLogo.style.backgroundImage = `url("${data.hostTeam.logo}")`;
           bgLogo.style.display = 'block';
-          console.log('背景ロゴ設定成功:', data.hostTeam.logo);
+          console.log('✅ 背景ロゴ設定成功:', data.hostTeam.logo);
+          console.log('backgroundImage:', bgLogo.style.backgroundImage);
+          console.log('display:', bgLogo.style.display);
         } else {
           bgLogo.style.backgroundImage = 'none';
           bgLogo.style.display = 'none';
-          console.log('背景ロゴ未設定（ロゴURLが空です）');
+          console.log('❌ 背景ロゴ未設定（ロゴURLが空です）');
         }
       } else {
-        console.error('backgroundLogo要素が見つかりません');
+        console.error('❌ backgroundLogo要素が見つかりません');
       }
 
       // ホームチームヘッダーにカラーを適用
@@ -395,6 +404,13 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      console.log('=== DOMContentLoaded ===');
+      const bgLogo = document.getElementById('backgroundLogo');
+      console.log('backgroundLogo要素の存在確認:', bgLogo);
+      if (bgLogo) {
+        console.log('初期backgroundImage:', bgLogo.style.backgroundImage);
+        console.log('初期display:', bgLogo.style.display);
+      }
       loadData();
     });
   </script>

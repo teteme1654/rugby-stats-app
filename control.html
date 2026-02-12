@@ -569,18 +569,28 @@
     // ロゴ画像読み込み
     async function loadTeamLogo(team) {
       try {
+        console.log(`=== ロゴ読み込み開始: ${team} ===`);
         const logoUrl = await window.electronAPI.loadLogo(team);
+        console.log('取得したロゴURL:', logoUrl);
+        
         if (logoUrl) {
           const inputId = team === 'hostTeam' ? 'hostTeamLogo' : 'awayTeamLogo';
           document.getElementById(inputId).value = logoUrl;
+          console.log('inputフィールドに設定:', inputId, logoUrl);
           
           // 表示画面を更新するために明示的にupdateTeamを呼び出す
+          console.log('updateTeam呼び出し中...');
           await window.electronAPI.updateTeam(team, 'logo', logoUrl);
+          console.log('updateTeam完了');
           
           // UIを最新の状態に更新
+          console.log('loadData呼び出し中...');
           await loadData();
+          console.log('loadData完了');
           
           alert('ロゴ画像を読み込みました');
+        } else {
+          console.log('ロゴURLがnullです（ユーザーがキャンセルした可能性）');
         }
       } catch (error) {
         console.error('ロゴ読み込みエラー:', error);
