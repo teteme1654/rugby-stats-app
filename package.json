@@ -25,6 +25,9 @@
       "**/*",
       "!dist",
       "!node_modules"
-    ]
+    ],
+    "win": {
+      "target": "portable"
+    }
   }
 }
