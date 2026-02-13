@@ -22,6 +22,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // チーム情報更新
   updateTeam: (team, field, value) => ipcRenderer.invoke('update-team', team, field, value),
   
+  // チーム名サイズ更新
+  updateTeamNameSize: (size) => ipcRenderer.invoke('update-team-name-size', size),
+  
   // CSV読み込み
   loadCSV: (team) => ipcRenderer.invoke('load-csv', team),
   
@@ -50,6 +53,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setAlwaysOnTop: (windowType, flag) => ipcRenderer.invoke('set-always-on-top', windowType, flag),
   
   // データ更新イベントのリスナー（表示画面用）
-  onUpdateData: (callback) => ipcRenderer.on('update-data', (event, data) => callback(data))
+  onUpdateData: (callback) => ipcRenderer.on('update-data', (event, data) => callback(data)),
+  
+  // チーム名サイズ更新イベントのリスナー
+  onUpdateTeamNameSize: (callback) => ipcRenderer.on('update-team-name-size', (event, size) => callback(size))
 });
 

@@ -231,6 +231,19 @@ ipcMain.handle('update-team', (event, team, field, value) => {
   return matchData;
 });
 
+// チーム名サイズ更新
+ipcMain.handle('update-team-name-size', (event, size) => {
+  if (displayWindow && !displayWindow.isDestroyed()) {
+    displayWindow.webContents.send('update-team-name-size', size);
+  }
+  if (scoreboardWindow && !scoreboardWindow.isDestroyed()) {
+    scoreboardWindow.webContents.send('update-team-name-size', size);
+  }
+  if (scoreboardChromakeyWindow && !scoreboardChromakeyWindow.isDestroyed()) {
+    scoreboardChromakeyWindow.webContents.send('update-team-name-size', size);
+  }
+});
+
 // ロゴ画像読み込み
 ipcMain.handle('load-logo', async (event, team) => {
   const result = await dialog.showOpenDialog(mainWindow, {

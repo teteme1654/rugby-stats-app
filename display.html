@@ -76,7 +76,7 @@
     }
 
     .team-name {
-      font-size: 2em;
+      font-size: var(--team-name-size, 2em);
       font-weight: 900;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -108,6 +108,10 @@
       font-size: 1em;
       color: rgb(255, 255, 255);
       min-width: 60px;
+    }
+
+    .score-column.away .score-label {
+      text-align: left;
     }
 
     .score-value {
@@ -265,6 +269,7 @@
       font-size: 1em;
       letter-spacing: 2px;
       font-weight: 900;
+      transform: scaleX(0.5);
     }
 
     @keyframes fadeIn {
@@ -311,9 +316,11 @@
         <div class="score-column away">
           <div class="score-row">
             <span class="score-value" id="awayFirstHalfScore">10</span>
+            <span class="score-label">前半</span>
           </div>
           <div class="score-row">
             <span class="score-value" id="awaySecondHalfScore">7</span>
+            <span class="score-label">後半</span>
           </div>
         </div>
       </div>
@@ -460,6 +467,11 @@
     window.electronAPI.onUpdateData((data) => {
       currentData = data;
       updateDisplay(data);
+    });
+    
+    // チーム名サイズ更新リスナー
+    window.electronAPI.onUpdateTeamNameSize((size) => {
+      document.documentElement.style.setProperty('--team-name-size', `${size}em`);
     });
 
     function updateDisplay(data) {

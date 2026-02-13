@@ -233,6 +233,16 @@
     <!-- チーム情報・スコア -->
     <div class="control-panel">
       <h2 class="section-title">チーム情報・スコア</h2>
+      
+      <!-- チーム名サイズ調整 -->
+      <div style="background: #f8f9fa; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px;">
+        <label style="margin-bottom: 10px;">チーム名サイズ調整:</label>
+        <div style="display: flex; align-items: center; gap: 15px;">
+          <input type="range" id="teamNameSizeSlider" min="1.0" max="3.5" step="0.1" value="2.0" 
+                 style="flex: 1; cursor: pointer;">
+          <span id="teamNameSizeDisplay" style="min-width: 60px; font-weight: bold; text-align: right;">2.0em</span>
+        </div>
+      </div>
       <div class="teams-container">
         <!-- ホームチーム -->
         <div class="team-section">
@@ -533,6 +543,13 @@
 
     // イベントリスナー設定
     function setupEventListeners() {
+      // チーム名サイズスライダー
+      document.getElementById('teamNameSizeSlider').addEventListener('input', (e) => {
+        const size = parseFloat(e.target.value);
+        document.getElementById('teamNameSizeDisplay').textContent = `${size.toFixed(1)}em`;
+        window.electronAPI.updateTeamNameSize(size);
+      });
+      
       // チーム名
       document.getElementById('hostTeamName').addEventListener('change', (e) => {
         window.electronAPI.updateTeam('hostTeam', 'name', e.target.value);
