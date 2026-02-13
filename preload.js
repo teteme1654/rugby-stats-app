@@ -23,7 +23,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   updateTeam: (team, field, value) => ipcRenderer.invoke('update-team', team, field, value),
   
   // チーム名サイズ更新
-  updateTeamNameSize: (size) => ipcRenderer.invoke('update-team-name-size', size),
+  updateTeamNameSize: (team, size) => ipcRenderer.invoke('update-team-name-size', team, size),
   
   // CSV読み込み
   loadCSV: (team) => ipcRenderer.invoke('load-csv', team),
@@ -56,6 +56,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onUpdateData: (callback) => ipcRenderer.on('update-data', (event, data) => callback(data)),
   
   // チーム名サイズ更新イベントのリスナー
-  onUpdateTeamNameSize: (callback) => ipcRenderer.on('update-team-name-size', (event, size) => callback(size))
+  onUpdateTeamNameSize: (callback) => ipcRenderer.on('update-team-name-size', (event, team, size) => callback(team, size))
 });
 

@@ -76,11 +76,18 @@
     }
 
     .team-name {
-      font-size: var(--team-name-size, 2em);
       font-weight: 900;
       text-transform: uppercase;
       letter-spacing: 1px;
       color: white;
+    }
+    
+    .team-header.host .team-name {
+      font-size: var(--host-team-name-size, 2em);
+    }
+    
+    .team-header.away .team-name {
+      font-size: var(--away-team-name-size, 2em);
     }
 
     .score-section {
@@ -470,8 +477,12 @@
     });
     
     // チーム名サイズ更新リスナー
-    window.electronAPI.onUpdateTeamNameSize((size) => {
-      document.documentElement.style.setProperty('--team-name-size', `${size}em`);
+    window.electronAPI.onUpdateTeamNameSize((team, size) => {
+      if (team === 'host') {
+        document.documentElement.style.setProperty('--host-team-name-size', `${size}em`);
+      } else if (team === 'away') {
+        document.documentElement.style.setProperty('--away-team-name-size', `${size}em`);
+      }
     });
 
     function updateDisplay(data) {

@@ -232,15 +232,15 @@ ipcMain.handle('update-team', (event, team, field, value) => {
 });
 
 // チーム名サイズ更新
-ipcMain.handle('update-team-name-size', (event, size) => {
+ipcMain.handle('update-team-name-size', (event, team, size) => {
   if (displayWindow && !displayWindow.isDestroyed()) {
-    displayWindow.webContents.send('update-team-name-size', size);
+    displayWindow.webContents.send('update-team-name-size', team, size);
   }
   if (scoreboardWindow && !scoreboardWindow.isDestroyed()) {
-    scoreboardWindow.webContents.send('update-team-name-size', size);
+    scoreboardWindow.webContents.send('update-team-name-size', team, size);
   }
   if (scoreboardChromakeyWindow && !scoreboardChromakeyWindow.isDestroyed()) {
-    scoreboardChromakeyWindow.webContents.send('update-team-name-size', size);
+    scoreboardChromakeyWindow.webContents.send('update-team-name-size', team, size);
   }
 });
 
