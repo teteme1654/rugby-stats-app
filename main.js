@@ -52,7 +52,7 @@ function createMainWindow() {
   });
 
   mainWindow.loadFile('control.html');
-  mainWindow.webContents.openDevTools(); // 開発者ツールを開く
+  // mainWindow.webContents.openDevTools(); // 開発者ツールを開く（本番では無効化）
   mainWindow.on('closed', () => {
     mainWindow = null;
     if (displayWindow) {
@@ -81,7 +81,7 @@ function createDisplayWindow() {
   });
 
   displayWindow.loadFile('display.html');
-  displayWindow.webContents.openDevTools(); // 開発者ツールを開く
+  // displayWindow.webContents.openDevTools(); // 開発者ツールを開く（本番では無効化）
   displayWindow.on('closed', () => {
     displayWindow = null;
   });
