@@ -303,25 +303,67 @@ ipcMain.handle('load-csv', async (event, team) => {
 
   try {
     const filePath = result.filePaths[0];
+    const csvDir = path.dirname(filePath);
     const content = fs.readFileSync(filePath, 'utf-8');
     const lines = content.split('\n').filter(line => line.trim());
     const players = [];
+    
+    let teamName = matchData[team].name;  // デフォルト値
+    let logoDataUri = matchData[team].logo;  // デフォルト値
 
     // ヘッダー行をスキップして処理
     for (let i = 1; i < lines.length; i++) {
       const parts = lines[i].split(',').map(p => p.trim());
-      if (parts.length >= 2) {
+      
+      if (parts[0] === 'TEAM') {
+        // チーム情報行
+        teamName = parts[1] || teamName;
+        
+        // 4列目（ファイルパス）にロゴパスが指定されている
+        if (parts[3]) {
+          const logoPath = path.join(csvDir, parts[3]);
+          
+          if (fs.existsSync(logoPath)) {
+            try {
+              const logoBuffer = fs.readFileSync(logoPath);
+              const ext = path.extname(logoPath).toLowerCase();
+              let mimeType = 'image/png';
+              if (ext === '.jpg' || ext === '.jpeg') mimeType = 'image/jpeg';
+              else if (ext === '.gif') mimeType = 'image/gif';
+              else if (ext === '.svg') mimeType = 'image/svg+xml';
+              
+              logoDataUri = `data:${mimeType};base64,${logoBuffer.toString('base64')}`;
+              console.log(`✅ ロゴ読み込み成功: ${logoPath}`);
+            } catch (error) {
+              console.warn(`⚠️ ロゴ読み込みエラー: ${logoPath}`, error);
+            }
+          } else {
+            console.warn(`⚠️ ロゴファイルが見つかりません: ${logoPath}`);
+          }
+        }
+      } else if (parts.length >= 2) {
+        // 選手データ行
         players.push({
           number: parts[0],
           name: parts[1],
           position: parts[2] || ''
+          // parts[3] は将来の選手写真パス
         });
       }
     }
 
+    // matchDataを更新
+    matchData[team].name = teamName;
+    matchData[team].logo = logoDataUri;
     matchData.players[team] = players;
+    
     updateDisplay();
-    return players;
+    
+    return { 
+      players, 
+      teamName,
+      hasLogo: logoDataUri !== matchData[team].logo
+    };
   } catch (error) {
     console.error('CSV読み込みエラー:', error);
     return null;
