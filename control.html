@@ -634,16 +634,27 @@
 
     // CSV読み込み
     async function loadTeamCSV(team) {
-      const result = await window.electronAPI.loadCSV(team);
-      if (result) {
-        let message = `✅ データを読み込みました\n\n`;
-        message += `選手: ${result.players.length}名\n`;
-        message += `チーム名: ${result.teamName}\n`;
-        if (result.hasLogo) {
-          message += `ロゴ: 読み込み成功`;
+      try {
+        const result = await window.electronAPI.loadCSV(team);
+        console.log('CSV読み込み結果:', result);
+        
+        if (result) {
+          let message = `✅ データを読み込みました\n\n`;
+          message += `選手: ${result.players.length}名\n`;
+          message += `チーム名: ${result.teamName}\n`;
+          if (result.hasLogo) {
+            message += `ロゴ: 読み込み成功`;
+          } else {
+            message += `ロゴ: なし（または更新なし）`;
+          }
+          alert(message);
+          await loadData();
+        } else {
+          alert('⚠️ CSV読み込みがキャンセルされたか、エラーが発生しました。');
         }
-        alert(message);
-        await loadData();
+      } catch (error) {
+        console.error('CSV読み込みエラー（control.html）:', error);
+        alert(`❌ エラーが発生しました:\n${error.message}`);
       }
     }
 
