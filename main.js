@@ -308,8 +308,11 @@ ipcMain.handle('load-csv', async (event, team) => {
     const lines = content.split('\n').filter(line => line.trim());
     const players = [];
     
-    let teamName = matchData[team].name;  // デフォルト値
-    let logoDataUri = matchData[team].logo;  // デフォルト値
+    // team が 'host' or 'away' なので、matchData用に変換
+    const teamKey = team === 'host' ? 'hostTeam' : 'awayTeam';
+    
+    let teamName = matchData[teamKey].name;  // デフォルト値
+    let logoDataUri = matchData[teamKey].logo;  // デフォルト値
     let logoUpdated = false;  // ロゴが更新されたかフラグ
 
     // ヘッダー行をスキップして処理
@@ -355,9 +358,9 @@ ipcMain.handle('load-csv', async (event, team) => {
     }
 
     // matchDataを更新
-    matchData[team].name = teamName;
-    matchData[team].logo = logoDataUri;
-    matchData.players[team] = players;
+    matchData[teamKey].name = teamName;
+    matchData[teamKey].logo = logoDataUri;
+    matchData.players[team] = players;  // players は 'host' / 'away' キー
     
     updateDisplay();
     
