@@ -310,6 +310,7 @@ ipcMain.handle('load-csv', async (event, team) => {
     
     let teamName = matchData[team].name;  // デフォルト値
     let logoDataUri = matchData[team].logo;  // デフォルト値
+    let logoUpdated = false;  // ロゴが更新されたかフラグ
 
     // ヘッダー行をスキップして処理
     for (let i = 1; i < lines.length; i++) {
@@ -333,6 +334,7 @@ ipcMain.handle('load-csv', async (event, team) => {
               else if (ext === '.svg') mimeType = 'image/svg+xml';
               
               logoDataUri = `data:${mimeType};base64,${logoBuffer.toString('base64')}`;
+              logoUpdated = true;
               console.log(`✅ ロゴ読み込み成功: ${logoPath}`);
             } catch (error) {
               console.warn(`⚠️ ロゴ読み込みエラー: ${logoPath}`, error);
@@ -359,10 +361,12 @@ ipcMain.handle('load-csv', async (event, team) => {
     
     updateDisplay();
     
+    console.log(`✅ CSV読み込み完了: ${players.length}名, チーム名: ${teamName}, ロゴ更新: ${logoUpdated}`);
+    
     return { 
       players, 
       teamName,
-      hasLogo: logoDataUri !== matchData[team].logo
+      hasLogo: logoUpdated
     };
   } catch (error) {
     console.error('CSV読み込みエラー:', error);
