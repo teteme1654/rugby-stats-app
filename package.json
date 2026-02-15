@@ -30,5 +30,8 @@
       "target": "portable",
       "sign": null
     }
+  },
+  "dependencies": {
+    "xlsx": "^0.18.5"
   }
 }

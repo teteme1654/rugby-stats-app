@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>データマッピング & インポート設定</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .step {
+            padding: 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .step:last-child {
+            border-bottom: none;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-right: 15px;
+        }
+
+        .step-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            background: #f8f9ff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            background: #f0f2ff;
+            border-color: #764ba2;
+        }
+
+        .upload-area.dragover {
+            background: #e8ebff;
+            border-color: #764ba2;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+
+        .preview-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .preview-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .preview-table tr:hover {
+            background: #f8f9ff;
+        }
+
+        .mapping-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 6px;
+        }
+
+        .mapping-source {
+            flex: 1;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .mapping-arrow {
+            margin: 0 20px;
+            font-size: 1.5em;
+            color: #667eea;
+        }
+
+        .mapping-target {
+            flex: 1;
+        }
+
+        .mapping-target select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1em;
+            background: white;
+            cursor: pointer;
+        }
+
+        .mapping-target select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .path-config {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .path-config-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .input-group input[type="text"] {
+            width: calc(100% - 50px);
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .input-group input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group .btn-icon {
+            width: 40px;
+            height: 40px;
+            margin-left: 5px;
+            padding: 0;
+            vertical-align: middle;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px;
+            background: #f8f9ff;
+        }
+
+        .preset-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-message.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        #previewSection, #mappingSection, #pathGenerationSection {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 データマッピング & インポート設定</h1>
+            <p>Excel/CSVファイルを読み込み、システム形式に変換します</p>
+        </div>
+
+        <!-- Step 1: ファイル選択 -->
+        <div class="step">
+            <div class="step-header">
+                <div class="step-number">1</div>
+                <div class="step-title">ファイル選択</div>
+            </div>
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <p style="font-size: 1.2em; margin-bottom: 10px;">ファイルをドロップ または クリックして選択</p>
+                <p style="color: #666;">対応形式: CSV, XLSX, XLS</p>
+            </div>
+            <div id="fileInfo" style="margin-top: 15px; display: none;">
+                <p><strong>選択ファイル:</strong> <span id="fileName"></span></p>
+            </div>
+        </div>
+
+        <!-- Step 2: プレビュー -->
+        <div class="step" id="previewSection">
+            <div class="step-header">
+                <div class="step-number">2</div>
+                <div class="step-title">データプレビュー</div>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="preview-table" id="previewTable">
+                    <!-- プレビューデータがここに表示されます -->
+                </table>
+            </div>
+        </div>
+
+        <!-- Step 3: カラムマッピング -->
+        <div class="step" id="mappingSection">
+            <div class="step-header">
+                <div class="step-number">3</div>
+                <div class="step-title">カラムマッピング</div>
+            </div>
+            <div class="preset-controls" style="margin-bottom: 20px;">
+                <select id="presetSelect" class="btn-secondary" style="padding: 10px; border-radius: 6px; border: 2px solid #e0e0e0;">
+                    <option value="">プリセットを選択...</option>
+                </select>
+                <button class="btn btn-secondary" onclick="loadPreset()">プリセット適用</button>
+                <button class="btn btn-secondary" onclick="savePreset()">現在の設定を保存</button>
+            </div>
+            <div id="mappingContainer">
+                <!-- マッピング行がここに動的に生成されます -->
+            </div>
+        </div>
+
+        <!-- Step 4: 画像パス自動生成 -->
+        <div class="step" id="pathGenerationSection">
+            <div class="step-header">
+                <div class="step-number">4</div>
+                <div class="step-title">画像パス自動生成（オプション）</div>
+            </div>
+            
+            <!-- 選手写真 -->
+            <div class="path-config">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="enablePlayerPhoto" onchange="togglePathConfig('player')">
+                    <label for="enablePlayerPhoto">選手写真のパスを自動生成</label>
+                </div>
+                <div id="playerPathConfig" style="display: none; margin-top: 15px;">
+                    <div class="input-group">
+                        <label>ベースパス</label>
+                        <input type="text" id="playerBasePath" value="./assets/players/">
+                        <button class="btn btn-icon btn-secondary" onclick="selectFolder('player')">📁</button>
+                    </div>
+                    <div class="input-group">
+                        <label>ファイル名パターン（例: {JerseyNo}.jpg）</label>
+                        <input type="text" id="playerPattern" value="{JerseyNo}.jpg">
+                    </div>
+                    <div class="input-group">
+                        <label>対象カラム</label>
+                        <input type="text" id="playerTargetColumn" value="PhotoPath">
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="playerCheckExists" checked>
+                        <label for="playerCheckExists">ファイル存在チェックを実行</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- チームロゴ -->
+            <div class="path-config">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="enableTeamLogo" onchange="togglePathConfig('team')">
+                    <label for="enableTeamLogo">チームロゴのパスを自動生成</label>
+                </div>
+                <div id="teamPathConfig" style="display: none; margin-top: 15px;">
+                    <div class="input-group">
+                        <label>ベースパス</label>
+                        <input type="text" id="teamBasePath" value="./assets/logos/">
+                        <button class="btn btn-icon btn-secondary" onclick="selectFolder('team')">📁</button>
+                    </div>
+                    <div class="input-group">
+                        <label>ファイル名パターン（例: {TeamName}_logo.png）</label>
+                        <input type="text" id="teamPattern" value="{TeamName}_logo.png">
+                    </div>
+                    <div class="input-group">
+                        <label>対象カラム</label>
+                        <input type="text" id="teamTargetColumn" value="LogoPath">
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="teamCheckExists" checked>
+                        <label for="teamCheckExists">ファイル存在チェックを実行</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- アクションバー -->
+        <div class="action-bar">
+            <div>
+                <button class="btn btn-secondary" onclick="reset()">リセット</button>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-secondary" onclick="previewResult()">変換結果をプレビュー</button>
+                <button class="btn btn-primary" onclick="executeImport()">インポート実行</button>
+            </div>
+        </div>
+
+        <!-- ステータスメッセージ -->
+        <div id="statusMessage" class="status-message"></div>
+    </div>
+
+    <script>
+        let uploadedData = null;
+        let headers = [];
+
+        // システム必須項目の定義
+        const systemColumns = [
+            { value: '', label: 'マッピングしない' },
+            { value: 'PlayerName', label: '選手名' },
+            { value: 'JerseyNo', label: '背番号' },
+            { value: 'Position', label: 'ポジション' },
+            { value: 'PhotoPath', label: '写真パス' },
+            { value: 'TeamName', label: 'チーム名' },
+            { value: 'LogoPath', label: 'ロゴパス' }
+        ];
+
+        // ファイルアップロードエリアの設定
+        const uploadArea = document.getElementById('uploadArea');
+        
+        uploadArea.addEventListener('click', () => {
+            loadFile();
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const file = files[0];
+                await handleFile(file);
+            }
+        });
+
+        async function loadFile() {
+            const result = await window.electronAPI.loadDataFile();
+            if (result) {
+                uploadedData = result;
+                headers = result.headers;
+                displayFileInfo(result.fileName);
+                displayPreview(result);
+                generateMappingUI();
+                showStatusMessage('ファイルを読み込みました', 'success');
+            }
+        }
+
+        function displayFileInfo(fileName) {
+            document.getElementById('fileName').textContent = fileName;
+            document.getElementById('fileInfo').style.display = 'block';
+        }
+
+        function displayPreview(data) {
+            const table = document.getElementById('previewTable');
+            table.innerHTML = '';
+
+            // ヘッダー行
+            const thead = table.createTHead();
+            const headerRow = thead.insertRow();
+            data.headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                headerRow.appendChild(th);
+            });
+
+            // データ行（最大10行）
+            const tbody = table.createTBody();
+            const previewRows = data.preview.slice(0, 10);
+            previewRows.forEach(row => {
+                const tr = tbody.insertRow();
+                row.forEach(cell => {
+                    const td = tr.insertCell();
+                    td.textContent = cell || '';
+                });
+            });
+
+            document.getElementById('previewSection').style.display = 'block';
+        }
+
+        function generateMappingUI() {
+            const container = document.getElementById('mappingContainer');
+            container.innerHTML = '';
+
+            headers.forEach((header, index) => {
+                const row = document.createElement('div');
+                row.className = 'mapping-row';
+                
+                row.innerHTML = `
+                    <div class="mapping-source">${header}</div>
+                    <div class="mapping-arrow">→</div>
+                    <div class="mapping-target">
+                        <select id="mapping_${index}" data-source="${header}">
+                            ${systemColumns.map(col => 
+                                `<option value="${col.value}">${col.label}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                `;
+                
+                container.appendChild(row);
+            });
+
+            document.getElementById('mappingSection').style.display = 'block';
+            document.getElementById('pathGenerationSection').style.display = 'block';
+        }
+
+        function togglePathConfig(type) {
+            const checkbox = document.getElementById(`enable${type === 'player' ? 'PlayerPhoto' : 'TeamLogo'}`);
+            const config = document.getElementById(`${type}PathConfig`);
+            config.style.display = checkbox.checked ? 'block' : 'none';
+        }
+
+        async function selectFolder(type) {
+            const result = await window.electronAPI.selectFolder();
+            if (result) {
+                document.getElementById(`${type}BasePath`).value = result;
+            }
+        }
+
+        function getMappingConfig() {
+            const mapping = {};
+            headers.forEach((header, index) => {
+                const select = document.getElementById(`mapping_${index}`);
+                const targetColumn = select.value;
+                if (targetColumn) {
+                    mapping[header] = targetColumn;
+                }
+            });
+            return mapping;
+        }
+
+        function getPathGenerationConfig() {
+            const config = {};
+            
+            if (document.getElementById('enablePlayerPhoto').checked) {
+                config.player = {
+                    basePath: document.getElementById('playerBasePath').value,
+                    pattern: document.getElementById('playerPattern').value,
+                    targetColumn: document.getElementById('playerTargetColumn').value,
+                    checkExists: document.getElementById('playerCheckExists').checked
+                };
+            }
+            
+            if (document.getElementById('enableTeamLogo').checked) {
+                config.team = {
+                    basePath: document.getElementById('teamBasePath').value,
+                    pattern: document.getElementById('teamPattern').value,
+                    targetColumn: document.getElementById('teamTargetColumn').value,
+                    checkExists: document.getElementById('teamCheckExists').checked
+                };
+            }
+            
+            return config;
+        }
+
+        async function executeImport() {
+            if (!uploadedData) {
+                showStatusMessage('ファイルが選択されていません', 'error');
+                return;
+            }
+
+            const mapping = getMappingConfig();
+            const pathConfig = getPathGenerationConfig();
+
+            const config = {
+                data: uploadedData,
+                mapping: mapping,
+                pathGeneration: pathConfig
+            };
+
+            const result = await window.electronAPI.executeImport(config);
+            
+            if (result.success) {
+                showStatusMessage(`インポート成功！ ${result.count}件のデータを処理しました`, 'success');
+            } else {
+                showStatusMessage(`エラー: ${result.error}`, 'error');
+            }
+        }
+
+        async function previewResult() {
+            if (!uploadedData) {
+                showStatusMessage('ファイルが選択されていません', 'error');
+                return;
+            }
+
+            const mapping = getMappingConfig();
+            const pathConfig = getPathGenerationConfig();
+
+            const config = {
+                data: uploadedData,
+                mapping: mapping,
+                pathGeneration: pathConfig
+            };
+
+            const result = await window.electronAPI.previewConversion(config);
+            
+            if (result.success) {
+                console.log('変換結果プレビュー:', result.preview);
+                showStatusMessage('変換結果をコンソールに出力しました', 'success');
+            } else {
+                showStatusMessage(`エラー: ${result.error}`, 'error');
+            }
+        }
+
+        async function savePreset() {
+            const presetName = prompt('プリセット名を入力してください:');
+            if (!presetName) return;
+
+            const preset = {
+                name: presetName,
+                mapping: getMappingConfig(),
+                pathGeneration: getPathGenerationConfig()
+            };
+
+            const result = await window.electronAPI.savePreset(presetName, preset);
+            if (result.success) {
+                showStatusMessage(`プリセット「${presetName}」を保存しました`, 'success');
+                loadPresetList();
+            } else {
+                showStatusMessage(`保存エラー: ${result.error}`, 'error');
+            }
+        }
+
+        async function loadPreset() {
+            const select = document.getElementById('presetSelect');
+            const presetName = select.value;
+            if (!presetName) return;
+
+            const preset = await window.electronAPI.loadPreset(presetName);
+            if (preset) {
+                applyPreset(preset);
+                showStatusMessage(`プリセット「${presetName}」を適用しました`, 'success');
+            }
+        }
+
+        function applyPreset(preset) {
+            // マッピング設定を適用
+            if (preset.mapping) {
+                headers.forEach((header, index) => {
+                    const select = document.getElementById(`mapping_${index}`);
+                    if (select && preset.mapping[header]) {
+                        select.value = preset.mapping[header];
+                    }
+                });
+            }
+
+            // パス生成設定を適用
+            if (preset.pathGeneration) {
+                if (preset.pathGeneration.player) {
+                    document.getElementById('enablePlayerPhoto').checked = true;
+                    togglePathConfig('player');
+                    document.getElementById('playerBasePath').value = preset.pathGeneration.player.basePath;
+                    document.getElementById('playerPattern').value = preset.pathGeneration.player.pattern;
+                    document.getElementById('playerTargetColumn').value = preset.pathGeneration.player.targetColumn;
+                    document.getElementById('playerCheckExists').checked = preset.pathGeneration.player.checkExists;
+                }
+                
+                if (preset.pathGeneration.team) {
+                    document.getElementById('enableTeamLogo').checked = true;
+                    togglePathConfig('team');
+                    document.getElementById('teamBasePath').value = preset.pathGeneration.team.basePath;
+                    document.getElementById('teamPattern').value = preset.pathGeneration.team.pattern;
+                    document.getElementById('teamTargetColumn').value = preset.pathGeneration.team.targetColumn;
+                    document.getElementById('teamCheckExists').checked = preset.pathGeneration.team.checkExists;
+                }
+            }
+        }
+
+        async function loadPresetList() {
+            const presets = await window.electronAPI.getPresetList();
+            const select = document.getElementById('presetSelect');
+            select.innerHTML = '<option value="">プリセットを選択...</option>';
+            
+            presets.forEach(preset => {
+                const option = document.createElement('option');
+                option.value = preset;
+                option.textContent = preset;
+                select.appendChild(option);
+            });
+        }
+
+        function reset() {
+            uploadedData = null;
+            headers = [];
+            document.getElementById('fileInfo').style.display = 'none';
+            document.getElementById('previewSection').style.display = 'none';
+            document.getElementById('mappingSection').style.display = 'none';
+            document.getElementById('pathGenerationSection').style.display = 'none';
+            showStatusMessage('リセットしました', 'success');
+        }
+
+        function showStatusMessage(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message ${type}`;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // 初期化時にプリセットリストをロード
+        window.addEventListener('DOMContentLoaded', () => {
+            loadPresetList();
+        });
+    </script>
+</body>
+</html>

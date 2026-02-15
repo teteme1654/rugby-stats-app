@@ -408,6 +408,7 @@
     <!-- クイックアクション -->
     <div class="control-panel">
       <div class="quick-actions">
+        <button class="action-btn" onclick="openMapper()" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">📊 外部データ取り込み</button>
         <button class="action-btn" onclick="toggleDisplayWindow()">📺 表示画面 ON/OFF</button>
         <button class="action-btn" onclick="toggleScoreboardWindow()">🎬 透過スコアボード ON/OFF</button>
         <button class="action-btn" onclick="toggleScoreboardChromakeyWindow()">🎥 クロマキースコアボード ON/OFF</button>
@@ -694,6 +695,11 @@
     // クロマキースコアボードの開閉
     async function toggleScoreboardChromakeyWindow() {
       await window.electronAPI.toggleScoreboardChromakey();
+    }
+
+    // マッパーウィンドウを開く
+    async function openMapper() {
+      await window.electronAPI.openMapper();
     }
 
     // 試合リセット

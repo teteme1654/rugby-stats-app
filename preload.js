@@ -56,6 +56,34 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onUpdateData: (callback) => ipcRenderer.on('update-data', (event, data) => callback(data)),
   
   // チーム名サイズ更新イベントのリスナー
-  onUpdateTeamNameSize: (callback) => ipcRenderer.on('update-team-name-size', (event, team, size) => callback(team, size))
+  onUpdateTeamNameSize: (callback) => ipcRenderer.on('update-team-name-size', (event, team, size) => callback(team, size)),
+  
+  // ============================================================
+  // データマッピング & インポート機能（Issue #3, #4対応）
+  // ============================================================
+  
+  // マッパーウィンドウを開く
+  openMapper: () => ipcRenderer.invoke('open-mapper'),
+  
+  // データファイルを読み込む
+  loadDataFile: () => ipcRenderer.invoke('load-data-file'),
+  
+  // フォルダ選択
+  selectFolder: () => ipcRenderer.invoke('select-folder'),
+  
+  // インポート実行
+  executeImport: (config) => ipcRenderer.invoke('execute-import', config),
+  
+  // 変換プレビュー
+  previewConversion: (config) => ipcRenderer.invoke('preview-conversion', config),
+  
+  // プリセット保存
+  savePreset: (presetName, preset) => ipcRenderer.invoke('save-preset', presetName, preset),
+  
+  // プリセット読み込み
+  loadPreset: (presetName) => ipcRenderer.invoke('load-preset', presetName),
+  
+  // プリセット一覧取得
+  getPresetList: () => ipcRenderer.invoke('get-preset-list')
 });
 

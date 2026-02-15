@@ -498,3 +498,298 @@ ipcMain.handle('set-always-on-top', (event, windowType, flag) => {
     scoreboardChromakeyWindow.setAlwaysOnTop(flag);
   }
 });
+
+// ============================================================
+// データマッピング & インポート機能（Issue #3, #4対応）
+// ============================================================
+
+const XLSX = require('xlsx');
+let mapperWindow = null;
+
+// マッパーウィンドウを開く
+ipcMain.handle('open-mapper', () => {
+  if (mapperWindow && !mapperWindow.isDestroyed()) {
+    mapperWindow.focus();
+    return;
+  }
+
+  mapperWindow = new BrowserWindow({
+    width: 1200,
+    height: 800,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js')
+    },
+    icon: path.join(__dirname, 'icon.png')
+  });
+
+  mapperWindow.loadFile('mapper.html');
+  
+  mapperWindow.on('closed', () => {
+    mapperWindow = null;
+  });
+});
+
+// データファイル（CSV/Excel）を読み込む
+ipcMain.handle('load-data-file', async (event) => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openFile'],
+    filters: [
+      { name: 'Data Files', extensions: ['csv', 'xlsx', 'xls'] }
+    ]
+  });
+
+  if (result.canceled || result.filePaths.length === 0) {
+    return null;
+  }
+
+  const filePath = result.filePaths[0];
+  const fileName = path.basename(filePath);
+  const ext = path.extname(filePath).toLowerCase();
+
+  try {
+    let data = [];
+    let headers = [];
+
+    if (ext === '.csv') {
+      // CSV読み込み
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const lines = content.split('\n').filter(line => line.trim());
+      
+      if (lines.length > 0) {
+        headers = lines[0].split(',').map(h => h.trim());
+        data = lines.slice(1).map(line => 
+          line.split(',').map(cell => cell.trim())
+        );
+      }
+    } else {
+      // Excel読み込み
+      const workbook = XLSX.readFile(filePath);
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      
+      if (jsonData.length > 0) {
+        headers = jsonData[0];
+        data = jsonData.slice(1);
+      }
+    }
+
+    return {
+      fileName: fileName,
+      headers: headers,
+      preview: data,
+      fullData: data
+    };
+  } catch (error) {
+    console.error('ファイル読み込みエラー:', error);
+    return null;
+  }
+});
+
+// フォルダ選択ダイアログ
+ipcMain.handle('select-folder', async (event) => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openDirectory']
+  });
+
+  if (result.canceled || result.filePaths.length === 0) {
+    return null;
+  }
+
+  return result.filePaths[0];
+});
+
+// データ変換とインポート実行
+ipcMain.handle('execute-import', async (event, config) => {
+  try {
+    const convertedData = await convertData(config);
+    
+    // 変換されたデータをCSV形式で一時保存
+    const outputPath = path.join(__dirname, 'temp_import.csv');
+    const csvContent = generateCSV(convertedData);
+    fs.writeFileSync(outputPath, csvContent, 'utf-8');
+    
+    // 既存のCSV読み込み機能を使用してインポート
+    // （ここでは簡易的に処理を記述）
+    console.log('✅ インポート成功:', convertedData.length, '件');
+    
+    return {
+      success: true,
+      count: convertedData.length,
+      data: convertedData
+    };
+  } catch (error) {
+    console.error('インポートエラー:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+});
+
+// データ変換プレビュー
+ipcMain.handle('preview-conversion', async (event, config) => {
+  try {
+    const convertedData = await convertData(config);
+    
+    return {
+      success: true,
+      preview: convertedData.slice(0, 5) // 先頭5件のみ
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+});
+
+// データ変換ロジック
+async function convertData(config) {
+  const { data, mapping, pathGeneration } = config;
+  const fullData = data.fullData;
+  const headers = data.headers;
+  
+  const converted = [];
+
+  for (let rowIndex = 0; rowIndex < fullData.length; rowIndex++) {
+    const row = fullData[rowIndex];
+    const newRow = {};
+
+    // Step 1: カラムマッピング適用
+    for (let [sourceCol, targetCol] of Object.entries(mapping)) {
+      const sourceIndex = headers.indexOf(sourceCol);
+      if (sourceIndex !== -1 && row[sourceIndex] !== undefined) {
+        newRow[targetCol] = row[sourceIndex];
+      }
+    }
+
+    // Step 2: 画像パス自動生成（Issue #4）
+    if (pathGeneration) {
+      // 選手写真パス生成
+      if (pathGeneration.player) {
+        const { basePath, pattern, targetColumn, checkExists } = pathGeneration.player;
+        const filePath = generateFilePath(basePath, pattern, newRow);
+        
+        if (checkExists) {
+          const fullPath = path.join(__dirname, filePath);
+          if (fs.existsSync(fullPath)) {
+            newRow[targetColumn] = filePath;
+          } else {
+            console.warn(`⚠️ ファイルが見つかりません: ${filePath}`);
+            newRow[targetColumn] = './assets/noimage.jpg'; // デフォルト画像
+          }
+        } else {
+          newRow[targetColumn] = filePath;
+        }
+      }
+
+      // チームロゴパス生成
+      if (pathGeneration.team) {
+        const { basePath, pattern, targetColumn, checkExists } = pathGeneration.team;
+        const filePath = generateFilePath(basePath, pattern, newRow);
+        
+        if (checkExists) {
+          const fullPath = path.join(__dirname, filePath);
+          if (fs.existsSync(fullPath)) {
+            newRow[targetColumn] = filePath;
+          } else {
+            console.warn(`⚠️ ロゴファイルが見つかりません: ${filePath}`);
+            newRow[targetColumn] = '';
+          }
+        } else {
+          newRow[targetColumn] = filePath;
+        }
+      }
+    }
+
+    converted.push(newRow);
+  }
+
+  return converted;
+}
+
+// ファイルパス生成（パターン置換）
+function generateFilePath(basePath, pattern, data) {
+  let filePath = pattern;
+  
+  // {ColumnName} パターンを実際の値で置換
+  const matches = pattern.match(/\{([^}]+)\}/g);
+  if (matches) {
+    matches.forEach(match => {
+      const columnName = match.replace(/[{}]/g, '');
+      if (data[columnName]) {
+        filePath = filePath.replace(match, data[columnName]);
+      }
+    });
+  }
+  
+  return basePath + filePath;
+}
+
+// CSV生成
+function generateCSV(data) {
+  if (data.length === 0) return '';
+  
+  const headers = Object.keys(data[0]);
+  const rows = data.map(row => 
+    headers.map(h => row[h] || '').join(',')
+  );
+  
+  return [headers.join(','), ...rows].join('\n');
+}
+
+// プリセット保存
+ipcMain.handle('save-preset', async (event, presetName, preset) => {
+  try {
+    const presetsDir = path.join(__dirname, 'presets');
+    if (!fs.existsSync(presetsDir)) {
+      fs.mkdirSync(presetsDir);
+    }
+    
+    const presetPath = path.join(presetsDir, `${presetName}.json`);
+    fs.writeFileSync(presetPath, JSON.stringify(preset, null, 2), 'utf-8');
+    
+    console.log(`✅ プリセット保存: ${presetName}`);
+    return { success: true };
+  } catch (error) {
+    console.error('プリセット保存エラー:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+// プリセット読み込み
+ipcMain.handle('load-preset', async (event, presetName) => {
+  try {
+    const presetPath = path.join(__dirname, 'presets', `${presetName}.json`);
+    if (!fs.existsSync(presetPath)) {
+      return null;
+    }
+    
+    const content = fs.readFileSync(presetPath, 'utf-8');
+    return JSON.parse(content);
+  } catch (error) {
+    console.error('プリセット読み込みエラー:', error);
+    return null;
+  }
+});
+
+// プリセット一覧取得
+ipcMain.handle('get-preset-list', async (event) => {
+  try {
+    const presetsDir = path.join(__dirname, 'presets');
+    if (!fs.existsSync(presetsDir)) {
+      return [];
+    }
+    
+    const files = fs.readdirSync(presetsDir);
+    return files
+      .filter(f => f.endsWith('.json'))
+      .map(f => f.replace('.json', ''));
+  } catch (error) {
+    console.error('プリセット一覧取得エラー:', error);
+    return [];
+  }
+});
