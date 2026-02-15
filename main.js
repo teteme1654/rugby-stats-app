@@ -568,25 +568,109 @@ ipcMain.handle('load-data-file', async (event) => {
       const workbook = XLSX.readFile(filePath);
       const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
       
       if (jsonData.length > 0) {
-        headers = jsonData[0];
-        data = jsonData.slice(1);
+        // ヘッダー行を自動検出（"NO"を含む行）
+        const headerRowIndex = jsonData.findIndex(row => 
+          row.some(cell => String(cell).toUpperCase() === 'NO')
+        );
+        
+        if (headerRowIndex !== -1) {
+          headers = jsonData[headerRowIndex];
+          data = jsonData;
+        } else {
+          // 従来形式（1行目がヘッダー）
+          headers = jsonData[0];
+          data = jsonData.slice(1);
+        }
       }
     }
+
+    // ファイル構造を自動検出
+    const fileFormat = detectFileFormat(data, headers);
+    console.log('📊 検出されたフォーマット:', fileFormat.type);
 
     return {
       fileName: fileName,
       headers: headers,
       preview: data,
-      fullData: data
+      fullData: data,
+      format: fileFormat
     };
   } catch (error) {
     console.error('ファイル読み込みエラー:', error);
     return null;
   }
 });
+
+// ファイル構造の自動検出
+function detectFileFormat(data, headers) {
+  // 両チーム形式の検出条件:
+  // 1. "NO"列が複数ある（列AとF）
+  // 2. 中央に空白列がある（列E）
+  // 3. データが左右対称的に配置されている
+  
+  const headerRow = data.find(row => 
+    row.some(cell => String(cell).toUpperCase() === 'NO')
+  );
+  
+  if (!headerRow) {
+    return { type: 'single', mode: 'manual' };
+  }
+
+  // "NO"の位置を全て検索
+  const noPositions = [];
+  headerRow.forEach((cell, index) => {
+    if (String(cell).toUpperCase() === 'NO') {
+      noPositions.push(index);
+    }
+  });
+
+  // 2つ以上の"NO"がある → 両チーム形式の可能性
+  if (noPositions.length >= 2) {
+    const leftNoIndex = noPositions[0];
+    const rightNoIndex = noPositions[1];
+    
+    // 中央に空白列があるか確認
+    const middleIndex = Math.floor((leftNoIndex + rightNoIndex) / 2);
+    const hasEmptyColumn = headerRow[middleIndex] === '' || !headerRow[middleIndex];
+    
+    if (hasEmptyColumn) {
+      console.log('✅ 両チーム一括形式を検出しました');
+      return {
+        type: 'dual',
+        mode: 'auto',
+        leftColumns: { start: leftNoIndex, end: leftNoIndex + 3 },  // NO, Pos, Name, Romaji
+        rightColumns: { start: rightNoIndex, end: rightNoIndex + 3 },
+        emptyColumn: middleIndex
+      };
+    }
+  }
+
+  // シングルチーム形式
+  return { type: 'single', mode: 'manual' };
+}
+
+// ポジション名正規化（"PR／プロップ" → "PR"）
+function normalizePosition(posText) {
+  if (!posText) return '';
+  
+  const text = String(posText).trim();
+  
+  // "PR／プロップ" 形式
+  const match = text.match(/^([A-Z0-9]+)／/);
+  if (match) {
+    return match[1];
+  }
+  
+  // "PR" のみ、または "プロップ" のみ
+  if (/^[A-Z0-9]+$/.test(text)) {
+    return text;
+  }
+  
+  return text.split('／')[0] || text;
+}
 
 // フォルダ選択ダイアログ
 ipcMain.handle('select-folder', async (event) => {
@@ -604,20 +688,46 @@ ipcMain.handle('select-folder', async (event) => {
 // データ変換とインポート実行
 ipcMain.handle('execute-import', async (event, config) => {
   try {
+    const { data, mapping, pathGeneration, format } = config;
+    
+    // 両チーム一括形式の場合
+    if (format && format.type === 'dual') {
+      return await importDualTeamData(config);
+    }
+    
+    // シングルチーム形式（従来）
     const convertedData = await convertData(config);
     
-    // 変換されたデータをCSV形式で一時保存
-    const outputPath = path.join(__dirname, 'temp_import.csv');
-    const csvContent = generateCSV(convertedData);
-    fs.writeFileSync(outputPath, csvContent, 'utf-8');
+    // チーム選択がない場合はエラー
+    if (!config.targetTeam) {
+      return {
+        success: false,
+        error: 'インポート先のチーム（ホーム/アウェイ）を選択してください'
+      };
+    }
     
-    // 既存のCSV読み込み機能を使用してインポート
-    // （ここでは簡易的に処理を記述）
-    console.log('✅ インポート成功:', convertedData.length, '件');
+    // matchDataに格納
+    const teamKey = config.targetTeam; // 'host' or 'away'
+    matchData.players[teamKey] = convertedData.map(player => ({
+      number: player.JerseyNo || player.背番号,
+      name: player.PlayerName || player.名前,
+      position: normalizePosition(player.Position || player.ポジション || '')
+    }));
+    
+    // チーム名も更新
+    if (convertedData.length > 0 && convertedData[0].TeamName) {
+      const teamKeyForName = teamKey === 'host' ? 'hostTeam' : 'awayTeam';
+      matchData[teamKeyForName].name = convertedData[0].TeamName;
+    }
+    
+    updateDisplay();
+    
+    console.log(`✅ ${teamKey}チームにインポート成功:`, convertedData.length, '件');
     
     return {
       success: true,
       count: convertedData.length,
+      team: teamKey,
       data: convertedData
     };
   } catch (error) {
@@ -628,6 +738,112 @@ ipcMain.handle('execute-import', async (event, config) => {
     };
   }
 });
+
+// 両チーム一括インポート処理
+async function importDualTeamData(config) {
+  const { data, format } = config;
+  const fullData = data.fullData;
+  
+  // ヘッダー行を探す
+  const headerRowIndex = fullData.findIndex(row => 
+    row.some(cell => String(cell).toUpperCase() === 'NO')
+  );
+  
+  if (headerRowIndex === -1) {
+    throw new Error('ヘッダー行が見つかりません');
+  }
+  
+  const leftCols = format.leftColumns;
+  const rightCols = format.rightColumns;
+  
+  // ホームチーム（左側）のデータ抽出
+  const hostPlayers = [];
+  for (let i = headerRowIndex + 1; i < fullData.length; i++) {
+    const row = fullData[i];
+    const no = row[leftCols.start];
+    
+    // 空行、"リザーブメンバー"行、ヘッダーなどをスキップ
+    if (!no || no === '' || String(no).includes('リザーブ') || String(no).includes('NO')) {
+      continue;
+    }
+    
+    // 数値または数値文字列かチェック
+    if (isNaN(Number(no))) {
+      continue;
+    }
+    
+    hostPlayers.push({
+      number: String(no),
+      position: normalizePosition(row[leftCols.start + 1] || ''),
+      name: (row[leftCols.start + 2] || '').trim()
+    });
+  }
+  
+  // アウェイチーム（右側）のデータ抽出
+  const awayPlayers = [];
+  for (let i = headerRowIndex + 1; i < fullData.length; i++) {
+    const row = fullData[i];
+    const no = row[rightCols.start];
+    
+    if (!no || no === '' || String(no).includes('リザーブ') || String(no).includes('NO')) {
+      continue;
+    }
+    
+    if (isNaN(Number(no))) {
+      continue;
+    }
+    
+    awayPlayers.push({
+      number: String(no),
+      position: normalizePosition(row[rightCols.start + 1] || ''),
+      name: (row[rightCols.start + 2] || '').trim()
+    });
+  }
+  
+  // チーム名を抽出（行7付近から）
+  let hostTeamName = 'ホームチーム';
+  let awayTeamName = 'アウェイチーム';
+  
+  for (let i = 0; i < Math.min(headerRowIndex, fullData.length); i++) {
+    const row = fullData[i];
+    
+    // 左側（ホーム）
+    const leftText = String(row[leftCols.start] || '');
+    // 右側（アウェイ）
+    const rightText = String(row[rightCols.start] || '');
+    
+    // "メンバー"を含む行からチーム名を抽出
+    if (leftText.includes('メンバー')) {
+      hostTeamName = leftText.replace(/メンバー.*$/, '').replace(/[　\s※]+$/, '').trim();
+    }
+    if (rightText.includes('メンバー') || rightText.includes('ワイルド') || rightText.includes('チーム')) {
+      awayTeamName = rightText.replace(/メンバー.*$/, '').replace(/[　\s※]+$/, '').trim();
+      // "※"以降を削除
+      awayTeamName = awayTeamName.split('※')[0].trim();
+    }
+  }
+  
+  // matchDataに格納
+  matchData.players.host = hostPlayers;
+  matchData.players.away = awayPlayers;
+  matchData.hostTeam.name = hostTeamName;
+  matchData.awayTeam.name = awayTeamName;
+  
+  updateDisplay();
+  
+  console.log(`✅ 両チーム一括インポート成功`);
+  console.log(`   ホーム: ${hostTeamName} (${hostPlayers.length}名)`);
+  console.log(`   アウェイ: ${awayTeamName} (${awayPlayers.length}名)`);
+  
+  return {
+    success: true,
+    mode: 'dual',
+    hostCount: hostPlayers.length,
+    awayCount: awayPlayers.length,
+    hostTeamName: hostTeamName,
+    awayTeamName: awayTeamName
+  };
+}
 
 // データ変換プレビュー
 ipcMain.handle('preview-conversion', async (event, config) => {

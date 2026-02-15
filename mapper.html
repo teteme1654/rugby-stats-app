@@ -300,8 +300,61 @@
             border: 1px solid #ffeaa7;
         }
 
-        #previewSection, #mappingSection, #pathGenerationSection {
+        #previewSection, #mappingSection, #pathGenerationSection, #teamSelectionSection {
             display: none;
+        }
+
+        .format-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .format-badge {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .team-selection {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .team-option {
+            flex: 1;
+            padding: 20px;
+            border: 3px solid #e0e0e0;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .team-option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .team-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            margin-bottom: 10px;
+        }
+
+        .team-option.selected {
+            border-color: #667eea;
+            background: #f8f9ff;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
         }
     </style>
 </head>
@@ -325,13 +378,42 @@
             </div>
             <div id="fileInfo" style="margin-top: 15px; display: none;">
                 <p><strong>選択ファイル:</strong> <span id="fileName"></span></p>
+                <div id="formatInfo" class="format-info" style="display: none;">
+                    <span>🔍 検出形式:</span>
+                    <span class="format-badge" id="formatBadge"></span>
+                    <span id="formatDescription"></span>
+                </div>
             </div>
         </div>
 
-        <!-- Step 2: プレビュー -->
-        <div class="step" id="previewSection">
+        <!-- Step 2: チーム選択（シングルモード時のみ） -->
+        <div class="step" id="teamSelectionSection">
             <div class="step-header">
                 <div class="step-number">2</div>
+                <div class="step-title">インポート先チーム選択</div>
+            </div>
+            <div class="team-selection">
+                <div class="team-option" onclick="selectTeam('host')">
+                    <input type="radio" name="targetTeam" value="host" id="teamHost">
+                    <label for="teamHost" style="cursor: pointer;">
+                        <div style="font-size: 2em; margin-bottom: 10px;">🏠</div>
+                        <div style="font-size: 1.3em; font-weight: bold;">ホームチーム</div>
+                    </label>
+                </div>
+                <div class="team-option" onclick="selectTeam('away')">
+                    <input type="radio" name="targetTeam" value="away" id="teamAway">
+                    <label for="teamAway" style="cursor: pointer;">
+                        <div style="font-size: 2em; margin-bottom: 10px;">✈️</div>
+                        <div style="font-size: 1.3em; font-weight: bold;">アウェイチーム</div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: プレビュー -->
+        <div class="step" id="previewSection">
+            <div class="step-header">
+                <div class="step-number">3</div>
                 <div class="step-title">データプレビュー</div>
             </div>
             <div style="overflow-x: auto;">
@@ -341,10 +423,10 @@
             </div>
         </div>
 
-        <!-- Step 3: カラムマッピング -->
+        <!-- Step 4: カラムマッピング -->
         <div class="step" id="mappingSection">
             <div class="step-header">
-                <div class="step-number">3</div>
+                <div class="step-number">4</div>
                 <div class="step-title">カラムマッピング</div>
             </div>
             <div class="preset-controls" style="margin-bottom: 20px;">
@@ -359,10 +441,10 @@
             </div>
         </div>
 
-        <!-- Step 4: 画像パス自動生成 -->
+        <!-- Step 5: 画像パス自動生成 -->
         <div class="step" id="pathGenerationSection">
             <div class="step-header">
-                <div class="step-number">4</div>
+                <div class="step-number">5</div>
                 <div class="step-title">画像パス自動生成（オプション）</div>
             </div>
             
@@ -483,16 +565,53 @@
             if (result) {
                 uploadedData = result;
                 headers = result.headers;
-                displayFileInfo(result.fileName);
+                displayFileInfo(result.fileName, result.format);
                 displayPreview(result);
-                generateMappingUI();
+                
+                // フォーマットによって表示を切り替え
+                if (result.format && result.format.type === 'dual') {
+                    // 両チーム一括モード → マッピング不要
+                    document.getElementById('mappingSection').style.display = 'none';
+                    document.getElementById('pathGenerationSection').style.display = 'none';
+                    document.getElementById('teamSelectionSection').style.display = 'none';
+                } else {
+                    // シングルモード → チーム選択必須
+                    generateMappingUI();
+                    document.getElementById('teamSelectionSection').style.display = 'block';
+                }
+                
                 showStatusMessage('ファイルを読み込みました', 'success');
             }
         }
 
-        function displayFileInfo(fileName) {
+        function displayFileInfo(fileName, format) {
             document.getElementById('fileName').textContent = fileName;
             document.getElementById('fileInfo').style.display = 'block';
+            
+            if (format) {
+                const formatInfo = document.getElementById('formatInfo');
+                const formatBadge = document.getElementById('formatBadge');
+                const formatDescription = document.getElementById('formatDescription');
+                
+                if (format.type === 'dual') {
+                    formatBadge.textContent = '両チーム一括形式';
+                    formatDescription.textContent = '両チームのデータを自動的に抽出してインポートします';
+                } else {
+                    formatBadge.textContent = 'シングルチーム形式';
+                    formatDescription.textContent = 'インポート先のチームを選択してください';
+                }
+                
+                formatInfo.style.display = 'flex';
+            }
+        }
+
+        function selectTeam(team) {
+            // ラジオボタンを選択
+            document.getElementById(`team${team === 'host' ? 'Host' : 'Away'}`).checked = true;
+            
+            // ビジュアルフィードバック
+            document.querySelectorAll('.team-option').forEach(el => el.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
         }
 
         function displayPreview(data) {
@@ -604,21 +723,46 @@
                 return;
             }
 
+            const format = uploadedData.format;
+            
+            // シングルモードの場合はチーム選択をチェック
+            let targetTeam = null;
+            if (!format || format.type !== 'dual') {
+                const selectedTeam = document.querySelector('input[name="targetTeam"]:checked');
+                if (!selectedTeam) {
+                    showStatusMessage('インポート先のチーム（ホーム/アウェイ）を選択してください', 'error');
+                    return;
+                }
+                targetTeam = selectedTeam.value;
+            }
+
             const mapping = getMappingConfig();
             const pathConfig = getPathGenerationConfig();
 
             const config = {
                 data: uploadedData,
                 mapping: mapping,
-                pathGeneration: pathConfig
+                pathGeneration: pathConfig,
+                targetTeam: targetTeam,
+                format: format
             };
 
             const result = await window.electronAPI.executeImport(config);
             
             if (result.success) {
-                showStatusMessage(`インポート成功！ ${result.count}件のデータを処理しました`, 'success');
+                if (result.mode === 'dual') {
+                    showStatusMessage(
+                        `✅ 両チーム一括インポート成功！\n` +
+                        `ホーム: ${result.hostTeamName} (${result.hostCount}名)\n` +
+                        `アウェイ: ${result.awayTeamName} (${result.awayCount}名)`,
+                        'success'
+                    );
+                } else {
+                    const teamLabel = targetTeam === 'host' ? 'ホームチーム' : 'アウェイチーム';
+                    showStatusMessage(`✅ ${teamLabel}にインポート成功！ ${result.count}件のデータを処理しました`, 'success');
+                }
             } else {
-                showStatusMessage(`エラー: ${result.error}`, 'error');
+                showStatusMessage(`❌ エラー: ${result.error}`, 'error');
             }
         }
 
