@@ -608,7 +608,7 @@ ipcMain.handle('load-data-file', async (event) => {
 function detectFileFormat(data, headers) {
   // 両チーム形式の検出条件:
   // 1. "NO"列が複数ある（列AとF）
-  // 2. 中央に空白列がある（列E）
+  // 2. 左側と右側の間に空白列がある
   // 3. データが左右対称的に配置されている
   
   const headerRow = data.find(row => 
@@ -632,23 +632,35 @@ function detectFileFormat(data, headers) {
     const leftNoIndex = noPositions[0];
     const rightNoIndex = noPositions[1];
     
-    // 中央に空白列があるか確認
-    const middleIndex = Math.floor((leftNoIndex + rightNoIndex) / 2);
-    const hasEmptyColumn = headerRow[middleIndex] === '' || !headerRow[middleIndex];
+    // 左側データの終わりと右側データの始まりの間に空白列があるか確認
+    // 左側: NO(0), Pos(1), Name(2), Romaji(3), 空白(4)
+    // 右側: NO(5), Pos(6), Name(7), Romaji(8)
+    let hasEmptyColumn = false;
+    for (let i = leftNoIndex + 1; i < rightNoIndex; i++) {
+      if (headerRow[i] === '' || !headerRow[i]) {
+        hasEmptyColumn = true;
+        console.log(`✅ 空白列を検出: index ${i}`);
+        break;
+      }
+    }
     
-    if (hasEmptyColumn) {
+    // または、2つのNOの間隔が5以上ある場合も両チーム形式と判定
+    const distance = rightNoIndex - leftNoIndex;
+    if (hasEmptyColumn || distance >= 5) {
       console.log('✅ 両チーム一括形式を検出しました');
+      console.log(`  左側NO: ${leftNoIndex}, 右側NO: ${rightNoIndex}, 間隔: ${distance}`);
       return {
         type: 'dual',
         mode: 'auto',
         leftColumns: { start: leftNoIndex, end: leftNoIndex + 3 },  // NO, Pos, Name, Romaji
         rightColumns: { start: rightNoIndex, end: rightNoIndex + 3 },
-        emptyColumn: middleIndex
+        emptyColumn: leftNoIndex + 4
       };
     }
   }
 
   // シングルチーム形式
+  console.log('⚠️ シングルチーム形式と判定しました');
   return { type: 'single', mode: 'manual' };
 }
 
