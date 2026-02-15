@@ -268,13 +268,14 @@
               <button onclick="addScore('host', 'conversion')" style="flex: 1; min-width: 100px; padding: 10px; font-weight: bold;">⚽ CG +2</button>
               <button onclick="addScore('host', 'penalty')" style="flex: 1; min-width: 100px; padding: 10px; font-weight: bold;">🎯 PG +3</button>
               <button onclick="addScore('host', 'drop')" style="flex: 1; min-width: 100px; padding: 10px; font-weight: bold;">💨 DG +3</button>
+              <button onclick="addScore('host', 'penaltyTry')" style="flex: 1; min-width: 100px; padding: 10px; font-weight: bold;">⚖️ PT +7</button>
             </div>
             <div style="margin-top: 10px; font-size: 1.5em; font-weight: bold; text-align: center;">
               スコア: <span id="hostScoreDisplay">0</span>
             </div>
             <div style="margin-top: 5px; font-size: 0.9em; color: #666; text-align: center;">
               TRY:<span id="hostTriesDisplay">0</span> CG:<span id="hostConversionsDisplay">0</span> 
-              PG:<span id="hostPGDisplay">0</span> DG:<span id="hostDGDisplay">0</span>
+              PG:<span id="hostPGDisplay">0</span> DG:<span id="hostDGDisplay">0</span> PT:<span id="hostPTDisplay">0</span>
             </div>
           </div>
         </div>
@@ -313,13 +314,14 @@
               <button onclick="addScore('away', 'conversion')" style="flex: 1; min-width: 100px; padding: 10px; font-weight: bold;">⚽ CG +2</button>
               <button onclick="addScore('away', 'penalty')" style="flex: 1; min-width: 100px; padding: 10px; font-weight: bold;">🎯 PG +3</button>
               <button onclick="addScore('away', 'drop')" style="flex: 1; min-width: 100px; padding: 10px; font-weight: bold;">💨 DG +3</button>
+              <button onclick="addScore('away', 'penaltyTry')" style="flex: 1; min-width: 100px; padding: 10px; font-weight: bold;">⚖️ PT +7</button>
             </div>
             <div style="margin-top: 10px; font-size: 1.5em; font-weight: bold; text-align: center;">
               スコア: <span id="awayScoreDisplay">0</span>
             </div>
             <div style="margin-top: 5px; font-size: 0.9em; color: #666; text-align: center;">
               TRY:<span id="awayTriesDisplay">0</span> CG:<span id="awayConversionsDisplay">0</span> 
-              PG:<span id="awayPGDisplay">0</span> DG:<span id="awayDGDisplay">0</span>
+              PG:<span id="awayPGDisplay">0</span> DG:<span id="awayDGDisplay">0</span> PT:<span id="awayPTDisplay">0</span>
             </div>
           </div>
         </div>
@@ -461,6 +463,10 @@
           points = 3;
           statKey = 'dropGoals';
           break;
+        case 'penaltyTry':
+          points = 7;
+          statKey = 'penaltyTries';
+          break;
       }
       
       // 現在のデータを取得
@@ -478,6 +484,7 @@
       // 表示を更新
       await loadData();
     }
+
 
     // 初期データ読み込み
     async function loadData() {
@@ -498,6 +505,7 @@
       document.getElementById('hostConversionsDisplay').textContent = currentData.stats.host.conversions;
       document.getElementById('hostPGDisplay').textContent = currentData.stats.host.penaltyGoals;
       document.getElementById('hostDGDisplay').textContent = currentData.stats.host.dropGoals || 0;
+      document.getElementById('hostPTDisplay').textContent = currentData.stats.host.penaltyTries || 0;
 
       document.getElementById('awayTeamName').value = currentData.awayTeam.name;
       document.getElementById('awayTeamLogo').value = currentData.awayTeam.logo;
@@ -508,6 +516,7 @@
       document.getElementById('awayConversionsDisplay').textContent = currentData.stats.away.conversions;
       document.getElementById('awayPGDisplay').textContent = currentData.stats.away.penaltyGoals;
       document.getElementById('awayDGDisplay').textContent = currentData.stats.away.dropGoals || 0;
+      document.getElementById('awayPTDisplay').textContent = currentData.stats.away.penaltyTries || 0;
 
       updatePlayersList('host', currentData.players.host);
       updatePlayersList('away', currentData.players.away);
@@ -703,25 +712,45 @@
     }
 
     // 試合リセット
-    function resetMatch() {
+    async function resetMatch() {
       if (confirm('試合データをリセットしますか？この操作は取り消せません。')) {
-        document.getElementById('hostScore').value = 0;
-        document.getElementById('awayScore').value = 0;
-        document.getElementById('hostTries').value = 0;
-        document.getElementById('awayTries').value = 0;
-        document.getElementById('hostConversions').value = 0;
-        document.getElementById('awayConversions').value = 0;
-        document.getElementById('hostPG').value = 0;
-        document.getElementById('awayPG').value = 0;
-
-        window.electronAPI.updateScore('host', 0);
-        window.electronAPI.updateScore('away', 0);
-        window.electronAPI.updateStats('host', 'tries', 0);
-        window.electronAPI.updateStats('away', 'tries', 0);
-        window.electronAPI.updateStats('host', 'conversions', 0);
-        window.electronAPI.updateStats('away', 'conversions', 0);
-        window.electronAPI.updateStats('host', 'penaltyGoals', 0);
-        window.electronAPI.updateStats('away', 'penaltyGoals', 0);
+        // 前半・後半のスコアをリセット
+        halfScores.first.host = 0;
+        halfScores.first.away = 0;
+        halfScores.second.host = 0;
+        halfScores.second.away = 0;
+        
+        // 表示をリセット
+        document.getElementById('hostFirstHalfScore').textContent = 0;
+        document.getElementById('hostSecondHalfScore').textContent = 0;
+        document.getElementById('awayFirstHalfScore').textContent = 0;
+        document.getElementById('awaySecondHalfScore').textContent = 0;
+        
+        // バックエンドのスコアと統計をリセット
+        await window.electronAPI.updateScore('host', 0);
+        await window.electronAPI.updateScore('away', 0);
+        
+        // 全ての統計をリセット
+        const statKeys = ['tries', 'conversions', 'penaltyGoals', 'dropGoals', 'penaltyTries'];
+        for (const key of statKeys) {
+          await window.electronAPI.updateStats('host', key, 0);
+          await window.electronAPI.updateStats('away', key, 0);
+        }
+        
+        // 前半・後半ごとの統計もリセット
+        for (const half of ['first', 'second']) {
+          for (const key of statKeys) {
+            await window.electronAPI.updateHalfStats(half, 'host', key, 0);
+            await window.electronAPI.updateHalfStats(half, 'away', key, 0);
+          }
+          await window.electronAPI.updateHalfScore(half, 'host', 0);
+          await window.electronAPI.updateHalfScore(half, 'away', 0);
+        }
+        
+        // UIを更新
+        await loadData();
+        
+        alert('試合データをリセットしました。');
       }
     }
 

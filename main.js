@@ -16,14 +16,14 @@ let matchData = {
   },
   stats: {
     host: { 
-      tries: 0, conversions: 0, penaltyGoals: 0, dropGoals: 0,
-      first: { tries: 0, conversions: 0, penaltyGoals: 0, dropGoals: 0 },
-      second: { tries: 0, conversions: 0, penaltyGoals: 0, dropGoals: 0 }
+      tries: 0, conversions: 0, penaltyGoals: 0, dropGoals: 0, penaltyTries: 0,
+      first: { tries: 0, conversions: 0, penaltyGoals: 0, dropGoals: 0, penaltyTries: 0 },
+      second: { tries: 0, conversions: 0, penaltyGoals: 0, dropGoals: 0, penaltyTries: 0 }
     },
     away: { 
-      tries: 0, conversions: 0, penaltyGoals: 0, dropGoals: 0,
-      first: { tries: 0, conversions: 0, penaltyGoals: 0, dropGoals: 0 },
-      second: { tries: 0, conversions: 0, penaltyGoals: 0, dropGoals: 0 }
+      tries: 0, conversions: 0, penaltyGoals: 0, dropGoals: 0, penaltyTries: 0,
+      first: { tries: 0, conversions: 0, penaltyGoals: 0, dropGoals: 0, penaltyTries: 0 },
+      second: { tries: 0, conversions: 0, penaltyGoals: 0, dropGoals: 0, penaltyTries: 0 }
     }
   },
   players: {
