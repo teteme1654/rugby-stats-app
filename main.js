@@ -430,6 +430,50 @@ ipcMain.handle('substitute-player', (event, team, outNumber, inNumber) => {
   }
 });
 
+// 選手情報を更新（Issue #5）
+ipcMain.handle('update-player', (event, team, playerIndex, updatedPlayer) => {
+  try {
+    const players = matchData.players[team];
+    if (!players || players.length === 0) {
+      throw new Error(`${team}チームの選手データが読み込まれていません`);
+    }
+    
+    if (playerIndex < 0 || playerIndex >= players.length) {
+      throw new Error(`無効な選手インデックス: ${playerIndex}`);
+    }
+    
+    // 選手情報を更新
+    players[playerIndex] = {
+      ...players[playerIndex],
+      ...updatedPlayer
+    };
+    
+    // 表示画面を更新
+    updateDisplay();
+    
+    console.log(`選手情報を更新しました: ${team} [${playerIndex}]`, updatedPlayer);
+    return { success: true, player: players[playerIndex] };
+  } catch (error) {
+    console.error('選手情報の更新エラー:', error);
+    throw error;
+  }
+});
+
+// 画像ファイル選択（Issue #5）
+ipcMain.handle('select-image-file', async () => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openFile'],
+    filters: [
+      { name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'] }
+    ]
+  });
+  
+  if (!result.canceled && result.filePaths.length > 0) {
+    return { filePath: result.filePaths[0] };
+  }
+  return null;
+});
+
 // 表示画面を更新
 function updateDisplay() {
   if (displayWindow && !displayWindow.isDestroyed()) {

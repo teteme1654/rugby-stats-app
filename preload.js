@@ -84,6 +84,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
   loadPreset: (presetName) => ipcRenderer.invoke('load-preset', presetName),
   
   // プリセット一覧取得
-  getPresetList: () => ipcRenderer.invoke('get-preset-list')
+  getPresetList: () => ipcRenderer.invoke('get-preset-list'),
+  
+  // ============================================================
+  // 選手情報編集機能（Issue #5対応）
+  // ============================================================
+  
+  // 選手情報を更新
+  updatePlayer: (team, playerIndex, updatedPlayer) => ipcRenderer.invoke('update-player', team, playerIndex, updatedPlayer),
+  
+  // 画像ファイル選択
+  selectImageFile: () => ipcRenderer.invoke('select-image-file')
 });
 

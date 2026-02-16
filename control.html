@@ -198,6 +198,72 @@
       margin-top: 20px;
       font-weight: bold;
     }
+
+    /* 選手編集モーダル */
+    dialog {
+      border: none;
+      border-radius: 15px;
+      padding: 0;
+      box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+      min-width: 500px;
+    }
+
+    dialog::backdrop {
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .dialog-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 15px 15px 0 0;
+    }
+
+    .dialog-header h2 {
+      margin: 0;
+      font-size: 1.5em;
+    }
+
+    .dialog-body {
+      padding: 20px;
+    }
+
+    .dialog-footer {
+      padding: 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .edit-btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: background 0.3s;
+    }
+
+    .edit-btn:hover {
+      background: #5568d3;
+    }
+
+    .player-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .player-item-info {
+      flex: 1;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
   </style>
 </head>
 <body>
@@ -530,10 +596,13 @@
         return;
       }
 
-      container.innerHTML = players.map(p => `
+      container.innerHTML = players.map((p, index) => `
         <div class="player-item">
-          <span><span class="player-number">${p.number}</span>${p.name}</span>
-          <span style="color: #666;">${p.position}</span>
+          <div class="player-item-info">
+            <span><span class="player-number">${p.number}</span>${p.name}</span>
+            <span style="color: #666;">${p.position}</span>
+          </div>
+          <button class="edit-btn" onclick="openEditPlayerDialog('${team}', ${index})">✏️ 編集</button>
         </div>
       `).join('');
       
@@ -754,11 +823,129 @@
       }
     }
 
+    // 選手編集モーダルを開く
+    function openEditPlayerDialog(team, playerIndex) {
+      const dialog = document.getElementById('editPlayerDialog');
+      const players = currentData.players[team];
+      const player = players[playerIndex];
+
+      // フォームにデータをセット
+      document.getElementById('editTeam').value = team;
+      document.getElementById('editPlayerIndex').value = playerIndex;
+      document.getElementById('editPlayerNumber').value = player.number || '';
+      document.getElementById('editPlayerName').value = player.name || '';
+      document.getElementById('editPlayerPosition').value = player.position || '';
+      document.getElementById('editPlayerImage').value = player.image || '';
+
+      // モーダルを表示
+      dialog.showModal();
+    }
+
+    // 選手情報を保存
+    async function savePlayerEdit() {
+      const team = document.getElementById('editTeam').value;
+      const playerIndex = parseInt(document.getElementById('editPlayerIndex').value);
+      const number = document.getElementById('editPlayerNumber').value.trim();
+      const name = document.getElementById('editPlayerName').value.trim();
+      const position = document.getElementById('editPlayerPosition').value.trim();
+      const image = document.getElementById('editPlayerImage').value.trim();
+
+      // バリデーション
+      if (!name) {
+        alert('選手名は必須です。');
+        return;
+      }
+      if (!number) {
+        alert('背番号は必須です。');
+        return;
+      }
+
+      // 更新データを作成
+      const updatedPlayer = {
+        number: number,
+        name: name,
+        position: position,
+        image: image
+      };
+
+      try {
+        // バックエンドに更新を送信
+        await window.electronAPI.updatePlayer(team, playerIndex, updatedPlayer);
+        
+        // UIを更新
+        await loadData();
+        
+        // モーダルを閉じる
+        closeEditPlayerDialog();
+        
+        alert('選手情報を更新しました。');
+      } catch (error) {
+        console.error('選手情報の更新に失敗しました:', error);
+        alert('選手情報の更新に失敗しました。');
+      }
+    }
+
+    // モーダルを閉じる
+    function closeEditPlayerDialog() {
+      const dialog = document.getElementById('editPlayerDialog');
+      dialog.close();
+    }
+
+    // 画像ファイルを選択
+    async function selectPlayerImage() {
+      try {
+        const result = await window.electronAPI.selectImageFile();
+        if (result && result.filePath) {
+          document.getElementById('editPlayerImage').value = result.filePath;
+        }
+      } catch (error) {
+        console.error('画像ファイルの選択に失敗しました:', error);
+      }
+    }
+
     // 初期化
     window.addEventListener('DOMContentLoaded', () => {
       loadData();
       setupEventListeners();
     });
   </script>
+
+  <!-- 選手編集モーダル -->
+  <dialog id="editPlayerDialog">
+    <div class="dialog-header">
+      <h2>選手情報の編集</h2>
+    </div>
+    <div class="dialog-body">
+      <input type="hidden" id="editTeam">
+      <input type="hidden" id="editPlayerIndex">
+      
+      <div class="form-group">
+        <label for="editPlayerNumber">背番号 *</label>
+        <input type="text" id="editPlayerNumber" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="editPlayerName">選手名 *</label>
+        <input type="text" id="editPlayerName" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="editPlayerPosition">ポジション</label>
+        <input type="text" id="editPlayerPosition">
+      </div>
+      
+      <div class="form-group">
+        <label for="editPlayerImage">画像ファイルパス</label>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="editPlayerImage" style="flex: 1;">
+          <button onclick="selectPlayerImage()" style="padding: 10px;">📁 選択</button>
+        </div>
+      </div>
+    </div>
+    <div class="dialog-footer">
+      <button onclick="closeEditPlayerDialog()" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">キャンセル</button>
+      <button onclick="savePlayerEdit()" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">保存</button>
+    </div>
+  </dialog>
 </body>
 </html>
