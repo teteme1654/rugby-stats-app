@@ -6,6 +6,39 @@ let mainWindow = null;
 let displayWindow = null;
 let scoreboardWindow = null;
 let scoreboardChromakeyWindow = null;
+
+// ディスプレイ設定を保存
+let displaySettings = {
+  displayWindowIndex: null,  // スタッツ表示用ディスプレイのインデックス
+  scoreboardWindowIndex: null // スコアボード用ディスプレイのインデックス
+};
+
+// 設定ファイルのパス
+const settingsPath = path.join(app.getPath('userData'), 'display-settings.json');
+
+// 設定を読み込む
+function loadDisplaySettings() {
+  try {
+    if (fs.existsSync(settingsPath)) {
+      const data = fs.readFileSync(settingsPath, 'utf8');
+      displaySettings = JSON.parse(data);
+      console.log('ディスプレイ設定を読み込みました:', displaySettings);
+    }
+  } catch (error) {
+    console.error('ディスプレイ設定の読み込みに失敗しました:', error);
+  }
+}
+
+// 設定を保存する
+function saveDisplaySettings() {
+  try {
+    fs.writeFileSync(settingsPath, JSON.stringify(displaySettings, null, 2));
+    console.log('ディスプレイ設定を保存しました:', displaySettings);
+  } catch (error) {
+    console.error('ディスプレイ設定の保存に失敗しました:', error);
+  }
+}
+
 let matchData = {
   hostTeam: { name: 'ホームチーム', logo: '', color: '#FF0000' },
   awayTeam: { name: 'アウェイチーム', logo: '', color: '#0000FF' },
@@ -63,13 +96,22 @@ function createMainWindow() {
 
 function createDisplayWindow() {
   const displays = screen.getAllDisplays();
-  const externalDisplay = displays.find((display) => {
-    return display.bounds.x !== 0 || display.bounds.y !== 0;
-  }) || displays[0];
+  
+  // 保存された設定があればそれを使用、なければ2枚目のディスプレイ
+  let targetDisplay;
+  if (displaySettings.displayWindowIndex !== null && displays[displaySettings.displayWindowIndex]) {
+    targetDisplay = displays[displaySettings.displayWindowIndex];
+    console.log(`スタッツ表示画面: ディスプレイ${displaySettings.displayWindowIndex + 1}を使用`);
+  } else {
+    // デフォルト: 最初の外部ディスプレイ（2枚目）
+    targetDisplay = displays.find((display) => {
+      return display.bounds.x !== 0 || display.bounds.y !== 0;
+    }) || displays[0];
+  }
 
   displayWindow = new BrowserWindow({
-    x: externalDisplay.bounds.x,
-    y: externalDisplay.bounds.y,
+    x: targetDisplay.bounds.x,
+    y: targetDisplay.bounds.y,
     fullscreen: true,
     frame: false,
     webPreferences: {
@@ -90,10 +132,17 @@ function createDisplayWindow() {
 function createScoreboardWindow() {
   const displays = screen.getAllDisplays();
   
-  // 3台目のモニターがあればそこに、なければメインディスプレイに配置
-  let targetDisplay = displays[0];
-  if (displays.length >= 3) {
-    targetDisplay = displays[2];
+  // 保存された設定があればそれを使用、なければ3枚目のディスプレイ
+  let targetDisplay;
+  if (displaySettings.scoreboardWindowIndex !== null && displays[displaySettings.scoreboardWindowIndex]) {
+    targetDisplay = displays[displaySettings.scoreboardWindowIndex];
+    console.log(`スコアボード: ディスプレイ${displaySettings.scoreboardWindowIndex + 1}を使用`);
+  } else {
+    // デフォルト: 3台目のモニターがあればそこに、なければメインディスプレイ
+    targetDisplay = displays[0];
+    if (displays.length >= 3) {
+      targetDisplay = displays[2];
+    }
   }
 
   const displayWidth = targetDisplay.bounds.width;
@@ -162,6 +211,7 @@ function createScoreboardChromakeyWindow() {
 }
 
 app.whenReady().then(() => {
+  loadDisplaySettings(); // ディスプレイ設定を読み込む
   createMainWindow();
   createDisplayWindow();
 });
@@ -472,6 +522,34 @@ ipcMain.handle('select-image-file', async () => {
     return { filePath: result.filePaths[0] };
   }
   return null;
+});
+
+// ディスプレイ情報を取得
+ipcMain.handle('get-displays', () => {
+  const displays = screen.getAllDisplays();
+  return displays.map((display, index) => ({
+    id: display.id,
+    index: index,
+    width: display.bounds.width,
+    height: display.bounds.height,
+    x: display.bounds.x,
+    y: display.bounds.y,
+    primary: display.bounds.x === 0 && display.bounds.y === 0
+  }));
+});
+
+// ウィンドウのディスプレイを設定
+ipcMain.handle('set-display-for-window', (event, windowType, displayIndex) => {
+  if (windowType === 'display') {
+    displaySettings.displayWindowIndex = displayIndex;
+  } else if (windowType === 'scoreboard') {
+    displaySettings.scoreboardWindowIndex = displayIndex;
+  }
+  
+  saveDisplaySettings();
+  
+  console.log(`${windowType}のディスプレイを${displayIndex + 1}に設定しました`);
+  return { success: true, windowType, displayIndex };
 });
 
 // 表示画面を更新

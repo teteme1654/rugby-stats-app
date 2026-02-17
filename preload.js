@@ -94,6 +94,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
   updatePlayer: (team, playerIndex, updatedPlayer) => ipcRenderer.invoke('update-player', team, playerIndex, updatedPlayer),
   
   // 画像ファイル選択
-  selectImageFile: () => ipcRenderer.invoke('select-image-file')
+  selectImageFile: () => ipcRenderer.invoke('select-image-file'),
+  
+  // ============================================================
+  // ディスプレイ設定機能
+  // ============================================================
+  
+  // 接続されているディスプレイ情報を取得
+  getDisplays: () => ipcRenderer.invoke('get-displays'),
+  
+  // 指定したウィンドウのディスプレイを設定
+  setDisplayForWindow: (windowType, displayIndex) => ipcRenderer.invoke('set-display-for-window', windowType, displayIndex)
 });
 

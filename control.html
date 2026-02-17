@@ -473,6 +473,35 @@
       </div>
     </div>
 
+    <!-- ディスプレイ設定 -->
+    <div class="control-panel">
+      <h2 class="section-title">ディスプレイ設定</h2>
+      <div class="form-group">
+        <label>接続されているディスプレイ:</label>
+        <div id="displayList" style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+          <p style="color: #999;">読み込み中...</p>
+        </div>
+      </div>
+      
+      <div class="teams-container">
+        <div class="form-group">
+          <label>📊 スタッツ表示画面:</label>
+          <select id="displayWindowSelect" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-size: 1em;">
+            <option value="">ディスプレイを選択</option>
+          </select>
+          <button onclick="applyDisplaySetting('display')" style="margin-top: 10px; width: 100%;">適用</button>
+        </div>
+        
+        <div class="form-group">
+          <label>🎬 スコアボード:</label>
+          <select id="scoreboardWindowSelect" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-size: 1em;">
+            <option value="">ディスプレイを選択</option>
+          </select>
+          <button onclick="applyDisplaySetting('scoreboard')" style="margin-top: 10px; width: 100%;">適用</button>
+        </div>
+      </div>
+    </div>
+
     <!-- クイックアクション -->
     <div class="control-panel">
       <div class="quick-actions">
@@ -907,7 +936,83 @@
     window.addEventListener('DOMContentLoaded', () => {
       loadData();
       setupEventListeners();
+      loadDisplayList();
     });
+
+    // ディスプレイ一覧を読み込む
+    async function loadDisplayList() {
+      try {
+        const displays = await window.electronAPI.getDisplays();
+        
+        // ディスプレイ情報を表示
+        const displayListDiv = document.getElementById('displayList');
+        displayListDiv.innerHTML = displays.map((d, index) => `
+          <div style="padding: 10px; margin-bottom: 10px; background: white; border-radius: 5px; border: 2px solid ${d.primary ? '#667eea' : '#ddd'};">
+            <strong>ディスプレイ ${index + 1} ${d.primary ? '(メイン)' : ''}</strong><br>
+            <span style="color: #666; font-size: 0.9em;">
+              解像度: ${d.width} × ${d.height} | 位置: (${d.x}, ${d.y})
+            </span>
+          </div>
+        `).join('');
+        
+        // セレクトボックスにオプションを追加
+        const displaySelect = document.getElementById('displayWindowSelect');
+        const scoreboardSelect = document.getElementById('scoreboardWindowSelect');
+        
+        const options = displays.map((d, index) => 
+          `<option value="${index}">ディスプレイ ${index + 1} - ${d.width}×${d.height} ${d.primary ? '(メイン)' : ''}</option>`
+        ).join('');
+        
+        displaySelect.innerHTML = '<option value="">ディスプレイを選択</option>' + options;
+        scoreboardSelect.innerHTML = '<option value="">ディスプレイを選択</option>' + options;
+        
+        // 保存された設定を読み込み
+        const savedDisplayIndex = localStorage.getItem('displayWindowIndex');
+        const savedScoreboardIndex = localStorage.getItem('scoreboardWindowIndex');
+        
+        if (savedDisplayIndex !== null) {
+          displaySelect.value = savedDisplayIndex;
+        }
+        if (savedScoreboardIndex !== null) {
+          scoreboardSelect.value = savedScoreboardIndex;
+        }
+      } catch (error) {
+        console.error('ディスプレイ情報の取得に失敗しました:', error);
+        document.getElementById('displayList').innerHTML = '<p style="color: red;">ディスプレイ情報の取得に失敗しました</p>';
+      }
+    }
+
+    // ディスプレイ設定を適用
+    async function applyDisplaySetting(windowType) {
+      try {
+        let selectElement, storageKey;
+        
+        if (windowType === 'display') {
+          selectElement = document.getElementById('displayWindowSelect');
+          storageKey = 'displayWindowIndex';
+        } else if (windowType === 'scoreboard') {
+          selectElement = document.getElementById('scoreboardWindowSelect');
+          storageKey = 'scoreboardWindowIndex';
+        }
+        
+        const displayIndex = selectElement.value;
+        if (displayIndex === '') {
+          alert('ディスプレイを選択してください。');
+          return;
+        }
+        
+        // 設定を保存
+        localStorage.setItem(storageKey, displayIndex);
+        
+        // バックエンドに設定を送信
+        await window.electronAPI.setDisplayForWindow(windowType, parseInt(displayIndex));
+        
+        alert(`${windowType === 'display' ? 'スタッツ表示画面' : 'スコアボード'}のディスプレイ設定を更新しました。\n次回表示時に適用されます。`);
+      } catch (error) {
+        console.error('ディスプレイ設定の適用に失敗しました:', error);
+        alert('ディスプレイ設定の適用に失敗しました。');
+      }
+    }
   </script>
 
   <!-- 選手編集モーダル -->
