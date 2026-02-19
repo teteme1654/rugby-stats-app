@@ -176,10 +176,17 @@ function createScoreboardWindow() {
 function createScoreboardChromakeyWindow() {
   const displays = screen.getAllDisplays();
   
-  // 3台目のモニターがあればそこに、なければメインディスプレイに配置
-  let targetDisplay = displays[0];
-  if (displays.length >= 3) {
-    targetDisplay = displays[2];
+  // 保存された設定があればそれを使用、なければ3枚目のディスプレイ
+  let targetDisplay;
+  if (displaySettings.scoreboardWindowIndex !== null && displays[displaySettings.scoreboardWindowIndex]) {
+    targetDisplay = displays[displaySettings.scoreboardWindowIndex];
+    console.log(`クロマキースコアボード: ディスプレイ${displaySettings.scoreboardWindowIndex + 1}を使用`);
+  } else {
+    // デフォルト: 3台目のモニターがあればそこに、なければメインディスプレイ
+    targetDisplay = displays[0];
+    if (displays.length >= 3) {
+      targetDisplay = displays[2];
+    }
   }
 
   const displayWidth = targetDisplay.bounds.width;
