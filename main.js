@@ -192,13 +192,12 @@ function createScoreboardChromakeyWindow() {
 
   const displayWidth = targetDisplay.bounds.width;
   const displayHeight = targetDisplay.bounds.height;
-  const scoreboardHeight = 150; // スコアボードの高さ
 
   scoreboardChromakeyWindow = new BrowserWindow({
     width: displayWidth,
-    height: scoreboardHeight,
+    height: displayHeight, // 全画面表示（クロマキー色を画面全体に表示）
     x: targetDisplay.bounds.x,
-    y: targetDisplay.bounds.y + displayHeight - scoreboardHeight, // 画面最下部に配置
+    y: targetDisplay.bounds.y,
     frame: false,
     transparent: false, // クロマキー版は不透明
     alwaysOnTop: true,
