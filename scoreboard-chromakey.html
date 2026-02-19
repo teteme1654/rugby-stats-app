@@ -185,63 +185,9 @@
     .control-btn.close:hover {
       background: rgba(255, 59, 48, 1);
     }
-
-    /* クロマキー色選択パネル */
-    .chromakey-controls {
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      display: flex;
-      gap: 5px;
-      z-index: 1000;
-      -webkit-app-region: no-drag;
-      opacity: 0.6;
-      transition: opacity 0.3s;
-    }
-    
-    .chromakey-controls:hover {
-      opacity: 1;
-    }
-
-    .color-btn {
-      width: 40px;
-      height: 30px;
-      border-radius: 5px;
-      border: 2px solid white;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .color-btn:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 10px rgba(255,255,255,0.5);
-    }
-
-    .color-btn.active {
-      border-width: 3px;
-      box-shadow: 0 0 15px rgba(255,255,255,0.8);
-    }
-
-    .color-btn.green {
-      background: #00FF00;
-    }
-
-    .color-btn.blue {
-      background: #0000FF;
-    }
-
-    .color-btn.magenta {
-      background: #FF00FF;
-    }
   </style>
 </head>
 <body>
-  <div class="chromakey-controls">
-    <button class="color-btn green active" onclick="setChromakey('#00FF00', this)" title="グリーン"></button>
-    <button class="color-btn blue" onclick="setChromakey('#0000FF', this)" title="ブルー"></button>
-    <button class="color-btn magenta" onclick="setChromakey('#FF00FF', this)" title="マゼンタ"></button>
-  </div>
-
   <div class="window-controls">
     <button class="control-btn" onclick="toggleAlwaysOnTop()" title="最前面表示切替">📌</button>
     <button class="control-btn close" onclick="closeWindow()" title="閉じる">✕</button>
@@ -332,14 +278,6 @@
         awayLogo.src = data.awayTeam.logo;
         awayLogo.style.display = 'block';
       }
-    }
-
-    function setChromakey(color, btn) {
-      document.body.style.background = color;
-      
-      // activeクラスを切り替え
-      document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
     }
 
     async function toggleAlwaysOnTop() {

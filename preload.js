@@ -104,6 +104,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getDisplays: () => ipcRenderer.invoke('get-displays'),
   
   // 指定したウィンドウのディスプレイを設定
-  setDisplayForWindow: (windowType, displayIndex) => ipcRenderer.invoke('set-display-for-window', windowType, displayIndex)
+  setDisplayForWindow: (windowType, displayIndex) => ipcRenderer.invoke('set-display-for-window', windowType, displayIndex),
+  
+  // クロマキー色を設定
+  setChromakeyColor: (color) => ipcRenderer.invoke('set-chromakey-color', color)
 });
 

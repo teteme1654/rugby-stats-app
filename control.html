@@ -502,6 +502,33 @@
       </div>
     </div>
 
+    <!-- クロマキー色設定 -->
+    <div class="control-panel">
+      <h2 class="section-title">クロマキー色設定</h2>
+      <div class="form-group">
+        <label>クロマキースコアボードの背景色:</label>
+        <div style="display: flex; gap: 15px; margin-top: 10px;">
+          <button onclick="setChromakeyColor('#00FF00')" style="flex: 1; padding: 15px; background: #00FF00; color: black; border: 2px solid #ddd; border-radius: 5px; cursor: pointer; font-weight: bold;">
+            グリーン (#00FF00)
+          </button>
+          <button onclick="setChromakeyColor('#0000FF')" style="flex: 1; padding: 15px; background: #0000FF; color: white; border: 2px solid #ddd; border-radius: 5px; cursor: pointer; font-weight: bold;">
+            ブルー (#0000FF)
+          </button>
+          <button onclick="setChromakeyColor('#FF00FF')" style="flex: 1; padding: 15px; background: #FF00FF; color: white; border: 2px solid #ddd; border-radius: 5px; cursor: pointer; font-weight: bold;">
+            マゼンタ (#FF00FF)
+          </button>
+        </div>
+        <div style="margin-top: 15px; display: flex; gap: 10px; align-items: center;">
+          <label>カスタム色:</label>
+          <input type="color" id="chromakeyColorPicker" value="#00FF00" style="width: 60px; height: 40px; border: 2px solid #ddd; border-radius: 5px; cursor: pointer;">
+          <button onclick="setChromakeyColor(document.getElementById('chromakeyColorPicker').value)" style="padding: 10px 20px;">カスタム色を適用</button>
+        </div>
+        <p style="margin-top: 10px; color: #666; font-size: 0.9em;">
+          現在の色: <span id="currentChromakeyColor" style="font-weight: bold;">#00FF00</span>
+        </p>
+      </div>
+    </div>
+
     <!-- クイックアクション -->
     <div class="control-panel">
       <div class="quick-actions">
@@ -937,7 +964,28 @@
       loadData();
       setupEventListeners();
       loadDisplayList();
+      loadChromakeyColor();
     });
+
+    // クロマキー色を設定
+    async function setChromakeyColor(color) {
+      try {
+        await window.electronAPI.setChromakeyColor(color);
+        localStorage.setItem('chromakeyColor', color);
+        document.getElementById('currentChromakeyColor').textContent = color;
+        alert(`クロマキー色を ${color} に設定しました。`);
+      } catch (error) {
+        console.error('クロマキー色の設定に失敗しました:', error);
+        alert('クロマキー色の設定に失敗しました。');
+      }
+    }
+
+    // 保存されたクロマキー色を読み込む
+    function loadChromakeyColor() {
+      const savedColor = localStorage.getItem('chromakeyColor') || '#00FF00';
+      document.getElementById('chromakeyColorPicker').value = savedColor;
+      document.getElementById('currentChromakeyColor').textContent = savedColor;
+    }
 
     // ディスプレイ一覧を読み込む
     async function loadDisplayList() {

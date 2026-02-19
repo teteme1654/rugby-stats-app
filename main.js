@@ -10,7 +10,8 @@ let scoreboardChromakeyWindow = null;
 // ディスプレイ設定を保存
 let displaySettings = {
   displayWindowIndex: null,  // スタッツ表示用ディスプレイのインデックス
-  scoreboardWindowIndex: null // スコアボード用ディスプレイのインデックス
+  scoreboardWindowIndex: null, // スコアボード用ディスプレイのインデックス
+  chromakeyColor: '#00FF00' // クロマキー背景色（デフォルト：グリーン）
 };
 
 // 設定ファイルのパス
@@ -167,7 +168,7 @@ function createScoreboardWindow() {
   });
 
   scoreboardWindow.loadFile('scoreboard.html');
-  scoreboardWindow.webContents.openDevTools(); // 開発者ツールを開く
+  // scoreboardWindow.webContents.openDevTools(); // 開発者ツールを開く（本番では無効化）
   scoreboardWindow.on('closed', () => {
     scoreboardWindow = null;
   });
@@ -211,7 +212,16 @@ function createScoreboardChromakeyWindow() {
   });
 
   scoreboardChromakeyWindow.loadFile('scoreboard-chromakey.html');
-  scoreboardChromakeyWindow.webContents.openDevTools(); // 開発者ツールを開く
+  // scoreboardChromakeyWindow.webContents.openDevTools(); // 開発者ツールを開く（本番では無効化）
+  
+  // ページ読み込み完了後にクロマキー色を設定
+  scoreboardChromakeyWindow.webContents.on('did-finish-load', () => {
+    const color = displaySettings.chromakeyColor || '#00FF00';
+    scoreboardChromakeyWindow.webContents.executeJavaScript(`
+      document.body.style.background = '${color}';
+    `);
+  });
+  
   scoreboardChromakeyWindow.on('closed', () => {
     scoreboardChromakeyWindow = null;
   });
@@ -557,6 +567,22 @@ ipcMain.handle('set-display-for-window', (event, windowType, displayIndex) => {
   
   console.log(`${windowType}のディスプレイを${displayIndex + 1}に設定しました`);
   return { success: true, windowType, displayIndex };
+});
+
+// クロマキー色を設定
+ipcMain.handle('set-chromakey-color', (event, color) => {
+  displaySettings.chromakeyColor = color;
+  saveDisplaySettings();
+  
+  // 既にクロマキースコアボードが開いている場合は即座に反映
+  if (scoreboardChromakeyWindow && !scoreboardChromakeyWindow.isDestroyed()) {
+    scoreboardChromakeyWindow.webContents.executeJavaScript(`
+      document.body.style.background = '${color}';
+    `);
+  }
+  
+  console.log(`クロマキー色を${color}に設定しました`);
+  return { success: true, color };
 });
 
 // 表示画面を更新
