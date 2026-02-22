@@ -667,6 +667,21 @@
       
       // 表示を更新
       await loadData();
+      
+      // カウント表示を即座に更新
+      const countIdMap = {
+        'tries': `${team}TriesCount`,
+        'conversions': `${team}ConversionsCount`,
+        'penaltyGoals': `${team}PGCount`,
+        'dropGoals': `${team}DGCount`,
+        'penaltyTries': `${team}PTCount`
+      };
+      if (countIdMap[statKey]) {
+        const countElement = document.getElementById(countIdMap[statKey]);
+        if (countElement) {
+          countElement.textContent = parseInt(countElement.textContent) + 1;
+        }
+      }
     }
 
     // スコア減算（取り消し用）
@@ -723,6 +738,21 @@
       
       // 表示を更新
       await loadData();
+      
+      // カウント表示を即座に更新
+      const countIdMap = {
+        'tries': `${team}TriesCount`,
+        'conversions': `${team}ConversionsCount`,
+        'penaltyGoals': `${team}PGCount`,
+        'dropGoals': `${team}DGCount`,
+        'penaltyTries': `${team}PTCount`
+      };
+      if (countIdMap[statKey]) {
+        const countElement = document.getElementById(countIdMap[statKey]);
+        if (countElement) {
+          countElement.textContent = parseInt(countElement.textContent) - 1;
+        }
+      }
     }
 
 
