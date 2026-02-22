@@ -331,32 +331,48 @@
             <label>スコア操作:</label>
             <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
               <div style="display: flex; flex-direction: column; gap: 5px;">
-                <button onclick="addScore('host', 'try')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">🏉 +5</button>
+                <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
+                  🏉 トライ<br>
+                  <span id="hostTriesCount" style="font-size: 1.2em; color: #667eea;">0</span>
+                </div>
+                <button onclick="addScore('host', 'try')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+5</button>
                 <button onclick="subtractScore('host', 'try')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-5</button>
               </div>
               <div style="display: flex; flex-direction: column; gap: 5px;">
-                <button onclick="addScore('host', 'conversion')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">⚽ +2</button>
+                <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
+                  ⚽ CG<br>
+                  <span id="hostConversionsCount" style="font-size: 1.2em; color: #667eea;">0</span>
+                </div>
+                <button onclick="addScore('host', 'conversion')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+2</button>
                 <button onclick="subtractScore('host', 'conversion')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-2</button>
               </div>
               <div style="display: flex; flex-direction: column; gap: 5px;">
-                <button onclick="addScore('host', 'penalty')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">🎯 +3</button>
+                <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
+                  🎯 PG<br>
+                  <span id="hostPGCount" style="font-size: 1.2em; color: #667eea;">0</span>
+                </div>
+                <button onclick="addScore('host', 'penalty')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+3</button>
                 <button onclick="subtractScore('host', 'penalty')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-3</button>
               </div>
               <div style="display: flex; flex-direction: column; gap: 5px;">
-                <button onclick="addScore('host', 'drop')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">💨 +3</button>
+                <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
+                  💨 DG<br>
+                  <span id="hostDGCount" style="font-size: 1.2em; color: #667eea;">0</span>
+                </div>
+                <button onclick="addScore('host', 'drop')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+3</button>
                 <button onclick="subtractScore('host', 'drop')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-3</button>
               </div>
               <div style="display: flex; flex-direction: column; gap: 5px;">
-                <button onclick="addScore('host', 'penaltyTry')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">⚖️ +7</button>
+                <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
+                  ⚖️ PT<br>
+                  <span id="hostPTCount" style="font-size: 1.2em; color: #667eea;">0</span>
+                </div>
+                <button onclick="addScore('host', 'penaltyTry')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+7</button>
                 <button onclick="subtractScore('host', 'penaltyTry')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-7</button>
               </div>
             </div>
             <div style="margin-top: 10px; font-size: 1.5em; font-weight: bold; text-align: center;">
               スコア: <span id="hostScoreDisplay">0</span>
-            </div>
-            <div style="margin-top: 5px; font-size: 0.9em; color: #666; text-align: center;">
-              TRY:<span id="hostTriesDisplay">0</span> CG:<span id="hostConversionsDisplay">0</span> 
-              PG:<span id="hostPGDisplay">0</span> DG:<span id="hostDGDisplay">0</span> PT:<span id="hostPTDisplay">0</span>
             </div>
           </div>
         </div>
@@ -392,32 +408,48 @@
             <label>スコア操作:</label>
             <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
               <div style="display: flex; flex-direction: column; gap: 5px;">
-                <button onclick="addScore('away', 'try')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">🏉 +5</button>
+                <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
+                  🏉 トライ<br>
+                  <span id="awayTriesCount" style="font-size: 1.2em; color: #667eea;">0</span>
+                </div>
+                <button onclick="addScore('away', 'try')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+5</button>
                 <button onclick="subtractScore('away', 'try')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-5</button>
               </div>
               <div style="display: flex; flex-direction: column; gap: 5px;">
-                <button onclick="addScore('away', 'conversion')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">⚽ +2</button>
+                <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
+                  ⚽ CG<br>
+                  <span id="awayConversionsCount" style="font-size: 1.2em; color: #667eea;">0</span>
+                </div>
+                <button onclick="addScore('away', 'conversion')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+2</button>
                 <button onclick="subtractScore('away', 'conversion')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-2</button>
               </div>
               <div style="display: flex; flex-direction: column; gap: 5px;">
-                <button onclick="addScore('away', 'penalty')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">🎯 +3</button>
+                <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
+                  🎯 PG<br>
+                  <span id="awayPGCount" style="font-size: 1.2em; color: #667eea;">0</span>
+                </div>
+                <button onclick="addScore('away', 'penalty')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+3</button>
                 <button onclick="subtractScore('away', 'penalty')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-3</button>
               </div>
               <div style="display: flex; flex-direction: column; gap: 5px;">
-                <button onclick="addScore('away', 'drop')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">💨 +3</button>
+                <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
+                  💨 DG<br>
+                  <span id="awayDGCount" style="font-size: 1.2em; color: #667eea;">0</span>
+                </div>
+                <button onclick="addScore('away', 'drop')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+3</button>
                 <button onclick="subtractScore('away', 'drop')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-3</button>
               </div>
               <div style="display: flex; flex-direction: column; gap: 5px;">
-                <button onclick="addScore('away', 'penaltyTry')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">⚖️ +7</button>
+                <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
+                  ⚖️ PT<br>
+                  <span id="awayPTCount" style="font-size: 1.2em; color: #667eea;">0</span>
+                </div>
+                <button onclick="addScore('away', 'penaltyTry')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+7</button>
                 <button onclick="subtractScore('away', 'penaltyTry')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-7</button>
               </div>
             </div>
             <div style="margin-top: 10px; font-size: 1.5em; font-weight: bold; text-align: center;">
               スコア: <span id="awayScoreDisplay">0</span>
-            </div>
-            <div style="margin-top: 5px; font-size: 0.9em; color: #666; text-align: center;">
-              TRY:<span id="awayTriesDisplay">0</span> CG:<span id="awayConversionsDisplay">0</span> 
-              PG:<span id="awayPGDisplay">0</span> DG:<span id="awayDGDisplay">0</span> PT:<span id="awayPTDisplay">0</span>
             </div>
           </div>
         </div>
@@ -714,6 +746,13 @@
       document.getElementById('hostPGDisplay').textContent = currentData.stats.host.penaltyGoals;
       document.getElementById('hostDGDisplay').textContent = currentData.stats.host.dropGoals || 0;
       document.getElementById('hostPTDisplay').textContent = currentData.stats.host.penaltyTries || 0;
+      
+      // ボタン上部のカウント表示も更新
+      document.getElementById('hostTriesCount').textContent = currentData.stats.host.tries;
+      document.getElementById('hostConversionsCount').textContent = currentData.stats.host.conversions;
+      document.getElementById('hostPGCount').textContent = currentData.stats.host.penaltyGoals;
+      document.getElementById('hostDGCount').textContent = currentData.stats.host.dropGoals || 0;
+      document.getElementById('hostPTCount').textContent = currentData.stats.host.penaltyTries || 0;
 
       document.getElementById('awayTeamName').value = currentData.awayTeam.name;
       document.getElementById('awayTeamLogo').value = currentData.awayTeam.logo;
@@ -725,6 +764,13 @@
       document.getElementById('awayPGDisplay').textContent = currentData.stats.away.penaltyGoals;
       document.getElementById('awayDGDisplay').textContent = currentData.stats.away.dropGoals || 0;
       document.getElementById('awayPTDisplay').textContent = currentData.stats.away.penaltyTries || 0;
+      
+      // ボタン上部のカウント表示も更新
+      document.getElementById('awayTriesCount').textContent = currentData.stats.away.tries;
+      document.getElementById('awayConversionsCount').textContent = currentData.stats.away.conversions;
+      document.getElementById('awayPGCount').textContent = currentData.stats.away.penaltyGoals;
+      document.getElementById('awayDGCount').textContent = currentData.stats.away.dropGoals || 0;
+      document.getElementById('awayPTCount').textContent = currentData.stats.away.penaltyTries || 0;
 
       updatePlayersList('host', currentData.players.host);
       updatePlayersList('away', currentData.players.away);
