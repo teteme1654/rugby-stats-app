@@ -676,10 +676,17 @@
         'dropGoals': `${team}DGCount`,
         'penaltyTries': `${team}PTCount`
       };
-      if (countIdMap[statKey]) {
-        const countElement = document.getElementById(countIdMap[statKey]);
+      const countId = countIdMap[statKey];
+      console.log('Updating count:', { team, statKey, countId });
+      if (countId) {
+        const countElement = document.getElementById(countId);
+        console.log('Count element:', countElement, 'Current value:', countElement?.textContent);
         if (countElement) {
-          countElement.textContent = parseInt(countElement.textContent) + 1;
+          const newValue = parseInt(countElement.textContent) + 1;
+          countElement.textContent = newValue;
+          console.log('Updated to:', newValue);
+        } else {
+          console.error('Count element not found:', countId);
         }
       }
     }
@@ -747,10 +754,17 @@
         'dropGoals': `${team}DGCount`,
         'penaltyTries': `${team}PTCount`
       };
-      if (countIdMap[statKey]) {
-        const countElement = document.getElementById(countIdMap[statKey]);
+      const countId = countIdMap[statKey];
+      console.log('Updating count (subtract):', { team, statKey, countId });
+      if (countId) {
+        const countElement = document.getElementById(countId);
+        console.log('Count element:', countElement, 'Current value:', countElement?.textContent);
         if (countElement) {
-          countElement.textContent = parseInt(countElement.textContent) - 1;
+          const newValue = parseInt(countElement.textContent) - 1;
+          countElement.textContent = newValue;
+          console.log('Updated to:', newValue);
+        } else {
+          console.error('Count element not found:', countId);
         }
       }
     }
