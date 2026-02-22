@@ -329,12 +329,27 @@
           </div>
           <div class="form-group">
             <label>スコア操作:</label>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-              <button onclick="addScore('host', 'try')" style="flex: 1; min-width: 100px; padding: 10px; font-weight: bold;">🏉 トライ +5</button>
-              <button onclick="addScore('host', 'conversion')" style="flex: 1; min-width: 100px; padding: 10px; font-weight: bold;">⚽ CG +2</button>
-              <button onclick="addScore('host', 'penalty')" style="flex: 1; min-width: 100px; padding: 10px; font-weight: bold;">🎯 PG +3</button>
-              <button onclick="addScore('host', 'drop')" style="flex: 1; min-width: 100px; padding: 10px; font-weight: bold;">💨 DG +3</button>
-              <button onclick="addScore('host', 'penaltyTry')" style="flex: 1; min-width: 100px; padding: 10px; font-weight: bold;">⚖️ PT +7</button>
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <button onclick="addScore('host', 'try')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">🏉 +5</button>
+                <button onclick="subtractScore('host', 'try')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-5</button>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <button onclick="addScore('host', 'conversion')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">⚽ +2</button>
+                <button onclick="subtractScore('host', 'conversion')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-2</button>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <button onclick="addScore('host', 'penalty')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">🎯 +3</button>
+                <button onclick="subtractScore('host', 'penalty')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-3</button>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <button onclick="addScore('host', 'drop')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">💨 +3</button>
+                <button onclick="subtractScore('host', 'drop')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-3</button>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <button onclick="addScore('host', 'penaltyTry')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">⚖️ +7</button>
+                <button onclick="subtractScore('host', 'penaltyTry')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-7</button>
+              </div>
             </div>
             <div style="margin-top: 10px; font-size: 1.5em; font-weight: bold; text-align: center;">
               スコア: <span id="hostScoreDisplay">0</span>
@@ -375,12 +390,27 @@
           </div>
           <div class="form-group">
             <label>スコア操作:</label>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-              <button onclick="addScore('away', 'try')" style="flex: 1; min-width: 100px; padding: 10px; font-weight: bold;">🏉 トライ +5</button>
-              <button onclick="addScore('away', 'conversion')" style="flex: 1; min-width: 100px; padding: 10px; font-weight: bold;">⚽ CG +2</button>
-              <button onclick="addScore('away', 'penalty')" style="flex: 1; min-width: 100px; padding: 10px; font-weight: bold;">🎯 PG +3</button>
-              <button onclick="addScore('away', 'drop')" style="flex: 1; min-width: 100px; padding: 10px; font-weight: bold;">💨 DG +3</button>
-              <button onclick="addScore('away', 'penaltyTry')" style="flex: 1; min-width: 100px; padding: 10px; font-weight: bold;">⚖️ PT +7</button>
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <button onclick="addScore('away', 'try')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">🏉 +5</button>
+                <button onclick="subtractScore('away', 'try')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-5</button>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <button onclick="addScore('away', 'conversion')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">⚽ +2</button>
+                <button onclick="subtractScore('away', 'conversion')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-2</button>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <button onclick="addScore('away', 'penalty')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">🎯 +3</button>
+                <button onclick="subtractScore('away', 'penalty')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-3</button>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <button onclick="addScore('away', 'drop')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">💨 +3</button>
+                <button onclick="subtractScore('away', 'drop')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-3</button>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <button onclick="addScore('away', 'penaltyTry')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">⚖️ +7</button>
+                <button onclick="subtractScore('away', 'penaltyTry')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-7</button>
+              </div>
             </div>
             <div style="margin-top: 10px; font-size: 1.5em; font-weight: bold; text-align: center;">
               スコア: <span id="awayScoreDisplay">0</span>
@@ -600,6 +630,62 @@
       
       // 前半/後半スコアを更新
       halfScores[currentHalf][team] += points;
+      document.getElementById(`${team}${currentHalf === 'first' ? 'First' : 'Second'}HalfScore`).textContent = halfScores[currentHalf][team];
+      await window.electronAPI.updateHalfScore(currentHalf, team, halfScores[currentHalf][team]);
+      
+      // 表示を更新
+      await loadData();
+    }
+
+    // スコア減算（取り消し用）
+    async function subtractScore(team, type) {
+      let points = 0;
+      let statKey = '';
+      
+      switch(type) {
+        case 'try':
+          points = 5;
+          statKey = 'tries';
+          break;
+        case 'conversion':
+          points = 2;
+          statKey = 'conversions';
+          break;
+        case 'penalty':
+          points = 3;
+          statKey = 'penaltyGoals';
+          break;
+        case 'drop':
+          points = 3;
+          statKey = 'dropGoals';
+          break;
+        case 'penaltyTry':
+          points = 7;
+          statKey = 'penaltyTries';
+          break;
+      }
+      
+      // 現在のデータを取得
+      const data = await window.electronAPI.getMatchData();
+      
+      // 現在の統計値を確認（マイナスにならないように）
+      const currentStat = data.stats[team][currentHalf][statKey];
+      if (currentStat <= 0) {
+        alert('これ以上減らせません（0未満にはできません）');
+        return;
+      }
+      
+      // 現在の前半/後半スコアを確認
+      if (halfScores[currentHalf][team] < points) {
+        alert('スコアが不足しています（マイナスにはできません）');
+        return;
+      }
+      
+      // 前半/後半の統計を更新
+      await window.electronAPI.updateHalfStats(currentHalf, team, statKey, currentStat - 1);
+      
+      // 前半/後半スコアを更新
+      halfScores[currentHalf][team] -= points;
       document.getElementById(`${team}${currentHalf === 'first' ? 'First' : 'Second'}HalfScore`).textContent = halfScores[currentHalf][team];
       await window.electronAPI.updateHalfScore(currentHalf, team, halfScores[currentHalf][team]);
       
