@@ -787,6 +787,19 @@
       document.getElementById('awayDGCount').textContent = currentData.stats.away.dropGoals || 0;
       document.getElementById('awayPTCount').textContent = currentData.stats.away.penaltyTries || 0;
 
+      // 前半/後半スコア表示を更新
+      if (currentData.halfScores) {
+        halfScores.first.host = currentData.halfScores.first.host;
+        halfScores.first.away = currentData.halfScores.first.away;
+        halfScores.second.host = currentData.halfScores.second.host;
+        halfScores.second.away = currentData.halfScores.second.away;
+        
+        document.getElementById('hostFirstHalfScore').textContent = currentData.halfScores.first.host;
+        document.getElementById('awayFirstHalfScore').textContent = currentData.halfScores.first.away;
+        document.getElementById('hostSecondHalfScore').textContent = currentData.halfScores.second.host;
+        document.getElementById('awaySecondHalfScore').textContent = currentData.halfScores.second.away;
+      }
+
       updatePlayersList('host', currentData.players.host);
       updatePlayersList('away', currentData.players.away);
     }
