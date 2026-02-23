@@ -86,7 +86,7 @@ function createMainWindow() {
   });
 
   mainWindow.loadFile('control.html');
-  // mainWindow.webContents.openDevTools(); // 開発者ツールを開く（本番では無効化）
+  mainWindow.webContents.openDevTools(); // 開発者ツールを開く（デバッグ用に一時的に有効化）
   mainWindow.on('closed', () => {
     mainWindow = null;
     if (displayWindow) {

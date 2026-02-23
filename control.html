@@ -743,13 +743,23 @@
 
     // 初期データ読み込み
     async function loadData() {
+      console.log('loadData: Fetching match data...');
       currentData = await window.electronAPI.getMatchData();
+      console.log('loadData: Received data:', currentData);
       updateUI();
+      console.log('loadData: UI updated');
     }
 
     // UIを更新
     function updateUI() {
       if (!currentData) return;
+
+      console.log('updateUI: Updating with data:', {
+        hostScore: currentData.score.host,
+        awayScore: currentData.score.away,
+        hostTries: currentData.stats.host.tries,
+        awayTries: currentData.stats.away.tries
+      });
 
       document.getElementById('hostTeamName').value = currentData.hostTeam.name;
       document.getElementById('hostTeamLogo').value = currentData.hostTeam.logo;
