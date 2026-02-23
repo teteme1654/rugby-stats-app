@@ -665,10 +665,7 @@
       document.getElementById(`${team}${currentHalf === 'first' ? 'First' : 'Second'}HalfScore`).textContent = halfScores[currentHalf][team];
       await window.electronAPI.updateHalfScore(currentHalf, team, halfScores[currentHalf][team]);
       
-      // 表示を更新
-      await loadData();
-      
-      // カウント表示を即座に更新
+      // カウント表示を先に更新（loadData()で上書きされる前に）
       const countIdMap = {
         'tries': `${team}TriesCount`,
         'conversions': `${team}ConversionsCount`,
@@ -678,17 +675,11 @@
       };
       const countId = countIdMap[statKey];
       console.log('Updating count:', { team, statKey, countId });
-      if (countId) {
-        const countElement = document.getElementById(countId);
-        console.log('Count element:', countElement, 'Current value:', countElement?.textContent);
-        if (countElement) {
-          const newValue = parseInt(countElement.textContent) + 1;
-          countElement.textContent = newValue;
-          console.log('Updated to:', newValue);
-        } else {
-          console.error('Count element not found:', countId);
-        }
-      }
+      
+      // 表示を更新（この時点でbackendのデータが更新されている）
+      await loadData();
+      
+      // loadData()の後は不要（updateUI()で正しく更新される）
     }
 
     // スコア減算（取り消し用）
@@ -743,30 +734,10 @@
       document.getElementById(`${team}${currentHalf === 'first' ? 'First' : 'Second'}HalfScore`).textContent = halfScores[currentHalf][team];
       await window.electronAPI.updateHalfScore(currentHalf, team, halfScores[currentHalf][team]);
       
-      // 表示を更新
+      // 表示を更新（この時点でbackendのデータが更新されている）
       await loadData();
       
-      // カウント表示を即座に更新
-      const countIdMap = {
-        'tries': `${team}TriesCount`,
-        'conversions': `${team}ConversionsCount`,
-        'penaltyGoals': `${team}PGCount`,
-        'dropGoals': `${team}DGCount`,
-        'penaltyTries': `${team}PTCount`
-      };
-      const countId = countIdMap[statKey];
-      console.log('Updating count (subtract):', { team, statKey, countId });
-      if (countId) {
-        const countElement = document.getElementById(countId);
-        console.log('Count element:', countElement, 'Current value:', countElement?.textContent);
-        if (countElement) {
-          const newValue = parseInt(countElement.textContent) - 1;
-          countElement.textContent = newValue;
-          console.log('Updated to:', newValue);
-        } else {
-          console.error('Count element not found:', countId);
-        }
-      }
+      // loadData()のupdateUI()で正しく更新される
     }
 
 
