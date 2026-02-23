@@ -766,13 +766,8 @@
       document.getElementById('hostTeamColor').value = currentData.hostTeam.color;
       document.getElementById('hostTeamColorPicker').value = currentData.hostTeam.color;
       document.getElementById('hostScoreDisplay').textContent = currentData.score.host;
-      document.getElementById('hostTriesDisplay').textContent = currentData.stats.host.tries;
-      document.getElementById('hostConversionsDisplay').textContent = currentData.stats.host.conversions;
-      document.getElementById('hostPGDisplay').textContent = currentData.stats.host.penaltyGoals;
-      document.getElementById('hostDGDisplay').textContent = currentData.stats.host.dropGoals || 0;
-      document.getElementById('hostPTDisplay').textContent = currentData.stats.host.penaltyTries || 0;
       
-      // ボタン上部のカウント表示も更新
+      // ボタン上部のカウント表示を更新
       document.getElementById('hostTriesCount').textContent = currentData.stats.host.tries;
       document.getElementById('hostConversionsCount').textContent = currentData.stats.host.conversions;
       document.getElementById('hostPGCount').textContent = currentData.stats.host.penaltyGoals;
@@ -784,13 +779,8 @@
       document.getElementById('awayTeamColor').value = currentData.awayTeam.color;
       document.getElementById('awayTeamColorPicker').value = currentData.awayTeam.color;
       document.getElementById('awayScoreDisplay').textContent = currentData.score.away;
-      document.getElementById('awayTriesDisplay').textContent = currentData.stats.away.tries;
-      document.getElementById('awayConversionsDisplay').textContent = currentData.stats.away.conversions;
-      document.getElementById('awayPGDisplay').textContent = currentData.stats.away.penaltyGoals;
-      document.getElementById('awayDGDisplay').textContent = currentData.stats.away.dropGoals || 0;
-      document.getElementById('awayPTDisplay').textContent = currentData.stats.away.penaltyTries || 0;
       
-      // ボタン上部のカウント表示も更新
+      // ボタン上部のカウント表示を更新
       document.getElementById('awayTriesCount').textContent = currentData.stats.away.tries;
       document.getElementById('awayConversionsCount').textContent = currentData.stats.away.conversions;
       document.getElementById('awayPGCount').textContent = currentData.stats.away.penaltyGoals;
