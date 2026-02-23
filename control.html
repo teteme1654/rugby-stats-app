@@ -333,7 +333,8 @@
               <div style="display: flex; flex-direction: column; gap: 5px;">
                 <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
                   🏉 トライ<br>
-                  <span id="hostTriesCount" style="font-size: 1.2em; color: #667eea;">0</span>
+                  <span style="font-size: 0.85em; color: #666;">前半: <span id="hostTriesFirstCount" style="color: #667eea;">0</span></span><br>
+                  <span style="font-size: 0.85em; color: #666;">後半: <span id="hostTriesSecondCount" style="color: #667eea;">0</span></span>
                 </div>
                 <button onclick="addScore('host', 'try')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+5</button>
                 <button onclick="subtractScore('host', 'try')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-5</button>
@@ -341,7 +342,8 @@
               <div style="display: flex; flex-direction: column; gap: 5px;">
                 <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
                   ⚽ CG<br>
-                  <span id="hostConversionsCount" style="font-size: 1.2em; color: #667eea;">0</span>
+                  <span style="font-size: 0.85em; color: #666;">前半: <span id="hostConversionsFirstCount" style="color: #667eea;">0</span></span><br>
+                  <span style="font-size: 0.85em; color: #666;">後半: <span id="hostConversionsSecondCount" style="color: #667eea;">0</span></span>
                 </div>
                 <button onclick="addScore('host', 'conversion')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+2</button>
                 <button onclick="subtractScore('host', 'conversion')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-2</button>
@@ -349,7 +351,8 @@
               <div style="display: flex; flex-direction: column; gap: 5px;">
                 <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
                   🎯 PG<br>
-                  <span id="hostPGCount" style="font-size: 1.2em; color: #667eea;">0</span>
+                  <span style="font-size: 0.85em; color: #666;">前半: <span id="hostPGFirstCount" style="color: #667eea;">0</span></span><br>
+                  <span style="font-size: 0.85em; color: #666;">後半: <span id="hostPGSecondCount" style="color: #667eea;">0</span></span>
                 </div>
                 <button onclick="addScore('host', 'penalty')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+3</button>
                 <button onclick="subtractScore('host', 'penalty')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-3</button>
@@ -357,7 +360,8 @@
               <div style="display: flex; flex-direction: column; gap: 5px;">
                 <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
                   💨 DG<br>
-                  <span id="hostDGCount" style="font-size: 1.2em; color: #667eea;">0</span>
+                  <span style="font-size: 0.85em; color: #666;">前半: <span id="hostDGFirstCount" style="color: #667eea;">0</span></span><br>
+                  <span style="font-size: 0.85em; color: #666;">後半: <span id="hostDGSecondCount" style="color: #667eea;">0</span></span>
                 </div>
                 <button onclick="addScore('host', 'drop')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+3</button>
                 <button onclick="subtractScore('host', 'drop')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-3</button>
@@ -365,7 +369,8 @@
               <div style="display: flex; flex-direction: column; gap: 5px;">
                 <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
                   ⚖️ PT<br>
-                  <span id="hostPTCount" style="font-size: 1.2em; color: #667eea;">0</span>
+                  <span style="font-size: 0.85em; color: #666;">前半: <span id="hostPTFirstCount" style="color: #667eea;">0</span></span><br>
+                  <span style="font-size: 0.85em; color: #666;">後半: <span id="hostPTSecondCount" style="color: #667eea;">0</span></span>
                 </div>
                 <button onclick="addScore('host', 'penaltyTry')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+7</button>
                 <button onclick="subtractScore('host', 'penaltyTry')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-7</button>
@@ -410,7 +415,8 @@
               <div style="display: flex; flex-direction: column; gap: 5px;">
                 <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
                   🏉 トライ<br>
-                  <span id="awayTriesCount" style="font-size: 1.2em; color: #667eea;">0</span>
+                  <span style="font-size: 0.85em; color: #666;">前半: <span id="awayTriesFirstCount" style="color: #667eea;">0</span></span><br>
+                  <span style="font-size: 0.85em; color: #666;">後半: <span id="awayTriesSecondCount" style="color: #667eea;">0</span></span>
                 </div>
                 <button onclick="addScore('away', 'try')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+5</button>
                 <button onclick="subtractScore('away', 'try')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-5</button>
@@ -418,7 +424,8 @@
               <div style="display: flex; flex-direction: column; gap: 5px;">
                 <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
                   ⚽ CG<br>
-                  <span id="awayConversionsCount" style="font-size: 1.2em; color: #667eea;">0</span>
+                  <span style="font-size: 0.85em; color: #666;">前半: <span id="awayConversionsFirstCount" style="color: #667eea;">0</span></span><br>
+                  <span style="font-size: 0.85em; color: #666;">後半: <span id="awayConversionsSecondCount" style="color: #667eea;">0</span></span>
                 </div>
                 <button onclick="addScore('away', 'conversion')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+2</button>
                 <button onclick="subtractScore('away', 'conversion')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-2</button>
@@ -426,7 +433,8 @@
               <div style="display: flex; flex-direction: column; gap: 5px;">
                 <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
                   🎯 PG<br>
-                  <span id="awayPGCount" style="font-size: 1.2em; color: #667eea;">0</span>
+                  <span style="font-size: 0.85em; color: #666;">前半: <span id="awayPGFirstCount" style="color: #667eea;">0</span></span><br>
+                  <span style="font-size: 0.85em; color: #666;">後半: <span id="awayPGSecondCount" style="color: #667eea;">0</span></span>
                 </div>
                 <button onclick="addScore('away', 'penalty')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+3</button>
                 <button onclick="subtractScore('away', 'penalty')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-3</button>
@@ -434,7 +442,8 @@
               <div style="display: flex; flex-direction: column; gap: 5px;">
                 <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
                   💨 DG<br>
-                  <span id="awayDGCount" style="font-size: 1.2em; color: #667eea;">0</span>
+                  <span style="font-size: 0.85em; color: #666;">前半: <span id="awayDGFirstCount" style="color: #667eea;">0</span></span><br>
+                  <span style="font-size: 0.85em; color: #666;">後半: <span id="awayDGSecondCount" style="color: #667eea;">0</span></span>
                 </div>
                 <button onclick="addScore('away', 'drop')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+3</button>
                 <button onclick="subtractScore('away', 'drop')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-3</button>
@@ -442,7 +451,8 @@
               <div style="display: flex; flex-direction: column; gap: 5px;">
                 <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
                   ⚖️ PT<br>
-                  <span id="awayPTCount" style="font-size: 1.2em; color: #667eea;">0</span>
+                  <span style="font-size: 0.85em; color: #666;">前半: <span id="awayPTFirstCount" style="color: #667eea;">0</span></span><br>
+                  <span style="font-size: 0.85em; color: #666;">後半: <span id="awayPTSecondCount" style="color: #667eea;">0</span></span>
                 </div>
                 <button onclick="addScore('away', 'penaltyTry')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+7</button>
                 <button onclick="subtractScore('away', 'penaltyTry')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-7</button>
@@ -767,12 +777,21 @@
       document.getElementById('hostTeamColorPicker').value = currentData.hostTeam.color;
       document.getElementById('hostScoreDisplay').textContent = currentData.score.host;
       
-      // ボタン上部のカウント表示を更新
-      document.getElementById('hostTriesCount').textContent = currentData.stats.host.tries;
-      document.getElementById('hostConversionsCount').textContent = currentData.stats.host.conversions;
-      document.getElementById('hostPGCount').textContent = currentData.stats.host.penaltyGoals;
-      document.getElementById('hostDGCount').textContent = currentData.stats.host.dropGoals || 0;
-      document.getElementById('hostPTCount').textContent = currentData.stats.host.penaltyTries || 0;
+      // ボタン上部のカウント表示を更新（前半/後半別）
+      if (currentData.stats.host.first) {
+        document.getElementById('hostTriesFirstCount').textContent = currentData.stats.host.first.tries || 0;
+        document.getElementById('hostConversionsFirstCount').textContent = currentData.stats.host.first.conversions || 0;
+        document.getElementById('hostPGFirstCount').textContent = currentData.stats.host.first.penaltyGoals || 0;
+        document.getElementById('hostDGFirstCount').textContent = currentData.stats.host.first.dropGoals || 0;
+        document.getElementById('hostPTFirstCount').textContent = currentData.stats.host.first.penaltyTries || 0;
+      }
+      if (currentData.stats.host.second) {
+        document.getElementById('hostTriesSecondCount').textContent = currentData.stats.host.second.tries || 0;
+        document.getElementById('hostConversionsSecondCount').textContent = currentData.stats.host.second.conversions || 0;
+        document.getElementById('hostPGSecondCount').textContent = currentData.stats.host.second.penaltyGoals || 0;
+        document.getElementById('hostDGSecondCount').textContent = currentData.stats.host.second.dropGoals || 0;
+        document.getElementById('hostPTSecondCount').textContent = currentData.stats.host.second.penaltyTries || 0;
+      }
 
       document.getElementById('awayTeamName').value = currentData.awayTeam.name;
       document.getElementById('awayTeamLogo').value = currentData.awayTeam.logo;
@@ -780,12 +799,21 @@
       document.getElementById('awayTeamColorPicker').value = currentData.awayTeam.color;
       document.getElementById('awayScoreDisplay').textContent = currentData.score.away;
       
-      // ボタン上部のカウント表示を更新
-      document.getElementById('awayTriesCount').textContent = currentData.stats.away.tries;
-      document.getElementById('awayConversionsCount').textContent = currentData.stats.away.conversions;
-      document.getElementById('awayPGCount').textContent = currentData.stats.away.penaltyGoals;
-      document.getElementById('awayDGCount').textContent = currentData.stats.away.dropGoals || 0;
-      document.getElementById('awayPTCount').textContent = currentData.stats.away.penaltyTries || 0;
+      // ボタン上部のカウント表示を更新（前半/後半別）
+      if (currentData.stats.away.first) {
+        document.getElementById('awayTriesFirstCount').textContent = currentData.stats.away.first.tries || 0;
+        document.getElementById('awayConversionsFirstCount').textContent = currentData.stats.away.first.conversions || 0;
+        document.getElementById('awayPGFirstCount').textContent = currentData.stats.away.first.penaltyGoals || 0;
+        document.getElementById('awayDGFirstCount').textContent = currentData.stats.away.first.dropGoals || 0;
+        document.getElementById('awayPTFirstCount').textContent = currentData.stats.away.first.penaltyTries || 0;
+      }
+      if (currentData.stats.away.second) {
+        document.getElementById('awayTriesSecondCount').textContent = currentData.stats.away.second.tries || 0;
+        document.getElementById('awayConversionsSecondCount').textContent = currentData.stats.away.second.conversions || 0;
+        document.getElementById('awayPGSecondCount').textContent = currentData.stats.away.second.penaltyGoals || 0;
+        document.getElementById('awayDGSecondCount').textContent = currentData.stats.away.second.dropGoals || 0;
+        document.getElementById('awayPTSecondCount').textContent = currentData.stats.away.second.penaltyTries || 0;
+      }
 
       // 前半/後半スコア表示を更新
       if (currentData.halfScores) {
