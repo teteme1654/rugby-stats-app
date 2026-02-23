@@ -25,19 +25,44 @@
       -webkit-app-region: drag;
     }
 
+    .scoreboard-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 90%;
+      max-width: 1000px;
+    }
+
     .scoreboard-container {
       display: flex;
       align-items: stretch;
       justify-content: center;
-      width: 90%;
-      max-width: 1000px;
+      width: 100%;
       height: 120px;
       position: relative;
       -webkit-app-region: no-drag;
       background: transparent;
       box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-      border-radius: 15px;
+      border-radius: 15px 15px 0 0;
       overflow: hidden;
+    }
+
+    .stadium-bar {
+      width: 100%;
+      background: linear-gradient(180deg, #4a5568 0%, #2d3748 100%);
+      padding: 12px 20px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      border-radius: 0 0 15px 15px;
+    }
+
+    .stadium-name {
+      font-size: 1em;
+      color: rgba(255, 255, 255, 0.9);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-weight: 700;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
     }
 
     .team-section {
@@ -111,10 +136,8 @@
 
     .score-section {
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 8px;
       padding: 0 50px;
       min-width: 300px;
       background: linear-gradient(180deg, #1a2332 0%, #0f1419 100%);
@@ -210,41 +233,45 @@
     <button class="control-btn close" onclick="closeWindow()" title="閉じる">✕</button>
   </div>
 
-  <div class="scoreboard-container">
-    <!-- ホームチーム -->
-    <div class="team-section host">
-      <img src="" alt="" class="team-logo" id="hostLogo" onerror="this.style.display='none'">
-      <div class="team-info">
-        <div class="team-name" id="hostName">HOME TEAM</div>
-        <div class="team-stats">
-          TRY:<span id="hostTries">0</span> 
-          CG:<span id="hostConversions">0</span> 
-          PG:<span id="hostPG">0</span>
+  <div class="scoreboard-wrapper">
+    <div class="scoreboard-container">
+      <!-- ホームチーム -->
+      <div class="team-section host">
+        <img src="" alt="" class="team-logo" id="hostLogo" onerror="this.style.display='none'">
+        <div class="team-info">
+          <div class="team-name" id="hostName">HOME TEAM</div>
+          <div class="team-stats">
+            TRY:<span id="hostTries">0</span> 
+            CG:<span id="hostConversions">0</span> 
+            PG:<span id="hostPG">0</span>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- スコア -->
-    <div class="score-section">
-      <div class="score-row">
+      <!-- スコア -->
+      <div class="score-section">
         <div class="score" id="hostScore">0</div>
         <div class="score-separator">-</div>
         <div class="score" id="awayScore">0</div>
       </div>
-      <div class="stadium-name">NATIONAL STADIUM</div>
-    </div>
 
-    <!-- アウェイチーム -->
-    <div class="team-section away">
-      <img src="" alt="" class="team-logo" id="awayLogo" onerror="this.style.display='none'">
-      <div class="team-info">
-        <div class="team-name" id="awayName">AWAY TEAM</div>
-        <div class="team-stats">
-          TRY:<span id="awayTries">0</span> 
-          CG:<span id="awayConversions">0</span> 
-          PG:<span id="awayPG">0</span>
+      <!-- アウェイチーム -->
+      <div class="team-section away">
+        <img src="" alt="" class="team-logo" id="awayLogo" onerror="this.style.display='none'">
+        <div class="team-info">
+          <div class="team-name" id="awayName">AWAY TEAM</div>
+          <div class="team-stats">
+            TRY:<span id="awayTries">0</span> 
+            CG:<span id="awayConversions">0</span> 
+            PG:<span id="awayPG">0</span>
+          </div>
         </div>
       </div>
+    </div>
+
+    <!-- スタジアム名バー -->
+    <div class="stadium-bar">
+      <div class="stadium-name">NATIONAL STADIUM</div>
     </div>
   </div>
 
