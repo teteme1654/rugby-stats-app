@@ -13,69 +13,78 @@
 
     body {
       font-family: 'Arial Black', 'Arial', sans-serif;
-      background: #00FF00; /* グリーンバック（クロマキー用） - 画面全体に適用 */
+      background: transparent; /* 透過背景 */
       color: white;
       overflow: hidden;
       width: 100vw;
       height: 100vh;
       display: flex;
       flex-direction: column;
-      justify-content: flex-end; /* コンテンツを下部に配置 */
-      -webkit-app-region: drag; /* ウィンドウをドラッグ可能に */
+      justify-content: center;
+      align-items: center;
+      -webkit-app-region: drag;
     }
 
     .scoreboard-container {
       display: flex;
       align-items: stretch;
-      justify-content: space-between;
-      width: 100%;
-      height: 150px; /* スコアボードの高さを固定 */
+      justify-content: center;
+      width: 90%;
+      max-width: 1000px;
+      height: 120px;
       position: relative;
-      -webkit-app-region: no-drag; /* 内部要素はドラッグ不可 */
-      background: transparent; /* 背景を透過に（bodyのクロマキー色が見える） */
+      -webkit-app-region: no-drag;
+      background: transparent;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      border-radius: 15px;
+      overflow: hidden;
     }
 
     .team-section {
       display: flex;
       align-items: center;
-      gap: 15px;
+      gap: 20px;
       flex: 1;
-      padding: 15px 30px;
+      padding: 20px 30px;
       justify-content: flex-start;
-      background: var(--team-bg, rgba(50,50,60,0.95));
+      position: relative;
     }
     
     .team-section.host {
-      background: linear-gradient(90deg, 
+      background: linear-gradient(135deg, 
         var(--host-color, #d32f2f) 0%, 
-        var(--host-color, #d32f2f) 60%,
-        transparent 100%
+        color-mix(in srgb, var(--host-color, #d32f2f) 80%, black) 100%
       );
+      clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%);
+      padding-right: 40px;
     }
 
     .team-section.away {
       flex-direction: row-reverse;
       justify-content: flex-start;
-      background: linear-gradient(270deg, 
+      background: linear-gradient(225deg, 
         var(--away-color, #1976d2) 0%, 
-        var(--away-color, #1976d2) 60%,
-        transparent 100%
+        color-mix(in srgb, var(--away-color, #1976d2) 80%, black) 100%
       );
+      clip-path: polygon(5% 0, 100% 0, 100% 100%, 0 100%);
+      padding-left: 40px;
     }
 
     .team-logo {
-      width: 70px;
-      height: 70px;
+      width: 80px;
+      height: 80px;
       object-fit: contain;
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 8px;
-      padding: 8px;
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 50%;
+      padding: 12px;
+      border: 3px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 
     .team-info {
       display: flex;
       flex-direction: column;
-      gap: 0px;
+      gap: 5px;
     }
 
     .team-section.away .team-info {
@@ -83,12 +92,13 @@
     }
 
     .team-name {
-      font-size: 1.6em;
+      font-size: 1.8em;
       font-weight: 900;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      text-shadow: 2px 2px 6px rgba(0,0,0,0.5);
+      letter-spacing: 2px;
+      text-shadow: 3px 3px 8px rgba(0,0,0,0.7);
       color: white;
+      line-height: 1;
     }
 
     .team-stats {
@@ -101,44 +111,50 @@
 
     .score-section {
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 20px;
-      padding: 0 40px;
-      min-width: 280px;
-      background: transparent; /* 背景を透過に（bodyのクロマキー色が見える） */
+      gap: 8px;
+      padding: 0 50px;
+      min-width: 300px;
+      background: linear-gradient(180deg, #1a2332 0%, #0f1419 100%);
+      position: relative;
+      z-index: 10;
+      box-shadow: 
+        -10px 0 20px rgba(0,0,0,0.3),
+        10px 0 20px rgba(0,0,0,0.3);
+    }
+
+    .score-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
     }
 
     .score {
-      font-size: 4.5em;
+      font-size: 5em;
       font-weight: 900;
       color: white;
-      text-shadow: 3px 3px 10px rgba(0,0,0,0.7);
-      min-width: 90px;
+      text-shadow: 0 0 20px rgba(255,255,255,0.5), 3px 3px 10px rgba(0,0,0,0.9);
+      min-width: 100px;
       text-align: center;
+      letter-spacing: 2px;
     }
 
     .score-separator {
       font-size: 4em;
-      color: rgba(255, 255, 255, 0.7);
+      color: rgba(255, 255, 255, 0.5);
       font-weight: 900;
     }
 
-    /* チームカラーのアクセント */
-    .team-section.host .team-name {
-      color: white;
-    }
-
-    .team-section.away .team-name {
-      color: white;
-    }
-
-    .team-section.host .team-logo {
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    .team-section.away .team-logo {
-      background: rgba(255, 255, 255, 0.2);
+    .stadium-name {
+      font-size: 0.75em;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-weight: 600;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
     }
 
     /* ウィンドウコントロール */
@@ -210,9 +226,12 @@
 
     <!-- スコア -->
     <div class="score-section">
-      <div class="score" id="hostScore">0</div>
-      <div class="score-separator">-</div>
-      <div class="score" id="awayScore">0</div>
+      <div class="score-row">
+        <div class="score" id="hostScore">0</div>
+        <div class="score-separator">-</div>
+        <div class="score" id="awayScore">0</div>
+      </div>
+      <div class="stadium-name">NATIONAL STADIUM</div>
     </div>
 
     <!-- アウェイチーム -->
@@ -278,6 +297,12 @@
       if (data.awayTeam.logo) {
         awayLogo.src = data.awayTeam.logo;
         awayLogo.style.display = 'block';
+      }
+      
+      // スタジアム名
+      const stadiumEl = document.querySelector('.stadium-name');
+      if (stadiumEl && data.stadiumName) {
+        stadiumEl.textContent = data.stadiumName.toUpperCase();
       }
     }
 

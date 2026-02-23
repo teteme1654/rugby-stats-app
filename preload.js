@@ -22,6 +22,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // チーム情報更新
   updateTeam: (team, field, value) => ipcRenderer.invoke('update-team', team, field, value),
   
+  // スタジアム名更新
+  updateStadiumName: (value) => ipcRenderer.invoke('update-stadium-name', value),
+  
   // チーム名サイズ更新
   updateTeamNameSize: (team, size) => ipcRenderer.invoke('update-team-name-size', team, size),
   

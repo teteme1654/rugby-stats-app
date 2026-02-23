@@ -43,6 +43,7 @@ function saveDisplaySettings() {
 let matchData = {
   hostTeam: { name: 'ホームチーム', logo: '', color: '#FF0000' },
   awayTeam: { name: 'アウェイチーム', logo: '', color: '#0000FF' },
+  stadiumName: 'NATIONAL STADIUM', // スタジアム名
   score: { host: 0, away: 0 },
   halfScores: {
     first: { host: 0, away: 0 },
@@ -293,6 +294,13 @@ ipcMain.handle('update-half-stats', (event, half, team, stat, value) => {
 // チーム情報更新
 ipcMain.handle('update-team', (event, team, field, value) => {
   matchData[team][field] = value;
+  updateDisplay();
+  return matchData;
+});
+
+// スタジアム名更新
+ipcMain.handle('update-stadium-name', (event, value) => {
+  matchData.stadiumName = value;
   updateDisplay();
   return matchData;
 });

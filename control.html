@@ -296,6 +296,16 @@
       </div>
     </div>
 
+    <!-- スタジアム情報 -->
+    <div class="control-panel">
+      <h2 class="section-title">スタジアム情報</h2>
+      <div class="form-group" style="max-width: 500px; margin: 0 auto;">
+        <label>スタジアム名:</label>
+        <input type="text" id="stadiumName" placeholder="NATIONAL STADIUM" value="NATIONAL STADIUM" 
+               onchange="updateStadiumName(this.value)" style="text-align: center; text-transform: uppercase;">
+      </div>
+    </div>
+
     <!-- チーム情報・スコア -->
     <div class="control-panel">
       <h2 class="section-title">チーム情報・スコア</h2>
@@ -771,6 +781,11 @@
         awayTries: currentData.stats.away.tries
       });
 
+      // スタジアム名
+      if (currentData.stadiumName) {
+        document.getElementById('stadiumName').value = currentData.stadiumName;
+      }
+
       document.getElementById('hostTeamName').value = currentData.hostTeam.name;
       document.getElementById('hostTeamLogo').value = currentData.hostTeam.logo;
       document.getElementById('hostTeamColor').value = currentData.hostTeam.color;
@@ -1022,6 +1037,11 @@
     // マッパーウィンドウを開く
     async function openMapper() {
       await window.electronAPI.openMapper();
+    }
+
+    // スタジアム名更新
+    async function updateStadiumName(value) {
+      await window.electronAPI.updateStadiumName(value);
     }
 
     // 試合リセット
