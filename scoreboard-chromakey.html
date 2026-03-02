@@ -50,10 +50,11 @@
     .stadium-bar {
       width: 100%;
       background: linear-gradient(180deg, #4a5568 0%, #2d3748 100%);
-      padding: 12px 20px;
+      padding: 15px 20px;
       text-align: center;
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       border-radius: 0 0 15px 15px;
+      overflow: visible;
     }
 
     .stadium-name {
@@ -63,6 +64,8 @@
       letter-spacing: 3px;
       font-weight: 700;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+      white-space: nowrap;
+      overflow: visible;
     }
 
     .team-section {
@@ -179,60 +182,9 @@
       font-weight: 600;
       text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
     }
-
-    /* ウィンドウコントロール */
-    .window-controls {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      display: flex;
-      gap: 10px;
-      z-index: 1000;
-      -webkit-app-region: no-drag;
-      opacity: 0.6;
-      transition: opacity 0.3s;
-    }
-    
-    .window-controls:hover {
-      opacity: 1;
-    }
-
-    .control-btn {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
-      border: none;
-      color: white;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      backdrop-filter: blur(5px);
-      transition: all 0.3s;
-    }
-
-    .control-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: scale(1.1);
-    }
-
-    .control-btn.close {
-      background: rgba(255, 59, 48, 0.8);
-    }
-
-    .control-btn.close:hover {
-      background: rgba(255, 59, 48, 1);
-    }
   </style>
 </head>
 <body>
-  <div class="window-controls">
-    <button class="control-btn" onclick="toggleAlwaysOnTop()" title="最前面表示切替">📌</button>
-    <button class="control-btn close" onclick="closeWindow()" title="閉じる">✕</button>
-  </div>
-
   <div class="scoreboard-wrapper">
     <div class="scoreboard-container">
       <!-- ホームチーム -->
@@ -277,7 +229,6 @@
 
   <script>
     let currentData = null;
-    let isAlwaysOnTop = true;
 
     async function loadData() {
       try {
@@ -331,15 +282,6 @@
       if (stadiumEl && data.stadiumName) {
         stadiumEl.textContent = data.stadiumName.toUpperCase();
       }
-    }
-
-    async function toggleAlwaysOnTop() {
-      isAlwaysOnTop = !isAlwaysOnTop;
-      await window.electronAPI.setAlwaysOnTop('scoreboard-chromakey', isAlwaysOnTop);
-    }
-
-    async function closeWindow() {
-      await window.electronAPI.closeScoreboardChromakey();
     }
 
     window.addEventListener('DOMContentLoaded', () => {
