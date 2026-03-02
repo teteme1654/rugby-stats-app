@@ -229,6 +229,7 @@
 
   <script>
     let currentData = null;
+    let displaySizeSettings = null; // 表示サイズ設定を保持
 
     async function loadData() {
       try {
@@ -282,11 +283,19 @@
       if (stadiumEl && data.stadiumName) {
         stadiumEl.textContent = data.stadiumName.toUpperCase();
       }
+      
+      // 表示サイズ設定を再適用（更新時に設定が失われないように）
+      if (displaySizeSettings) {
+        applyDisplaySizes(displaySizeSettings);
+      }
     }
 
     // 表示サイズ設定を適用
     function applyDisplaySizes(settings) {
       if (!settings) return;
+      
+      // 設定を保存
+      displaySizeSettings = settings;
       
       // CSS変数を設定
       const root = document.documentElement;
@@ -326,7 +335,17 @@
       applyDisplaySizes(settings);
     });
 
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
+      // 初回ロード時に保存された設定を取得
+      try {
+        const savedSettings = await window.electronAPI.getDisplaySizes();
+        if (savedSettings) {
+          applyDisplaySizes(savedSettings);
+        }
+      } catch (error) {
+        console.error('設定の読み込みに失敗:', error);
+      }
+      
       loadData();
     });
   </script>

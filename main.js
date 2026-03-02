@@ -623,6 +623,11 @@ ipcMain.handle('update-display-sizes', (event, settings) => {
   return { success: true, settings: displaySettings };
 });
 
+// 表示サイズ設定を取得
+ipcMain.handle('get-display-sizes', () => {
+  return displaySettings;
+});
+
 // 表示画面を更新
 function updateDisplay() {
   if (displayWindow && !displayWindow.isDestroyed()) {
