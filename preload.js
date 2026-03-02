@@ -110,6 +110,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setDisplayForWindow: (windowType, displayIndex) => ipcRenderer.invoke('set-display-for-window', windowType, displayIndex),
   
   // クロマキー色を設定
-  setChromakeyColor: (color) => ipcRenderer.invoke('set-chromakey-color', color)
+  setChromakeyColor: (color) => ipcRenderer.invoke('set-chromakey-color', color),
+  
+  // 表示サイズ設定を更新
+  updateDisplaySizes: (settings) => ipcRenderer.invoke('update-display-sizes', settings),
+  
+  // 表示サイズ設定更新イベントのリスナー
+  onUpdateDisplaySizes: (callback) => ipcRenderer.on('update-display-sizes', (event, settings) => callback(settings))
 });
 

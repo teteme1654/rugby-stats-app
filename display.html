@@ -606,6 +606,40 @@
       }).join('');
     }
 
+    // 表示サイズ設定を適用
+    function applyDisplaySizes(settings) {
+      if (!settings) return;
+      
+      // 選手テロップサイズ
+      if (settings.displayPlayerSize) {
+        document.querySelectorAll('.player-item').forEach(el => {
+          el.style.fontSize = settings.displayPlayerSize + 'em';
+        });
+      }
+      
+      // ゴール数テロップサイズ
+      if (settings.displayGoalSize) {
+        document.querySelectorAll('.stat-row').forEach(el => {
+          el.style.fontSize = settings.displayGoalSize + 'em';
+        });
+      }
+      
+      // 背景ロゴ透明度
+      if (settings.displayLogoOpacity !== undefined) {
+        const bgLogo = document.getElementById('backgroundLogo');
+        if (bgLogo) {
+          bgLogo.style.opacity = settings.displayLogoOpacity;
+        }
+      }
+      
+      console.log('表示サイズ設定を適用しました:', settings);
+    }
+
+    // 表示サイズ更新イベントをリッスン
+    window.electronAPI.onUpdateDisplaySizes((settings) => {
+      applyDisplaySizes(settings);
+    });
+
     window.addEventListener('DOMContentLoaded', () => {
       console.log('=== DOMContentLoaded ===');
       const bgLogo = document.getElementById('backgroundLogo');

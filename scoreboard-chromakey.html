@@ -284,6 +284,48 @@
       }
     }
 
+    // 表示サイズ設定を適用
+    function applyDisplaySizes(settings) {
+      if (!settings) return;
+      
+      // CSS変数を設定
+      const root = document.documentElement;
+      
+      if (settings.scoreboardLogoSize) {
+        root.style.setProperty('--logo-size', settings.scoreboardLogoSize + 'px');
+        document.querySelectorAll('.team-logo').forEach(el => {
+          el.style.width = settings.scoreboardLogoSize + 'px';
+          el.style.height = settings.scoreboardLogoSize + 'px';
+        });
+      }
+      
+      if (settings.scoreboardTeamNameSize) {
+        document.querySelectorAll('.team-name').forEach(el => {
+          el.style.fontSize = settings.scoreboardTeamNameSize + 'em';
+        });
+      }
+      
+      if (settings.scoreboardScoreSize) {
+        document.querySelectorAll('.score').forEach(el => {
+          el.style.fontSize = settings.scoreboardScoreSize + 'em';
+        });
+      }
+      
+      if (settings.scoreboardStadiumSize) {
+        const stadiumEl = document.querySelector('.stadium-name');
+        if (stadiumEl) {
+          stadiumEl.style.fontSize = settings.scoreboardStadiumSize + 'em';
+        }
+      }
+      
+      console.log('表示サイズ設定を適用しました:', settings);
+    }
+
+    // 表示サイズ更新イベントをリッスン
+    window.electronAPI.onUpdateDisplaySizes((settings) => {
+      applyDisplaySizes(settings);
+    });
+
     window.addEventListener('DOMContentLoaded', () => {
       loadData();
     });

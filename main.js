@@ -11,7 +11,18 @@ let scoreboardChromakeyWindow = null;
 let displaySettings = {
   displayWindowIndex: null,  // スタッツ表示用ディスプレイのインデックス
   scoreboardWindowIndex: null, // スコアボード用ディスプレイのインデックス
-  chromakeyColor: '#00FF00' // クロマキー背景色（デフォルト：グリーン）
+  chromakeyColor: '#00FF00', // クロマキー背景色（デフォルト：グリーン）
+  
+  // クロマキースコアボードのサイズ設定
+  scoreboardLogoSize: 80,      // ロゴサイズ（px）
+  scoreboardTeamNameSize: 1.8, // チーム名サイズ（em）
+  scoreboardScoreSize: 5,      // スコアサイズ（em）
+  scoreboardStadiumSize: 1,    // スタジアム名サイズ（em）
+  
+  // スタッツ表示画面のサイズ設定
+  displayPlayerSize: 2,        // 選手テロップサイズ（em）
+  displayGoalSize: 3,          // ゴール数テロップサイズ（em）
+  displayLogoOpacity: 0.2      // 背景ロゴ透明度（0.0-1.0）
 };
 
 // 設定ファイルのパス
@@ -590,6 +601,26 @@ ipcMain.handle('set-chromakey-color', (event, color) => {
   
   console.log(`クロマキー色を${color}に設定しました`);
   return { success: true, color };
+});
+
+// 表示サイズ設定を更新
+ipcMain.handle('update-display-sizes', (event, settings) => {
+  // 設定を更新
+  Object.assign(displaySettings, settings);
+  saveDisplaySettings();
+  
+  // クロマキースコアボードに反映
+  if (scoreboardChromakeyWindow && !scoreboardChromakeyWindow.isDestroyed()) {
+    scoreboardChromakeyWindow.webContents.send('update-display-sizes', displaySettings);
+  }
+  
+  // スタッツ表示画面に反映
+  if (displayWindow && !displayWindow.isDestroyed()) {
+    displayWindow.webContents.send('update-display-sizes', displaySettings);
+  }
+  
+  console.log('表示サイズ設定を更新しました:', settings);
+  return { success: true, settings: displaySettings };
 });
 
 // 表示画面を更新
