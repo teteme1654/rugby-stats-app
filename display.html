@@ -599,8 +599,8 @@
       const onFieldPlayers = players.slice(0, 15);
 
       container.innerHTML = onFieldPlayers.map(p => {
-        // 名前が16文字以上の場合は半角カナに変換
-        const displayName = p.name.length > 16 ? toHalfWidthKana(p.name) : p.name;
+        // 名前が13文字以上の場合は半角カナに変換
+        const displayName = p.name.length > 13 ? toHalfWidthKana(p.name) : p.name;
         
         return `
           <div class="player-item">
