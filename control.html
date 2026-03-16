@@ -171,10 +171,19 @@
     }
 
     .sub-controls {
-      display: grid;
-      grid-template-columns: 1fr 1fr auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .substitution-row {
+      display: flex;
       gap: 10px;
       align-items: end;
+      padding: 8px;
+      background: #f8f9fa;
+      border-radius: 5px;
+      border: 1px solid #dee2e6;
     }
 
     .quick-actions {
@@ -518,37 +527,109 @@
           <div>
             <h3>ホームチーム交代</h3>
             <div class="sub-controls">
-              <div class="form-group">
-                <label>OUT (交代する選手):</label>
-                <select id="hostOutNumber" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-size: 1em;">
-                  <option value="">選手を選択してください</option>
-                </select>
+              <!-- 複数行入力フォーム -->
+              <div id="hostSubstitutionRows">
+                <div class="substitution-row" data-row="0">
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>OUT:</label>
+                    <select class="host-out-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>IN:</label>
+                    <select class="host-in-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="substitution-row" data-row="1">
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>OUT:</label>
+                    <select class="host-out-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>IN:</label>
+                    <select class="host-in-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="substitution-row" data-row="2">
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>OUT:</label>
+                    <select class="host-out-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>IN:</label>
+                    <select class="host-in-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                </div>
               </div>
-              <div class="form-group">
-                <label>IN (投入する選手):</label>
-                <select id="hostInNumber" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-size: 1em;">
-                  <option value="">選手を選択してください</option>
-                </select>
+              <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button onclick="batchSubstitute('host')" style="flex: 1; background: #4CAF50; color: white; padding: 12px; border: none; border-radius: 5px; font-size: 1em; font-weight: bold; cursor: pointer;">🔄 一括交代実行</button>
+                <button onclick="clearSubstitutionRows('host')" style="flex: 0.3; background: #f44336; color: white; padding: 12px; border: none; border-radius: 5px; font-size: 1em; cursor: pointer;">❌ クリア</button>
               </div>
-              <button onclick="substitutePlayer('host')">交代</button>
             </div>
           </div>
           <div>
             <h3>アウェイチーム交代</h3>
             <div class="sub-controls">
-              <div class="form-group">
-                <label>OUT (交代する選手):</label>
-                <select id="awayOutNumber" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-size: 1em;">
-                  <option value="">選手を選択してください</option>
-                </select>
+              <!-- 複数行入力フォーム -->
+              <div id="awaySubstitutionRows">
+                <div class="substitution-row" data-row="0">
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>OUT:</label>
+                    <select class="away-out-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>IN:</label>
+                    <select class="away-in-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="substitution-row" data-row="1">
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>OUT:</label>
+                    <select class="away-out-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>IN:</label>
+                    <select class="away-in-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="substitution-row" data-row="2">
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>OUT:</label>
+                    <select class="away-out-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>IN:</label>
+                    <select class="away-in-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                </div>
               </div>
-              <div class="form-group">
-                <label>IN (投入する選手):</label>
-                <select id="awayInNumber" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-size: 1em;">
-                  <option value="">選手を選択してください</option>
-                </select>
+              <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button onclick="batchSubstitute('away')" style="flex: 1; background: #4CAF50; color: white; padding: 12px; border: none; border-radius: 5px; font-size: 1em; font-weight: bold; cursor: pointer;">🔄 一括交代実行</button>
+                <button onclick="clearSubstitutionRows('away')" style="flex: 0.3; background: #f44336; color: white; padding: 12px; border: none; border-radius: 5px; font-size: 1em; cursor: pointer;">❌ クリア</button>
               </div>
-              <button onclick="substitutePlayer('away')">交代</button>
             </div>
           </div>
         </div>
@@ -954,18 +1035,27 @@
     
     // 交代用ドロップダウンリストを更新
     function updateSubstitutionDropdowns(team, players) {
-      const outSelect = document.getElementById(`${team}OutNumber`);
-      const inSelect = document.getElementById(`${team}InNumber`);
-      
       // OUT選手（配列の最初の15人 = フィールドにいる選手）
       const onFieldPlayers = players.slice(0, 15);
-      outSelect.innerHTML = '<option value="">交代する選手を選択</option>' + 
+      const onFieldOptions = '<option value="">選択...</option>' + 
         onFieldPlayers.map(p => `<option value="${p.number}">${p.number}. ${p.position} ${p.name}</option>`).join('');
       
       // IN選手（配列の16人目以降 = リザーブにいる選手）
       const reservePlayers = players.slice(15);
-      inSelect.innerHTML = '<option value="">投入する選手を選択</option>' + 
+      const reserveOptions = '<option value="">選択...</option>' + 
         reservePlayers.map(p => `<option value="${p.number}">${p.number}. ${p.position} ${p.name}</option>`).join('');
+      
+      // 各行のセレクトボックスを更新
+      const outSelects = document.querySelectorAll(`.${team}-out-select`);
+      const inSelects = document.querySelectorAll(`.${team}-in-select`);
+      
+      outSelects.forEach(select => {
+        select.innerHTML = onFieldOptions;
+      });
+      
+      inSelects.forEach(select => {
+        select.innerHTML = reserveOptions;
+      });
     }
 
     // イベントリスナー設定
@@ -1100,6 +1190,74 @@
         console.error('交代エラー:', error);
         alert('エラー: ' + error.message);
       }
+    }
+    
+    // 一括交代機能
+    async function batchSubstitute(team) {
+      // 各行から入力を収集
+      const rows = document.querySelectorAll(`#${team}SubstitutionRows .substitution-row`);
+      const substitutions = [];
+      const outNumbers = new Set();
+      const inNumbers = new Set();
+      
+      rows.forEach((row, index) => {
+        const outSelect = row.querySelector(`.${team}-out-select`);
+        const inSelect = row.querySelector(`.${team}-in-select`);
+        const outValue = outSelect.value;
+        const inValue = inSelect.value;
+        
+        // 両方選択されている行のみ処理
+        if (outValue && inValue) {
+          // 重複チェック
+          if (outNumbers.has(outValue)) {
+            alert(`エラー: 選手 #${outValue} が複数回OUT選手として選択されています`);
+            return;
+          }
+          if (inNumbers.has(inValue)) {
+            alert(`エラー: 選手 #${inValue} が複数回IN選手として選択されています`);
+            return;
+          }
+          
+          outNumbers.add(outValue);
+          inNumbers.add(inValue);
+          substitutions.push({ out: outValue, in: inValue });
+        }
+      });
+      
+      if (substitutions.length === 0) {
+        alert('交代する選手を選択してください（OUT と IN の両方を選択）');
+        return;
+      }
+      
+      try {
+        // 各交代を順番に実行
+        for (const sub of substitutions) {
+          await window.electronAPI.substitutePlayer(team, sub.out, sub.in);
+        }
+        
+        // 交代後にデータを再読み込み
+        await loadData();
+        
+        // 成功メッセージ
+        alert(`${substitutions.length}人の選手交代を記録しました`);
+        
+        // フォームをクリア
+        clearSubstitutionRows(team);
+      } catch (error) {
+        console.error('一括交代エラー:', error);
+        alert('エラー: ' + error.message);
+      }
+    }
+    
+    // 交代フォームをクリア
+    function clearSubstitutionRows(team) {
+      const rows = document.querySelectorAll(`#${team}SubstitutionRows .substitution-row`);
+      rows.forEach(row => {
+        const outSelect = row.querySelector(`.${team}-out-select`);
+        const inSelect = row.querySelector(`.${team}-in-select`);
+        if (outSelect) outSelect.value = '';
+        if (inSelect) inSelect.value = '';
+      });
     }
 
     // 表示画面の開閉
