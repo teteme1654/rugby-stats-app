@@ -574,7 +574,7 @@
               </div>
               <div style="display: flex; gap: 10px; margin-top: 15px;">
                 <button onclick="batchSubstitute('host')" style="flex: 1; background: #4CAF50; color: white; padding: 12px; border: none; border-radius: 5px; font-size: 1em; font-weight: bold; cursor: pointer;">🔄 一括交代実行</button>
-                <button onclick="clearSubstitutionRows('host')" style="flex: 0.3; background: #f44336; color: white; padding: 12px; border: none; border-radius: 5px; font-size: 1em; cursor: pointer;">❌ クリア</button>
+                <button onclick="clearSubstitutionRows('host')" style="flex: 0.3; background: #6c757d; color: white; padding: 12px; border: none; border-radius: 5px; font-size: 1em; cursor: pointer;">❌ クリア</button>
               </div>
             </div>
           </div>
@@ -628,7 +628,7 @@
               </div>
               <div style="display: flex; gap: 10px; margin-top: 15px;">
                 <button onclick="batchSubstitute('away')" style="flex: 1; background: #4CAF50; color: white; padding: 12px; border: none; border-radius: 5px; font-size: 1em; font-weight: bold; cursor: pointer;">🔄 一括交代実行</button>
-                <button onclick="clearSubstitutionRows('away')" style="flex: 0.3; background: #f44336; color: white; padding: 12px; border: none; border-radius: 5px; font-size: 1em; cursor: pointer;">❌ クリア</button>
+                <button onclick="clearSubstitutionRows('away')" style="flex: 0.3; background: #6c757d; color: white; padding: 12px; border: none; border-radius: 5px; font-size: 1em; cursor: pointer;">❌ クリア</button>
               </div>
             </div>
           </div>
@@ -1050,12 +1050,25 @@
       const inSelects = document.querySelectorAll(`.${team}-in-select`);
       
       outSelects.forEach(select => {
+        const previousValue = select.value;
         select.innerHTML = onFieldOptions;
+        if (previousValue) select.value = previousValue; // 既存の選択を保持
       });
       
       inSelects.forEach(select => {
+        const previousValue = select.value;
         select.innerHTML = reserveOptions;
+        if (previousValue) select.value = previousValue; // 既存の選択を保持
       });
+      
+      // リスナーを設定（初回のみ）
+      if (!window[`${team}SubstitutionListenersSet`]) {
+        setupSubstitutionListeners(team);
+        window[`${team}SubstitutionListenersSet`] = true;
+      }
+      
+      // 選択可能な選手を更新
+      updateSubstitutionAvailability(team);
     }
 
     // イベントリスナー設定
@@ -1197,8 +1210,6 @@
       // 各行から入力を収集
       const rows = document.querySelectorAll(`#${team}SubstitutionRows .substitution-row`);
       const substitutions = [];
-      const outNumbers = new Set();
-      const inNumbers = new Set();
       
       rows.forEach((row, index) => {
         const outSelect = row.querySelector(`.${team}-out-select`);
@@ -1208,18 +1219,6 @@
         
         // 両方選択されている行のみ処理
         if (outValue && inValue) {
-          // 重複チェック
-          if (outNumbers.has(outValue)) {
-            alert(`エラー: 選手 #${outValue} が複数回OUT選手として選択されています`);
-            return;
-          }
-          if (inNumbers.has(inValue)) {
-            alert(`エラー: 選手 #${inValue} が複数回IN選手として選択されています`);
-            return;
-          }
-          
-          outNumbers.add(outValue);
-          inNumbers.add(inValue);
           substitutions.push({ out: outValue, in: inValue });
         }
       });
@@ -1257,6 +1256,67 @@
         const inSelect = row.querySelector(`.${team}-in-select`);
         if (outSelect) outSelect.value = '';
         if (inSelect) inSelect.value = '';
+      });
+      // クリア後に選択可能な選手を更新
+      updateSubstitutionAvailability(team);
+    }
+    
+    // 選択済み選手のバリデーション（リアルタイム）
+    function updateSubstitutionAvailability(team) {
+      const rows = document.querySelectorAll(`#${team}SubstitutionRows .substitution-row`);
+      const selectedOutNumbers = new Set();
+      const selectedInNumbers = new Set();
+      
+      // まず全ての選択済み選手を収集
+      rows.forEach(row => {
+        const outSelect = row.querySelector(`.${team}-out-select`);
+        const inSelect = row.querySelector(`.${team}-in-select`);
+        if (outSelect && outSelect.value) selectedOutNumbers.add(outSelect.value);
+        if (inSelect && inSelect.value) selectedInNumbers.add(inSelect.value);
+      });
+      
+      // 各行のセレクトボックスで選択済み選手を無効化
+      rows.forEach(row => {
+        const outSelect = row.querySelector(`.${team}-out-select`);
+        const inSelect = row.querySelector(`.${team}-in-select`);
+        const currentOutValue = outSelect ? outSelect.value : '';
+        const currentInValue = inSelect ? inSelect.value : '';
+        
+        // OUTセレクトボックスのオプションを更新
+        if (outSelect) {
+          Array.from(outSelect.options).forEach(option => {
+            if (option.value && option.value !== currentOutValue) {
+              option.disabled = selectedOutNumbers.has(option.value);
+              option.style.color = option.disabled ? '#ccc' : '';
+            }
+          });
+        }
+        
+        // INセレクトボックスのオプションを更新
+        if (inSelect) {
+          Array.from(inSelect.options).forEach(option => {
+            if (option.value && option.value !== currentInValue) {
+              option.disabled = selectedInNumbers.has(option.value);
+              option.style.color = option.disabled ? '#ccc' : '';
+            }
+          });
+        }
+      });
+    }
+    
+    // セレクトボックスにイベントリスナーを追加
+    function setupSubstitutionListeners(team) {
+      const rows = document.querySelectorAll(`#${team}SubstitutionRows .substitution-row`);
+      rows.forEach(row => {
+        const outSelect = row.querySelector(`.${team}-out-select`);
+        const inSelect = row.querySelector(`.${team}-in-select`);
+        
+        if (outSelect) {
+          outSelect.addEventListener('change', () => updateSubstitutionAvailability(team));
+        }
+        if (inSelect) {
+          inSelect.addEventListener('change', () => updateSubstitutionAvailability(team));
+        }
       });
     }
 
