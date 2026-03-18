@@ -53,7 +53,7 @@
       display: grid;
       grid-template-columns: 40% 60%;
       gap: 20px;
-      align-items: start;
+      align-items: stretch;
     }
     
     .left-column, .right-column {
@@ -500,16 +500,16 @@
           <div style="margin-top: 20px; text-align: center; font-size: 2em; font-weight: bold; padding: 15px; background: #f8f9fa; border-radius: 10px;">
             合計スコア: <span id="hostScoreDisplay" style="color: #667eea;">0</span> - <span id="awayScoreDisplay" style="color: #667eea;">0</span>
           </div>
-        </div>
-
-        <!-- クイックアクション -->
-        <div class="control-panel">
-          <h2 class="section-title">クイックアクション</h2>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <button onclick="toggleDisplayWindow()" style="padding: 15px; font-size: 1em; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">📺 表示画面</button>
-            <button onclick="toggleScoreboardWindow()" style="padding: 15px; font-size: 1em; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">🎬 スコアボード</button>
-            <button onclick="toggleScoreboardChromakeyWindow()" style="padding: 15px; font-size: 1em; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">🎥 クロマキー</button>
-            <button onclick="resetMatch()" style="padding: 15px; font-size: 1em; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">🔄 試合リセット</button>
+          
+          <!-- クイックアクション -->
+          <div style="margin-top: 20px;">
+            <h3 style="margin-bottom: 15px; color: #333; font-size: 1.2em;">クイックアクション</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <button onclick="toggleDisplayWindow()" style="padding: 15px; font-size: 1em; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">📺 表示画面</button>
+              <button onclick="toggleScoreboardWindow()" style="padding: 15px; font-size: 1em; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">🎬 スコアボード</button>
+              <button onclick="toggleScoreboardChromakeyWindow()" style="padding: 15px; font-size: 1em; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">🎥 クロマキー</button>
+              <button onclick="resetMatch()" style="padding: 15px; font-size: 1em; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">🔄 試合リセット</button>
+            </div>
           </div>
         </div>
       </div>
