@@ -517,40 +517,6 @@
       <!-- 右カラム -->
       <div class="right-column">
 
-    <!-- 選手情報 -->
-    <div class="control-panel">
-      <h2 class="section-title">選手情報管理</h2>
-      <div class="teams-container">
-        <!-- ホームチーム選手 -->
-        <div class="team-section">
-          <h3>ホームチーム選手</h3>
-          <div class="csv-section">
-            <button onclick="loadTeamCSV('host')">📄 CSV読み込み</button>
-            <p style="margin-top: 10px; color: #666; font-size: 0.9em;">
-              CSV形式: 背番号,名前,ポジション
-            </p>
-            <div class="players-list" id="hostPlayers">
-              <p style="color: #999;">選手データが読み込まれていません</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- アウェイチーム選手 -->
-        <div class="team-section">
-          <h3>アウェイチーム選手</h3>
-          <div class="csv-section">
-            <button onclick="loadTeamCSV('away')">📄 CSV読み込み</button>
-            <p style="margin-top: 10px; color: #666; font-size: 0.9em;">
-              CSV形式: 背番号,名前,ポジション
-            </p>
-            <div class="players-list" id="awayPlayers">
-              <p style="color: #999;">選手データが読み込まれていません</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- 選手交代 -->
     <div class="control-panel">
       <h2 class="section-title">選手交代</h2>
@@ -667,7 +633,42 @@
         </div>
       </div>
     </div>
+      </div>
+    </div>
 
+    <!-- 選手情報 -->
+    <div class="control-panel">
+      <h2 class="section-title">選手情報管理</h2>
+      <div class="teams-container">
+        <!-- ホームチーム選手 -->
+        <div class="team-section">
+          <h3>ホームチーム選手</h3>
+          <div class="csv-section">
+            <button onclick="loadTeamCSV('host')">📄 CSV読み込み</button>
+            <p style="margin-top: 10px; color: #666; font-size: 0.9em;">
+              CSV形式: 背番号,名前,ポジション
+            </p>
+            <div class="players-list" id="hostPlayers">
+              <p style="color: #999;">選手データが読み込まれていません</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- アウェイチーム選手 -->
+        <div class="team-section">
+          <h3>アウェイチーム選手</h3>
+          <div class="csv-section">
+            <button onclick="loadTeamCSV('away')">📄 CSV読み込み</button>
+            <p style="margin-top: 10px; color: #666; font-size: 0.9em;">
+              CSV形式: 背番号,名前,ポジション
+            </p>
+            <div class="players-list" id="awayPlayers">
+              <p style="color: #999;">選手データが読み込まれていません</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- ディスプレイ設定 -->
     <div class="control-panel">
       <h2 class="section-title">ディスプレイ設定</h2>
@@ -804,8 +805,6 @@
             <span id="displayLogoOpacityDisplay" style="min-width: 60px; font-weight: bold; text-align: right;">20%</span>
           </div>
         </div>
-      </div>
-    </div>
       </div>
     </div>
 
