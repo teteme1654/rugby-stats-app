@@ -28,45 +28,6 @@
       background: white;
       transform: scale(0.5);
       transform-origin: center;
-      animation: fadeIn 0.5s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @keyframes slideInLeft {
-      from {
-        transform: translateX(-100px);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-
-    @keyframes slideInRight {
-      from {
-        transform: translateX(100px);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-
-    @keyframes zoomIn {
-      from {
-        transform: scale(0.8);
-        opacity: 0;
-      }
-      to {
-        transform: scale(1);
-        opacity: 1;
-      }
     }
 
     /* 背景画像 */
@@ -80,97 +41,7 @@
       z-index: 1;
     }
 
-    /* 背番号ボックス */
-    .jersey-number {
-      position: absolute;
-      top: 160px;
-      left: 48px;
-      background: #E60012;
-      color: white;
-      font-size: 56px;
-      font-weight: bold;
-      padding: 15px 45px;
-      border: 4px solid black;
-      z-index: 10;
-      animation: slideInLeft 0.8s ease-out;
-    }
 
-    /* 情報バー（黒帯） */
-    .info-bar {
-      position: absolute;
-      top: 262px;
-      left: 28px;
-      width: 755px;
-      height: 130px;
-      background: black;
-      display: flex;
-      align-items: center;
-      padding: 0 30px;
-      gap: 25px;
-      z-index: 10;
-      animation: slideInLeft 1s ease-out;
-    }
-
-    /* チームロゴ */
-    .team-logo {
-      width: 100px;
-      height: 100px;
-      object-fit: contain;
-      flex-shrink: 0;
-    }
-
-    /* 選手情報テキスト */
-    .player-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    .name-jp {
-      color: white;
-      font-size: 64px;
-      font-weight: bold;
-      line-height: 1.1;
-      letter-spacing: 0.05em;
-    }
-
-    .name-en {
-      color: white;
-      font-size: 38px;
-      font-weight: bold;
-      line-height: 1.1;
-    }
-
-    .position {
-      color: white;
-      font-size: 38px;
-      font-weight: bold;
-      line-height: 1.1;
-    }
-
-    /* リーグロゴエリア */
-    .league-logos {
-      position: absolute;
-      bottom: 80px;
-      left: 175px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      z-index: 10;
-      animation: zoomIn 1s ease-out 0.5s both;
-    }
-
-    .league-logo-main {
-      width: 220px;
-      height: auto;
-    }
-
-    .league-logo-sponsor {
-      width: 120px;
-      height: auto;
-    }
 
     /* 選手写真 */
     .player-photo {
@@ -181,7 +52,6 @@
       height: 700px;
       object-fit: cover;
       z-index: 5;
-      animation: slideInRight 1s ease-out 0.3s both;
       
       /* 白背景除去 */
       mix-blend-mode: multiply;
@@ -222,67 +92,19 @@
     <!-- 背景画像 -->
     <img src="stats/images/ui/bg_visitor.jpg" alt="Background" class="background">
 
-    <!-- 背番号 -->
-    <div class="jersey-number">No.<span id="jerseyNo">11</span></div>
-
-    <!-- 情報バー -->
-    <div class="info-bar">
-      <!-- チームロゴ -->
-      <img src="stats/images/logo/サンゴリアス.png" alt="チームロゴ" class="team-logo">
-
-      <!-- 選手情報 -->
-      <div class="player-info">
-        <div class="name-jp" id="nameJp">チャールズ・ピウタウ</div>
-        <div class="name-en" id="nameEn">Charles Piutau</div>
-        <div class="position" id="position">FB／フルバック</div>
-      </div>
-    </div>
-
-    <!-- リーグロゴ（仮のテキスト） -->
-    <div class="league-logos">
-      <div style="font-size: 14px; font-weight: bold; color: #333; text-align: center;">
-        JAPAN RUGBY<br>LEAGUE ONE
-      </div>
-      <div style="font-size: 24px; font-weight: bold; color: #0066CC;">NTT</div>
-    </div>
-
     <!-- 選手写真 -->
     <img src="stats/images/players/1763948510837-_-SB_Bunkei_Kaku_①.jpg" alt="選手写真" class="player-photo" id="playerPhoto">
   </div>
 
   <!-- コントロールパネル -->
   <div class="controls">
-    <button onclick="updateSlide('11', 'チャールズ・ピウタウ', 'Charles Piutau', 'FB／フルバック')">Charles Piutau</button>
-    <button onclick="updateSlide('1', '平野 叶翔', 'Kanato Hirano', 'PR／プロップ')">選手1</button>
-    <button onclick="updateSlide('15', '佐藤 花子', 'Hanako Sato', 'FB／フルバック')">選手2</button>
-    <button onclick="restartAnimation()">🔄 再生</button>
+    <button onclick="changePlayer('stats/images/players/1763948510837-_-SB_Bunkei_Kaku_①.jpg')">選手1</button>
+    <button onclick="changePlayer('stats/images/players/1763948510837-_-SB_Bunkei_Kaku_①.jpg')">選手2</button>
   </div>
 
   <script>
-    function updateSlide(jerseyNo, nameJp, nameEn, position) {
-      document.getElementById('jerseyNo').textContent = jerseyNo;
-      document.getElementById('nameJp').textContent = nameJp;
-      document.getElementById('nameEn').textContent = nameEn;
-      document.getElementById('position').textContent = position;
-    }
-
-    function restartAnimation() {
-      const container = document.querySelector('.slide-container');
-      container.style.animation = 'none';
-      setTimeout(() => {
-        container.style.animation = 'fadeIn 0.5s ease-out';
-      }, 10);
-
-      // 各要素のアニメーションも再起動
-      const elements = ['.jersey-number', '.info-bar', '.league-logos', '.player-photo'];
-      elements.forEach(selector => {
-        const el = document.querySelector(selector);
-        const animation = window.getComputedStyle(el).animation;
-        el.style.animation = 'none';
-        setTimeout(() => {
-          el.style.animation = animation;
-        }, 10);
-      });
+    function changePlayer(photoPath) {
+      document.getElementById('playerPhoto').src = photoPath;
     }
   </script>
 </body>
