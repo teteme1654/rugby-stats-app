@@ -1,0 +1,1788 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ovaly - 管理画面</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.5em;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .control-panel {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      margin-bottom: 20px;
+    }
+    
+    /* 上部エリア（カラム外） */
+    .top-section {
+      background: white;
+      border-radius: 15px;
+      padding: 20px 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      margin-bottom: 20px;
+    }
+    
+    /* 2カラムレイアウト */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 40% 60%;
+      gap: 20px;
+      align-items: start;
+    }
+    
+    .left-column, .right-column {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .section-title {
+      font-size: 1.5em;
+      color: #667eea;
+      margin-bottom: 20px;
+      border-bottom: 3px solid #667eea;
+      padding-bottom: 10px;
+    }
+
+    .teams-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    .team-section {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      border: 2px solid #e0e0e0;
+    }
+
+    .team-section h3 {
+      margin-bottom: 15px;
+      color: #333;
+      font-size: 1.3em;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      font-size: 1em;
+      transition: border-color 0.3s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .score-input {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .score-input input {
+      text-align: center;
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: bold;
+      transition: all 0.3s;
+      margin-right: 10px;
+    }
+
+    button:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    button.secondary {
+      background: #6c757d;
+    }
+
+    button.secondary:hover {
+      background: #5a6268;
+    }
+
+    .csv-section {
+      margin-top: 20px;
+    }
+
+    .players-list {
+      max-height: 300px;
+      overflow-y: auto;
+      background: white;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      padding: 10px;
+      margin-top: 10px;
+    }
+
+    .player-item {
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .player-item:last-child {
+      border-bottom: none;
+    }
+
+    .player-number {
+      font-weight: bold;
+      color: #667eea;
+      margin-right: 10px;
+    }
+
+    .substitution-section {
+      background: #fff3cd;
+      padding: 20px;
+      border-radius: 10px;
+      border: 2px solid #ffc107;
+    }
+
+    .sub-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .substitution-row {
+      display: flex;
+      gap: 10px;
+      align-items: end;
+      padding: 8px;
+      background: #f8f9fa;
+      border-radius: 5px;
+      border: 1px solid #dee2e6;
+    }
+
+    .quick-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      justify-content: center;
+    }
+
+    .action-btn {
+      padding: 15px 30px;
+      font-size: 1.1em;
+    }
+
+    .status-bar {
+      background: #28a745;
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      text-align: center;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+
+    /* 選手編集モーダル */
+    dialog {
+      border: none;
+      border-radius: 15px;
+      padding: 0;
+      box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+      min-width: 500px;
+    }
+
+    dialog::backdrop {
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .dialog-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 15px 15px 0 0;
+    }
+
+    .dialog-header h2 {
+      margin: 0;
+      font-size: 1.5em;
+    }
+
+    .dialog-body {
+      padding: 20px;
+    }
+
+    .dialog-footer {
+      padding: 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .edit-btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: background 0.3s;
+    }
+
+    .edit-btn:hover {
+      background: #5568d3;
+    }
+
+    .player-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .player-item-info {
+      flex: 1;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🏉 Ovaly - 管理画面</h1>
+
+    <!-- 上部セクション：試合情報 + チーム情報 -->
+    <div class="top-section">
+      <h2 class="section-title">試合情報</h2>
+      <div style="display: flex; gap: 20px; align-items: center; justify-content: center; margin-bottom: 20px;">
+        <button id="halfBtn1" onclick="switchHalf('first')" style="padding: 15px 40px; font-size: 1.2em; background: #667eea;">前半</button>
+        <button id="halfBtn2" onclick="switchHalf('second')" style="padding: 15px 40px; font-size: 1.2em; background: #6c757d;">後半</button>
+        <div style="margin-left: 20px;">
+          <strong>現在:</strong> <span id="currentHalfDisplay">前半</span>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+        <div style="text-align: center; padding: 15px; background: rgba(102,126,234,0.1); border-radius: 10px;">
+          <h3 style="font-size: 1em; margin-bottom: 10px;">前半スコア</h3>
+          <div style="font-size: 1.8em; font-weight: bold;">
+            <span id="hostFirstHalfScore">0</span> - <span id="awayFirstHalfScore">0</span>
+          </div>
+        </div>
+        <div style="text-align: center; padding: 15px; background: rgba(102,126,234,0.1); border-radius: 10px;">
+          <h3 style="font-size: 1em; margin-bottom: 10px;">後半スコア</h3>
+          <div style="font-size: 1.8em; font-weight: bold;">
+            <span id="hostSecondHalfScore">0</span> - <span id="awaySecondHalfScore">0</span>
+          </div>
+        </div>
+        <div style="text-align: center; padding: 15px; background: rgba(102,126,234,0.1); border-radius: 10px;">
+          <h3 style="font-size: 1em; margin-bottom: 10px;">スタジアム</h3>
+          <input type="text" id="stadiumName" placeholder="NATIONAL STADIUM" value="NATIONAL STADIUM" 
+                 onchange="updateStadiumName(this.value)" style="text-align: center; text-transform: uppercase; border: none; background: transparent; font-size: 1.2em; font-weight: bold; width: 100%;">
+        </div>
+      </div>
+      
+      <h2 class="section-title" style="margin-top: 30px;">チーム情報</h2>
+      <div class="teams-container">
+        <!-- ホームチーム -->
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+          <h3 style="margin-bottom: 15px; color: #333;">ホームチーム</h3>
+          <div class="form-group">
+            <label>チーム名:</label>
+            <input type="text" id="hostTeamName" placeholder="チーム名を入力">
+          </div>
+          <div class="form-group">
+            <label>チーム名サイズ:</label>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <input type="range" id="hostTeamNameSizeSlider" min="1.0" max="3.5" step="0.1" value="2.0" 
+                     style="flex: 1; cursor: pointer;">
+              <span id="hostTeamNameSizeDisplay" style="min-width: 60px; font-weight: bold; text-align: right;">2.0em</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>ロゴ画像:</label>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <input type="text" id="hostTeamLogo" placeholder="ロゴ画像のURL" readonly style="flex: 1;">
+              <button onclick="loadTeamLogo('hostTeam')" style="padding: 10px 20px;">🖼️ 画像選択</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>チームカラー:</label>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <input type="color" id="hostTeamColorPicker" style="width: 60px; height: 40px; border: 2px solid #ddd; border-radius: 5px; cursor: pointer;">
+              <input type="text" id="hostTeamColor" placeholder="#FF0000" style="flex: 1;">
+            </div>
+          </div>
+        </div>
+
+        <!-- アウェイチーム -->
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+          <h3 style="margin-bottom: 15px; color: #333;">アウェイチーム</h3>
+          <div class="form-group">
+            <label>チーム名:</label>
+            <input type="text" id="awayTeamName" placeholder="チーム名を入力">
+          </div>
+          <div class="form-group">
+            <label>チーム名サイズ:</label>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <input type="range" id="awayTeamNameSizeSlider" min="1.0" max="3.5" step="0.1" value="2.0" 
+                     style="flex: 1; cursor: pointer;">
+              <span id="awayTeamNameSizeDisplay" style="min-width: 60px; font-weight: bold; text-align: right;">2.0em</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>ロゴ画像:</label>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <input type="text" id="awayTeamLogo" placeholder="ロゴ画像のURL" readonly style="flex: 1;">
+              <button onclick="loadTeamLogo('awayTeam')" style="padding: 10px 20px;">🖼️ 画像選択</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>チームカラー:</label>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <input type="color" id="awayTeamColorPicker" style="width: 60px; height: 40px; border: 2px solid #ddd; border-radius: 5px; cursor: pointer;">
+              <input type="text" id="awayTeamColor" placeholder="#0000FF" style="flex: 1;">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2カラムレイアウト開始 -->
+    <div class="main-layout">
+    <div class="control-panel">
+      <h2 class="section-title">試合進行</h2>
+      <div style="display: flex; gap: 20px; align-items: center; justify-content: center;">
+        <button id="halfBtn1" onclick="switchHalf('first')" style="padding: 15px 40px; font-size: 1.2em; background: #667eea;">前半</button>
+        <button id="halfBtn2" onclick="switchHalf('second')" style="padding: 15px 40px; font-size: 1.2em; background: #6c757d;">後半</button>
+        <div style="margin-left: 20px;">
+          <strong>現在:</strong> <span id="currentHalfDisplay">前半</span>
+        </div>
+      </div>
+      <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div style="text-align: center; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+          <h3>前半スコア</h3>
+          <div style="font-size: 2em; font-weight: bold; margin-top: 10px;">
+            <span id="hostFirstHalfScore">0</span> - <span id="awayFirstHalfScore">0</span>
+          </div>
+        </div>
+        <div style="text-align: center; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+          <h3>後半スコア</h3>
+          <div style="font-size: 2em; font-weight: bold; margin-top: 10px;">
+            <span id="hostSecondHalfScore">0</span> - <span id="awaySecondHalfScore">0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- スタジアム情報 -->
+    <div class="control-panel">
+      <h2 class="section-title">スタジアム情報</h2>
+      <div class="form-group" style="max-width: 500px; margin: 0 auto;">
+        <label>スタジアム名:</label>
+        <input type="text" id="stadiumName" placeholder="NATIONAL STADIUM" value="NATIONAL STADIUM" 
+               onchange="updateStadiumName(this.value)" style="text-align: center; text-transform: uppercase;">
+      </div>
+    </div>
+
+    <!-- チーム情報・スコア -->
+    <div class="control-panel">
+      <h2 class="section-title">チーム情報・スコア</h2>
+      <div class="teams-container">
+        <!-- ホームチーム -->
+        <div class="team-section">
+          <h3>ホームチーム</h3>
+          <div class="form-group">
+            <label>チーム名:</label>
+            <input type="text" id="hostTeamName" placeholder="チーム名を入力">
+          </div>
+          <div class="form-group">
+            <label>チーム名サイズ:</label>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <input type="range" id="hostTeamNameSizeSlider" min="1.0" max="3.5" step="0.1" value="2.0" 
+                     style="flex: 1; cursor: pointer;">
+              <span id="hostTeamNameSizeDisplay" style="min-width: 60px; font-weight: bold; text-align: right;">2.0em</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>ロゴ画像:</label>
+            <input type="text" id="hostTeamLogo" placeholder="ロゴ画像のURL" readonly>
+            <button onclick="loadTeamLogo('hostTeam')" style="margin-top: 5px;">🖼️ 画像を選択</button>
+          </div>
+          <div class="form-group">
+            <label>チームカラー:</label>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <input type="color" id="hostTeamColorPicker" style="width: 60px; height: 40px; border: 2px solid #ddd; border-radius: 5px; cursor: pointer;">
+              <input type="text" id="hostTeamColor" placeholder="#FF0000" style="flex: 1;">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>スコア操作:</label>
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
+                  🏉 トライ<br>
+                  <span style="font-size: 0.85em; color: #666;">前半: <span id="hostTriesFirstCount" style="color: #667eea;">0</span></span><br>
+                  <span style="font-size: 0.85em; color: #666;">後半: <span id="hostTriesSecondCount" style="color: #667eea;">0</span></span>
+                </div>
+                <button onclick="addScore('host', 'try')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+5</button>
+                <button onclick="subtractScore('host', 'try')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-5</button>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
+                  ⚽ CG<br>
+                  <span style="font-size: 0.85em; color: #666;">前半: <span id="hostConversionsFirstCount" style="color: #667eea;">0</span></span><br>
+                  <span style="font-size: 0.85em; color: #666;">後半: <span id="hostConversionsSecondCount" style="color: #667eea;">0</span></span>
+                </div>
+                <button onclick="addScore('host', 'conversion')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+2</button>
+                <button onclick="subtractScore('host', 'conversion')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-2</button>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
+                  🎯 PG<br>
+                  <span style="font-size: 0.85em; color: #666;">前半: <span id="hostPGFirstCount" style="color: #667eea;">0</span></span><br>
+                  <span style="font-size: 0.85em; color: #666;">後半: <span id="hostPGSecondCount" style="color: #667eea;">0</span></span>
+                </div>
+                <button onclick="addScore('host', 'penalty')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+3</button>
+                <button onclick="subtractScore('host', 'penalty')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-3</button>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
+                  💨 DG<br>
+                  <span style="font-size: 0.85em; color: #666;">前半: <span id="hostDGFirstCount" style="color: #667eea;">0</span></span><br>
+                  <span style="font-size: 0.85em; color: #666;">後半: <span id="hostDGSecondCount" style="color: #667eea;">0</span></span>
+                </div>
+                <button onclick="addScore('host', 'drop')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+3</button>
+                <button onclick="subtractScore('host', 'drop')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-3</button>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
+                  ⚖️ PT<br>
+                  <span style="font-size: 0.85em; color: #666;">前半: <span id="hostPTFirstCount" style="color: #667eea;">0</span></span><br>
+                  <span style="font-size: 0.85em; color: #666;">後半: <span id="hostPTSecondCount" style="color: #667eea;">0</span></span>
+                </div>
+                <button onclick="addScore('host', 'penaltyTry')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+7</button>
+                <button onclick="subtractScore('host', 'penaltyTry')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-7</button>
+              </div>
+            </div>
+            <div style="margin-top: 10px; font-size: 1.5em; font-weight: bold; text-align: center;">
+              スコア: <span id="hostScoreDisplay">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- アウェイチーム -->
+        <div class="team-section">
+          <h3>アウェイチーム</h3>
+          <div class="form-group">
+            <label>チーム名:</label>
+            <input type="text" id="awayTeamName" placeholder="チーム名を入力">
+          </div>
+          <div class="form-group">
+            <label>チーム名サイズ:</label>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <input type="range" id="awayTeamNameSizeSlider" min="1.0" max="3.5" step="0.1" value="2.0" 
+                     style="flex: 1; cursor: pointer;">
+              <span id="awayTeamNameSizeDisplay" style="min-width: 60px; font-weight: bold; text-align: right;">2.0em</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>ロゴ画像:</label>
+            <input type="text" id="awayTeamLogo" placeholder="ロゴ画像のURL" readonly>
+            <button onclick="loadTeamLogo('awayTeam')" style="margin-top: 5px;">🖼️ 画像を選択</button>
+          </div>
+          <div class="form-group">
+            <label>チームカラー:</label>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <input type="color" id="awayTeamColorPicker" style="width: 60px; height: 40px; border: 2px solid #ddd; border-radius: 5px; cursor: pointer;">
+              <input type="text" id="awayTeamColor" placeholder="#0000FF" style="flex: 1;">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>スコア操作:</label>
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
+                  🏉 トライ<br>
+                  <span style="font-size: 0.85em; color: #666;">前半: <span id="awayTriesFirstCount" style="color: #667eea;">0</span></span><br>
+                  <span style="font-size: 0.85em; color: #666;">後半: <span id="awayTriesSecondCount" style="color: #667eea;">0</span></span>
+                </div>
+                <button onclick="addScore('away', 'try')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+5</button>
+                <button onclick="subtractScore('away', 'try')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-5</button>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
+                  ⚽ CG<br>
+                  <span style="font-size: 0.85em; color: #666;">前半: <span id="awayConversionsFirstCount" style="color: #667eea;">0</span></span><br>
+                  <span style="font-size: 0.85em; color: #666;">後半: <span id="awayConversionsSecondCount" style="color: #667eea;">0</span></span>
+                </div>
+                <button onclick="addScore('away', 'conversion')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+2</button>
+                <button onclick="subtractScore('away', 'conversion')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-2</button>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
+                  🎯 PG<br>
+                  <span style="font-size: 0.85em; color: #666;">前半: <span id="awayPGFirstCount" style="color: #667eea;">0</span></span><br>
+                  <span style="font-size: 0.85em; color: #666;">後半: <span id="awayPGSecondCount" style="color: #667eea;">0</span></span>
+                </div>
+                <button onclick="addScore('away', 'penalty')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+3</button>
+                <button onclick="subtractScore('away', 'penalty')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-3</button>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
+                  💨 DG<br>
+                  <span style="font-size: 0.85em; color: #666;">前半: <span id="awayDGFirstCount" style="color: #667eea;">0</span></span><br>
+                  <span style="font-size: 0.85em; color: #666;">後半: <span id="awayDGSecondCount" style="color: #667eea;">0</span></span>
+                </div>
+                <button onclick="addScore('away', 'drop')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+3</button>
+                <button onclick="subtractScore('away', 'drop')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-3</button>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <div style="text-align: center; font-weight: bold; font-size: 0.9em; color: #333;">
+                  ⚖️ PT<br>
+                  <span style="font-size: 0.85em; color: #666;">前半: <span id="awayPTFirstCount" style="color: #667eea;">0</span></span><br>
+                  <span style="font-size: 0.85em; color: #666;">後半: <span id="awayPTSecondCount" style="color: #667eea;">0</span></span>
+                </div>
+                <button onclick="addScore('away', 'penaltyTry')" style="padding: 10px; font-weight: bold; background: #28a745; color: white;">+7</button>
+                <button onclick="subtractScore('away', 'penaltyTry')" style="padding: 5px; font-size: 0.9em; background: #dc3545; color: white;">-7</button>
+              </div>
+            </div>
+            <div style="margin-top: 10px; font-size: 1.5em; font-weight: bold; text-align: center;">
+              スコア: <span id="awayScoreDisplay">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 選手情報 -->
+    <div class="control-panel">
+      <h2 class="section-title">選手情報管理</h2>
+      <div class="teams-container">
+        <!-- ホームチーム選手 -->
+        <div class="team-section">
+          <h3>ホームチーム選手</h3>
+          <div class="csv-section">
+            <button onclick="loadTeamCSV('host')">📄 CSV読み込み</button>
+            <p style="margin-top: 10px; color: #666; font-size: 0.9em;">
+              CSV形式: 背番号,名前,ポジション
+            </p>
+            <div class="players-list" id="hostPlayers">
+              <p style="color: #999;">選手データが読み込まれていません</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- アウェイチーム選手 -->
+        <div class="team-section">
+          <h3>アウェイチーム選手</h3>
+          <div class="csv-section">
+            <button onclick="loadTeamCSV('away')">📄 CSV読み込み</button>
+            <p style="margin-top: 10px; color: #666; font-size: 0.9em;">
+              CSV形式: 背番号,名前,ポジション
+            </p>
+            <div class="players-list" id="awayPlayers">
+              <p style="color: #999;">選手データが読み込まれていません</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 選手交代 -->
+    <div class="control-panel">
+      <h2 class="section-title">選手交代</h2>
+      <div class="substitution-section">
+        <div class="teams-container">
+          <div>
+            <h3>ホームチーム交代</h3>
+            <div class="sub-controls">
+              <!-- 複数行入力フォーム -->
+              <div id="hostSubstitutionRows">
+                <div class="substitution-row" data-row="0">
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>OUT:</label>
+                    <select class="host-out-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>IN:</label>
+                    <select class="host-in-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="substitution-row" data-row="1">
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>OUT:</label>
+                    <select class="host-out-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>IN:</label>
+                    <select class="host-in-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="substitution-row" data-row="2">
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>OUT:</label>
+                    <select class="host-out-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>IN:</label>
+                    <select class="host-in-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button onclick="batchSubstitute('host')" style="flex: 1; background: #4CAF50; color: white; padding: 12px; border: none; border-radius: 5px; font-size: 1em; font-weight: bold; cursor: pointer;">🔄 一括交代実行</button>
+                <button onclick="clearSubstitutionRows('host')" style="flex: 0.3; background: #6c757d; color: white; padding: 12px; border: none; border-radius: 5px; font-size: 1em; cursor: pointer;">❌ クリア</button>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3>アウェイチーム交代</h3>
+            <div class="sub-controls">
+              <!-- 複数行入力フォーム -->
+              <div id="awaySubstitutionRows">
+                <div class="substitution-row" data-row="0">
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>OUT:</label>
+                    <select class="away-out-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>IN:</label>
+                    <select class="away-in-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="substitution-row" data-row="1">
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>OUT:</label>
+                    <select class="away-out-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>IN:</label>
+                    <select class="away-in-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="substitution-row" data-row="2">
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>OUT:</label>
+                    <select class="away-out-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                  <div class="form-group" style="flex: 1; min-width: 0;">
+                    <label>IN:</label>
+                    <select class="away-in-select" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+                      <option value="">選択...</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button onclick="batchSubstitute('away')" style="flex: 1; background: #4CAF50; color: white; padding: 12px; border: none; border-radius: 5px; font-size: 1em; font-weight: bold; cursor: pointer;">🔄 一括交代実行</button>
+                <button onclick="clearSubstitutionRows('away')" style="flex: 0.3; background: #6c757d; color: white; padding: 12px; border: none; border-radius: 5px; font-size: 1em; cursor: pointer;">❌ クリア</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ディスプレイ設定 -->
+    <div class="control-panel">
+      <h2 class="section-title">ディスプレイ設定</h2>
+      <div class="form-group">
+        <label>接続されているディスプレイ:</label>
+        <div id="displayList" style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+          <p style="color: #999;">読み込み中...</p>
+        </div>
+      </div>
+      
+      <div class="teams-container">
+        <div class="form-group">
+          <label>📊 スタッツ表示画面:</label>
+          <select id="displayWindowSelect" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-size: 1em;">
+            <option value="">ディスプレイを選択</option>
+          </select>
+          <button onclick="applyDisplaySetting('display')" style="margin-top: 10px; width: 100%;">適用</button>
+        </div>
+        
+        <div class="form-group">
+          <label>🎬 スコアボード:</label>
+          <select id="scoreboardWindowSelect" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-size: 1em;">
+            <option value="">ディスプレイを選択</option>
+          </select>
+          <button onclick="applyDisplaySetting('scoreboard')" style="margin-top: 10px; width: 100%;">適用</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- クロマキー色設定 -->
+    <div class="control-panel">
+      <h2 class="section-title">クロマキー色設定</h2>
+      <div class="form-group">
+        <label>クロマキースコアボードの背景色:</label>
+        <div style="display: flex; gap: 15px; margin-top: 10px;">
+          <button onclick="setChromakeyColor('#00FF00')" style="flex: 1; padding: 15px; background: #00FF00; color: black; border: 2px solid #ddd; border-radius: 5px; cursor: pointer; font-weight: bold;">
+            グリーン (#00FF00)
+          </button>
+          <button onclick="setChromakeyColor('#0000FF')" style="flex: 1; padding: 15px; background: #0000FF; color: white; border: 2px solid #ddd; border-radius: 5px; cursor: pointer; font-weight: bold;">
+            ブルー (#0000FF)
+          </button>
+          <button onclick="setChromakeyColor('#FF00FF')" style="flex: 1; padding: 15px; background: #FF00FF; color: white; border: 2px solid #ddd; border-radius: 5px; cursor: pointer; font-weight: bold;">
+            マゼンタ (#FF00FF)
+          </button>
+        </div>
+        <div style="margin-top: 15px; display: flex; gap: 10px; align-items: center;">
+          <label>カスタム色:</label>
+          <input type="color" id="chromakeyColorPicker" value="#00FF00" style="width: 60px; height: 40px; border: 2px solid #ddd; border-radius: 5px; cursor: pointer;">
+          <button onclick="setChromakeyColor(document.getElementById('chromakeyColorPicker').value)" style="padding: 10px 20px;">カスタム色を適用</button>
+        </div>
+        <p style="margin-top: 10px; color: #666; font-size: 0.9em;">
+          現在の色: <span id="currentChromakeyColor" style="font-weight: bold;">#00FF00</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- 表示サイズ設定 -->
+    <div class="control-panel">
+      <h2 class="section-title">📺 表示サイズ設定</h2>
+      
+      <!-- クロマキースコアボード -->
+      <h3 style="margin-bottom: 15px; color: #667eea;">━━━ クロマキースコアボード ━━━</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+        <div class="form-group">
+          <label>ロゴサイズ:</label>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <input type="range" id="scoreboardLogoSize" min="40" max="160" value="80" step="5" 
+                   onchange="updateDisplaySize('scoreboardLogoSize', this.value)" 
+                   style="flex: 1; cursor: pointer;">
+            <span id="scoreboardLogoSizeDisplay" style="min-width: 60px; font-weight: bold; text-align: right;">80px</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>チーム名サイズ:</label>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <input type="range" id="scoreboardTeamNameSize" min="0.9" max="3.6" value="1.8" step="0.1" 
+                   onchange="updateDisplaySize('scoreboardTeamNameSize', this.value)" 
+                   style="flex: 1; cursor: pointer;">
+            <span id="scoreboardTeamNameSizeDisplay" style="min-width: 60px; font-weight: bold; text-align: right;">1.8em</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>スコアサイズ:</label>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <input type="range" id="scoreboardScoreSize" min="2.5" max="10" value="5" step="0.5" 
+                   onchange="updateDisplaySize('scoreboardScoreSize', this.value)" 
+                   style="flex: 1; cursor: pointer;">
+            <span id="scoreboardScoreSizeDisplay" style="min-width: 60px; font-weight: bold; text-align: right;">5em</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>スタジアム名サイズ:</label>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <input type="range" id="scoreboardStadiumSize" min="0.5" max="2" value="1" step="0.1" 
+                   onchange="updateDisplaySize('scoreboardStadiumSize', this.value)" 
+                   style="flex: 1; cursor: pointer;">
+            <span id="scoreboardStadiumSizeDisplay" style="min-width: 60px; font-weight: bold; text-align: right;">1em</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- スタッツ表示画面 -->
+      <h3 style="margin-bottom: 15px; color: #667eea;">━━━ スタッツ表示画面 ━━━</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+        <div class="form-group">
+          <label>選手テロップサイズ:</label>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <input type="range" id="displayPlayerSize" min="1" max="4" value="2" step="0.1" 
+                   onchange="updateDisplaySize('displayPlayerSize', this.value)" 
+                   style="flex: 1; cursor: pointer;">
+            <span id="displayPlayerSizeDisplay" style="min-width: 60px; font-weight: bold; text-align: right;">2em</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>ゴール数テロップサイズ:</label>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <input type="range" id="displayGoalSize" min="1.5" max="6" value="3" step="0.1" 
+                   onchange="updateDisplaySize('displayGoalSize', this.value)" 
+                   style="flex: 1; cursor: pointer;">
+            <span id="displayGoalSizeDisplay" style="min-width: 60px; font-weight: bold; text-align: right;">3em</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>背景ロゴ透明度:</label>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <input type="range" id="displayLogoOpacity" min="0" max="1" value="0.2" step="0.05" 
+                   onchange="updateDisplaySize('displayLogoOpacity', this.value)" 
+                   style="flex: 1; cursor: pointer;">
+            <span id="displayLogoOpacityDisplay" style="min-width: 60px; font-weight: bold; text-align: right;">20%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- クイックアクション -->
+    <div class="control-panel">
+      <div class="quick-actions">
+        <button class="action-btn" onclick="openMapper()" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">📊 外部データ取り込み</button>
+        <button class="action-btn" onclick="toggleDisplayWindow()">📺 表示画面 ON/OFF</button>
+        <button class="action-btn" onclick="toggleScoreboardWindow()">🎬 透過スコアボード ON/OFF</button>
+        <button class="action-btn" onclick="toggleScoreboardChromakeyWindow()">🎥 クロマキースコアボード ON/OFF</button>
+        <button class="action-btn secondary" onclick="resetMatch()">🔄 試合リセット</button>
+      </div>
+      <div class="status-bar">
+        ✅ システム稼働中 - 表示画面と同期されています
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentData = null;
+    let currentHalf = 'first'; // 'first' or 'second'
+    let halfScores = {
+      first: { host: 0, away: 0 },
+      second: { host: 0, away: 0 }
+    };
+
+    // 前半/後半切り替え
+    async function switchHalf(half) {
+      currentHalf = half;
+      document.getElementById('currentHalfDisplay').textContent = half === 'first' ? '前半' : '後半';
+      document.getElementById('halfBtn1').style.background = half === 'first' ? '#667eea' : '#6c757d';
+      document.getElementById('halfBtn2').style.background = half === 'second' ? '#667eea' : '#6c757d';
+      
+      // サーバー側にも通知
+      await window.electronAPI.switchHalf(half);
+    }
+
+    // スコア加算
+    async function addScore(team, type) {
+      let points = 0;
+      let statKey = '';
+      
+      switch(type) {
+        case 'try':
+          points = 5;
+          statKey = 'tries';
+          break;
+        case 'conversion':
+          points = 2;
+          statKey = 'conversions';
+          break;
+        case 'penalty':
+          points = 3;
+          statKey = 'penaltyGoals';
+          break;
+        case 'drop':
+          points = 3;
+          statKey = 'dropGoals';
+          break;
+        case 'penaltyTry':
+          points = 7;
+          statKey = 'penaltyTries';
+          break;
+      }
+      
+      // 現在のデータを取得
+      const data = await window.electronAPI.getMatchData();
+      
+      // 前半/後半の統計を更新
+      const currentStat = data.stats[team][currentHalf][statKey];
+      await window.electronAPI.updateHalfStats(currentHalf, team, statKey, currentStat + 1);
+      
+      // 前半/後半スコアを更新
+      halfScores[currentHalf][team] += points;
+      document.getElementById(`${team}${currentHalf === 'first' ? 'First' : 'Second'}HalfScore`).textContent = halfScores[currentHalf][team];
+      await window.electronAPI.updateHalfScore(currentHalf, team, halfScores[currentHalf][team]);
+      
+      // カウント表示を先に更新（loadData()で上書きされる前に）
+      const countIdMap = {
+        'tries': `${team}TriesCount`,
+        'conversions': `${team}ConversionsCount`,
+        'penaltyGoals': `${team}PGCount`,
+        'dropGoals': `${team}DGCount`,
+        'penaltyTries': `${team}PTCount`
+      };
+      const countId = countIdMap[statKey];
+      console.log('Updating count:', { team, statKey, countId });
+      
+      // 表示を更新（この時点でbackendのデータが更新されている）
+      await loadData();
+      
+      // loadData()の後は不要（updateUI()で正しく更新される）
+    }
+
+    // スコア減算（取り消し用）
+    async function subtractScore(team, type) {
+      let points = 0;
+      let statKey = '';
+      
+      switch(type) {
+        case 'try':
+          points = 5;
+          statKey = 'tries';
+          break;
+        case 'conversion':
+          points = 2;
+          statKey = 'conversions';
+          break;
+        case 'penalty':
+          points = 3;
+          statKey = 'penaltyGoals';
+          break;
+        case 'drop':
+          points = 3;
+          statKey = 'dropGoals';
+          break;
+        case 'penaltyTry':
+          points = 7;
+          statKey = 'penaltyTries';
+          break;
+      }
+      
+      // 現在のデータを取得
+      const data = await window.electronAPI.getMatchData();
+      
+      // 現在の統計値を確認（マイナスにならないように）
+      const currentStat = data.stats[team][currentHalf][statKey];
+      if (currentStat <= 0) {
+        alert('これ以上減らせません（0未満にはできません）');
+        return;
+      }
+      
+      // 現在の前半/後半スコアを確認
+      if (halfScores[currentHalf][team] < points) {
+        alert('スコアが不足しています（マイナスにはできません）');
+        return;
+      }
+      
+      // 前半/後半の統計を更新
+      await window.electronAPI.updateHalfStats(currentHalf, team, statKey, currentStat - 1);
+      
+      // 前半/後半スコアを更新
+      halfScores[currentHalf][team] -= points;
+      document.getElementById(`${team}${currentHalf === 'first' ? 'First' : 'Second'}HalfScore`).textContent = halfScores[currentHalf][team];
+      await window.electronAPI.updateHalfScore(currentHalf, team, halfScores[currentHalf][team]);
+      
+      // 表示を更新（この時点でbackendのデータが更新されている）
+      await loadData();
+      
+      // loadData()のupdateUI()で正しく更新される
+    }
+
+
+    // 初期データ読み込み
+    async function loadData() {
+      console.log('loadData: Fetching match data...');
+      currentData = await window.electronAPI.getMatchData();
+      console.log('loadData: Received data:', currentData);
+      updateUI();
+      console.log('loadData: UI updated');
+    }
+
+    // UIを更新
+    function updateUI() {
+      if (!currentData) return;
+
+      console.log('updateUI: Updating with data:', {
+        hostScore: currentData.score.host,
+        awayScore: currentData.score.away,
+        hostTries: currentData.stats.host.tries,
+        awayTries: currentData.stats.away.tries
+      });
+
+      // スタジアム名
+      if (currentData.stadiumName) {
+        document.getElementById('stadiumName').value = currentData.stadiumName;
+      }
+
+      document.getElementById('hostTeamName').value = currentData.hostTeam.name;
+      document.getElementById('hostTeamLogo').value = currentData.hostTeam.logo;
+      document.getElementById('hostTeamColor').value = currentData.hostTeam.color;
+      document.getElementById('hostTeamColorPicker').value = currentData.hostTeam.color;
+      document.getElementById('hostScoreDisplay').textContent = currentData.score.host;
+      
+      // ボタン上部のカウント表示を更新（前半/後半別）
+      if (currentData.stats.host.first) {
+        document.getElementById('hostTriesFirstCount').textContent = currentData.stats.host.first.tries || 0;
+        document.getElementById('hostConversionsFirstCount').textContent = currentData.stats.host.first.conversions || 0;
+        document.getElementById('hostPGFirstCount').textContent = currentData.stats.host.first.penaltyGoals || 0;
+        document.getElementById('hostDGFirstCount').textContent = currentData.stats.host.first.dropGoals || 0;
+        document.getElementById('hostPTFirstCount').textContent = currentData.stats.host.first.penaltyTries || 0;
+      }
+      if (currentData.stats.host.second) {
+        document.getElementById('hostTriesSecondCount').textContent = currentData.stats.host.second.tries || 0;
+        document.getElementById('hostConversionsSecondCount').textContent = currentData.stats.host.second.conversions || 0;
+        document.getElementById('hostPGSecondCount').textContent = currentData.stats.host.second.penaltyGoals || 0;
+        document.getElementById('hostDGSecondCount').textContent = currentData.stats.host.second.dropGoals || 0;
+        document.getElementById('hostPTSecondCount').textContent = currentData.stats.host.second.penaltyTries || 0;
+      }
+
+      document.getElementById('awayTeamName').value = currentData.awayTeam.name;
+      document.getElementById('awayTeamLogo').value = currentData.awayTeam.logo;
+      document.getElementById('awayTeamColor').value = currentData.awayTeam.color;
+      document.getElementById('awayTeamColorPicker').value = currentData.awayTeam.color;
+      document.getElementById('awayScoreDisplay').textContent = currentData.score.away;
+      
+      // ボタン上部のカウント表示を更新（前半/後半別）
+      if (currentData.stats.away.first) {
+        document.getElementById('awayTriesFirstCount').textContent = currentData.stats.away.first.tries || 0;
+        document.getElementById('awayConversionsFirstCount').textContent = currentData.stats.away.first.conversions || 0;
+        document.getElementById('awayPGFirstCount').textContent = currentData.stats.away.first.penaltyGoals || 0;
+        document.getElementById('awayDGFirstCount').textContent = currentData.stats.away.first.dropGoals || 0;
+        document.getElementById('awayPTFirstCount').textContent = currentData.stats.away.first.penaltyTries || 0;
+      }
+      if (currentData.stats.away.second) {
+        document.getElementById('awayTriesSecondCount').textContent = currentData.stats.away.second.tries || 0;
+        document.getElementById('awayConversionsSecondCount').textContent = currentData.stats.away.second.conversions || 0;
+        document.getElementById('awayPGSecondCount').textContent = currentData.stats.away.second.penaltyGoals || 0;
+        document.getElementById('awayDGSecondCount').textContent = currentData.stats.away.second.dropGoals || 0;
+        document.getElementById('awayPTSecondCount').textContent = currentData.stats.away.second.penaltyTries || 0;
+      }
+
+      // 前半/後半スコア表示を更新
+      if (currentData.halfScores) {
+        halfScores.first.host = currentData.halfScores.first.host;
+        halfScores.first.away = currentData.halfScores.first.away;
+        halfScores.second.host = currentData.halfScores.second.host;
+        halfScores.second.away = currentData.halfScores.second.away;
+        
+        document.getElementById('hostFirstHalfScore').textContent = currentData.halfScores.first.host;
+        document.getElementById('awayFirstHalfScore').textContent = currentData.halfScores.first.away;
+        document.getElementById('hostSecondHalfScore').textContent = currentData.halfScores.second.host;
+        document.getElementById('awaySecondHalfScore').textContent = currentData.halfScores.second.away;
+      }
+
+      updatePlayersList('host', currentData.players.host);
+      updatePlayersList('away', currentData.players.away);
+    }
+
+    // 選手リスト表示
+    function updatePlayersList(team, players) {
+      const container = document.getElementById(`${team}Players`);
+      if (players.length === 0) {
+        container.innerHTML = '<p style="color: #999;">選手データが読み込まれていません</p>';
+        return;
+      }
+
+      container.innerHTML = players.map((p, index) => `
+        <div class="player-item">
+          <div class="player-item-info">
+            <span><span class="player-number">${p.number}</span>${p.name}</span>
+            <span style="color: #666;">${p.position}</span>
+          </div>
+          <button class="edit-btn" onclick="openEditPlayerDialog('${team}', ${index})">✏️ 編集</button>
+        </div>
+      `).join('');
+      
+      // 交代用ドロップダウンリストを更新
+      updateSubstitutionDropdowns(team, players);
+    }
+    
+    // 交代用ドロップダウンリストを更新
+    function updateSubstitutionDropdowns(team, players) {
+      // OUT選手（配列の最初の15人 = フィールドにいる選手）
+      const onFieldPlayers = players.slice(0, 15);
+      const onFieldOptions = '<option value="">選択...</option>' + 
+        onFieldPlayers.map(p => `<option value="${p.number}">${p.number}. ${p.position} ${p.name}</option>`).join('');
+      
+      // IN選手（配列の16人目以降 = リザーブにいる選手）
+      const reservePlayers = players.slice(15);
+      const reserveOptions = '<option value="">選択...</option>' + 
+        reservePlayers.map(p => `<option value="${p.number}">${p.number}. ${p.position} ${p.name}</option>`).join('');
+      
+      // 各行のセレクトボックスを更新
+      const outSelects = document.querySelectorAll(`.${team}-out-select`);
+      const inSelects = document.querySelectorAll(`.${team}-in-select`);
+      
+      outSelects.forEach(select => {
+        const previousValue = select.value;
+        select.innerHTML = onFieldOptions;
+        if (previousValue) select.value = previousValue; // 既存の選択を保持
+      });
+      
+      inSelects.forEach(select => {
+        const previousValue = select.value;
+        select.innerHTML = reserveOptions;
+        if (previousValue) select.value = previousValue; // 既存の選択を保持
+      });
+      
+      // リスナーを設定（初回のみ）
+      if (!window[`${team}SubstitutionListenersSet`]) {
+        setupSubstitutionListeners(team);
+        window[`${team}SubstitutionListenersSet`] = true;
+      }
+      
+      // 選択可能な選手を更新
+      updateSubstitutionAvailability(team);
+    }
+
+    // イベントリスナー設定
+    function setupEventListeners() {
+      // ホームチーム名サイズスライダー
+      document.getElementById('hostTeamNameSizeSlider').addEventListener('input', (e) => {
+        const size = parseFloat(e.target.value);
+        document.getElementById('hostTeamNameSizeDisplay').textContent = `${size.toFixed(1)}em`;
+        window.electronAPI.updateTeamNameSize('host', size);
+      });
+      
+      // アウェイチーム名サイズスライダー
+      document.getElementById('awayTeamNameSizeSlider').addEventListener('input', (e) => {
+        const size = parseFloat(e.target.value);
+        document.getElementById('awayTeamNameSizeDisplay').textContent = `${size.toFixed(1)}em`;
+        window.electronAPI.updateTeamNameSize('away', size);
+      });
+      
+      // チーム名
+      document.getElementById('hostTeamName').addEventListener('change', (e) => {
+        window.electronAPI.updateTeam('hostTeam', 'name', e.target.value);
+      });
+      document.getElementById('awayTeamName').addEventListener('change', (e) => {
+        window.electronAPI.updateTeam('awayTeam', 'name', e.target.value);
+      });
+
+      // ロゴURL
+      document.getElementById('hostTeamLogo').addEventListener('change', (e) => {
+        window.electronAPI.updateTeam('hostTeam', 'logo', e.target.value);
+      });
+      document.getElementById('awayTeamLogo').addEventListener('change', (e) => {
+        window.electronAPI.updateTeam('awayTeam', 'logo', e.target.value);
+      });
+
+      // チームカラー（テキスト入力）
+      document.getElementById('hostTeamColor').addEventListener('input', (e) => {
+        document.getElementById('hostTeamColorPicker').value = e.target.value;
+        window.electronAPI.updateTeam('hostTeam', 'color', e.target.value);
+      });
+      document.getElementById('awayTeamColor').addEventListener('input', (e) => {
+        document.getElementById('awayTeamColorPicker').value = e.target.value;
+        window.electronAPI.updateTeam('awayTeam', 'color', e.target.value);
+      });
+      
+      // チームカラー（カラーピッカー）
+      document.getElementById('hostTeamColorPicker').addEventListener('input', (e) => {
+        document.getElementById('hostTeamColor').value = e.target.value;
+        window.electronAPI.updateTeam('hostTeam', 'color', e.target.value);
+      });
+      document.getElementById('awayTeamColorPicker').addEventListener('input', (e) => {
+        document.getElementById('awayTeamColor').value = e.target.value;
+        window.electronAPI.updateTeam('awayTeam', 'color', e.target.value);
+      });
+    }
+
+    // ロゴ画像読み込み
+    async function loadTeamLogo(team) {
+      try {
+        console.log(`=== ロゴ読み込み開始: ${team} ===`);
+        const logoUrl = await window.electronAPI.loadLogo(team);
+        console.log('取得したロゴURL:', logoUrl);
+        
+        if (logoUrl) {
+          const inputId = team === 'hostTeam' ? 'hostTeamLogo' : 'awayTeamLogo';
+          document.getElementById(inputId).value = logoUrl;
+          console.log('inputフィールドに設定:', inputId, logoUrl);
+          
+          // 表示画面を更新するために明示的にupdateTeamを呼び出す
+          console.log('updateTeam呼び出し中...');
+          await window.electronAPI.updateTeam(team, 'logo', logoUrl);
+          console.log('updateTeam完了');
+          
+          // UIを最新の状態に更新
+          console.log('loadData呼び出し中...');
+          await loadData();
+          console.log('loadData完了');
+          
+          alert('ロゴ画像を読み込みました');
+        } else {
+          console.log('ロゴURLがnullです（ユーザーがキャンセルした可能性）');
+        }
+      } catch (error) {
+        console.error('ロゴ読み込みエラー:', error);
+        alert('エラー: ' + error.message);
+      }
+    }
+
+    // CSV読み込み
+    async function loadTeamCSV(team) {
+      try {
+        const result = await window.electronAPI.loadCSV(team);
+        console.log('CSV読み込み結果:', result);
+        
+        if (result) {
+          let message = `✅ データを読み込みました\n\n`;
+          message += `選手: ${result.players.length}名\n`;
+          message += `チーム名: ${result.teamName}\n`;
+          if (result.hasLogo) {
+            message += `ロゴ: 読み込み成功`;
+          } else {
+            message += `ロゴ: なし（または更新なし）`;
+          }
+          alert(message);
+          await loadData();
+        } else {
+          alert('⚠️ CSV読み込みがキャンセルされたか、エラーが発生しました。');
+        }
+      } catch (error) {
+        console.error('CSV読み込みエラー（control.html）:', error);
+        alert(`❌ エラーが発生しました:\n${error.message}`);
+      }
+    }
+
+    // 選手交代
+    async function substitutePlayer(team) {
+      const outNumber = document.getElementById(`${team}OutNumber`).value;
+      const inNumber = document.getElementById(`${team}InNumber`).value;
+      
+      if (!outNumber || !inNumber) {
+        alert('交代選手と投入選手の背番号を入力してください');
+        return;
+      }
+
+      try {
+        await window.electronAPI.substitutePlayer(team, outNumber, inNumber);
+        // 交代後にデータを再読み込みして選手リストを更新
+        await loadData();
+        alert('選手交代を記録しました');
+        document.getElementById(`${team}OutNumber`).value = '';
+        document.getElementById(`${team}InNumber`).value = '';
+      } catch (error) {
+        console.error('交代エラー:', error);
+        alert('エラー: ' + error.message);
+      }
+    }
+    
+    // 一括交代機能
+    async function batchSubstitute(team) {
+      // 各行から入力を収集
+      const rows = document.querySelectorAll(`#${team}SubstitutionRows .substitution-row`);
+      const substitutions = [];
+      
+      rows.forEach((row, index) => {
+        const outSelect = row.querySelector(`.${team}-out-select`);
+        const inSelect = row.querySelector(`.${team}-in-select`);
+        const outValue = outSelect.value;
+        const inValue = inSelect.value;
+        
+        // 両方選択されている行のみ処理
+        if (outValue && inValue) {
+          substitutions.push({ out: outValue, in: inValue });
+        }
+      });
+      
+      if (substitutions.length === 0) {
+        alert('交代する選手を選択してください（OUT と IN の両方を選択）');
+        return;
+      }
+      
+      try {
+        // 各交代を順番に実行
+        for (const sub of substitutions) {
+          await window.electronAPI.substitutePlayer(team, sub.out, sub.in);
+        }
+        
+        // 交代後にデータを再読み込み
+        await loadData();
+        
+        // 成功メッセージ
+        alert(`${substitutions.length}人の選手交代を記録しました`);
+        
+        // フォームをクリア
+        clearSubstitutionRows(team);
+      } catch (error) {
+        console.error('一括交代エラー:', error);
+        alert('エラー: ' + error.message);
+      }
+    }
+    
+    // 交代フォームをクリア
+    function clearSubstitutionRows(team) {
+      const rows = document.querySelectorAll(`#${team}SubstitutionRows .substitution-row`);
+      rows.forEach(row => {
+        const outSelect = row.querySelector(`.${team}-out-select`);
+        const inSelect = row.querySelector(`.${team}-in-select`);
+        if (outSelect) outSelect.value = '';
+        if (inSelect) inSelect.value = '';
+      });
+      // クリア後に選択可能な選手を更新
+      updateSubstitutionAvailability(team);
+    }
+    
+    // 選択済み選手のバリデーション（リアルタイム）
+    function updateSubstitutionAvailability(team) {
+      const rows = document.querySelectorAll(`#${team}SubstitutionRows .substitution-row`);
+      const selectedOutNumbers = new Set();
+      const selectedInNumbers = new Set();
+      
+      // まず全ての選択済み選手を収集
+      rows.forEach(row => {
+        const outSelect = row.querySelector(`.${team}-out-select`);
+        const inSelect = row.querySelector(`.${team}-in-select`);
+        if (outSelect && outSelect.value) selectedOutNumbers.add(outSelect.value);
+        if (inSelect && inSelect.value) selectedInNumbers.add(inSelect.value);
+      });
+      
+      // 各行のセレクトボックスで選択済み選手を無効化
+      rows.forEach(row => {
+        const outSelect = row.querySelector(`.${team}-out-select`);
+        const inSelect = row.querySelector(`.${team}-in-select`);
+        const currentOutValue = outSelect ? outSelect.value : '';
+        const currentInValue = inSelect ? inSelect.value : '';
+        
+        // OUTセレクトボックスのオプションを更新
+        if (outSelect) {
+          Array.from(outSelect.options).forEach(option => {
+            if (option.value && option.value !== currentOutValue) {
+              option.disabled = selectedOutNumbers.has(option.value);
+              option.style.color = option.disabled ? '#ccc' : '';
+            }
+          });
+        }
+        
+        // INセレクトボックスのオプションを更新
+        if (inSelect) {
+          Array.from(inSelect.options).forEach(option => {
+            if (option.value && option.value !== currentInValue) {
+              option.disabled = selectedInNumbers.has(option.value);
+              option.style.color = option.disabled ? '#ccc' : '';
+            }
+          });
+        }
+      });
+    }
+    
+    // セレクトボックスにイベントリスナーを追加
+    function setupSubstitutionListeners(team) {
+      const rows = document.querySelectorAll(`#${team}SubstitutionRows .substitution-row`);
+      rows.forEach(row => {
+        const outSelect = row.querySelector(`.${team}-out-select`);
+        const inSelect = row.querySelector(`.${team}-in-select`);
+        
+        if (outSelect) {
+          outSelect.addEventListener('change', () => updateSubstitutionAvailability(team));
+        }
+        if (inSelect) {
+          inSelect.addEventListener('change', () => updateSubstitutionAvailability(team));
+        }
+      });
+    }
+
+    // 表示画面の開閉
+    async function toggleDisplayWindow() {
+      await window.electronAPI.toggleDisplay();
+    }
+
+    // スコアボードの開閉
+    async function toggleScoreboardWindow() {
+      await window.electronAPI.toggleScoreboard();
+    }
+
+    // クロマキースコアボードの開閉
+    async function toggleScoreboardChromakeyWindow() {
+      await window.electronAPI.toggleScoreboardChromakey();
+    }
+
+    // マッパーウィンドウを開く
+    async function openMapper() {
+      await window.electronAPI.openMapper();
+    }
+
+    // スタジアム名更新
+    async function updateStadiumName(value) {
+      await window.electronAPI.updateStadiumName(value);
+    }
+
+    // 試合リセット
+    async function resetMatch() {
+      if (confirm('試合データをリセットしますか？この操作は取り消せません。')) {
+        // 前半・後半のスコアをリセット
+        halfScores.first.host = 0;
+        halfScores.first.away = 0;
+        halfScores.second.host = 0;
+        halfScores.second.away = 0;
+        
+        // 表示をリセット
+        document.getElementById('hostFirstHalfScore').textContent = 0;
+        document.getElementById('hostSecondHalfScore').textContent = 0;
+        document.getElementById('awayFirstHalfScore').textContent = 0;
+        document.getElementById('awaySecondHalfScore').textContent = 0;
+        
+        // バックエンドのスコアと統計をリセット
+        await window.electronAPI.updateScore('host', 0);
+        await window.electronAPI.updateScore('away', 0);
+        
+        // 全ての統計をリセット
+        const statKeys = ['tries', 'conversions', 'penaltyGoals', 'dropGoals', 'penaltyTries'];
+        for (const key of statKeys) {
+          await window.electronAPI.updateStats('host', key, 0);
+          await window.electronAPI.updateStats('away', key, 0);
+        }
+        
+        // 前半・後半ごとの統計もリセット
+        for (const half of ['first', 'second']) {
+          for (const key of statKeys) {
+            await window.electronAPI.updateHalfStats(half, 'host', key, 0);
+            await window.electronAPI.updateHalfStats(half, 'away', key, 0);
+          }
+          await window.electronAPI.updateHalfScore(half, 'host', 0);
+          await window.electronAPI.updateHalfScore(half, 'away', 0);
+        }
+        
+        // UIを更新
+        await loadData();
+        
+        alert('試合データをリセットしました。');
+      }
+    }
+
+    // 選手編集モーダルを開く
+    function openEditPlayerDialog(team, playerIndex) {
+      const dialog = document.getElementById('editPlayerDialog');
+      const players = currentData.players[team];
+      const player = players[playerIndex];
+
+      // フォームにデータをセット
+      document.getElementById('editTeam').value = team;
+      document.getElementById('editPlayerIndex').value = playerIndex;
+      document.getElementById('editPlayerNumber').value = player.number || '';
+      document.getElementById('editPlayerName').value = player.name || '';
+      document.getElementById('editPlayerPosition').value = player.position || '';
+      document.getElementById('editPlayerImage').value = player.image || '';
+
+      // モーダルを表示
+      dialog.showModal();
+    }
+
+    // 選手情報を保存
+    async function savePlayerEdit() {
+      const team = document.getElementById('editTeam').value;
+      const playerIndex = parseInt(document.getElementById('editPlayerIndex').value);
+      const number = document.getElementById('editPlayerNumber').value.trim();
+      const name = document.getElementById('editPlayerName').value.trim();
+      const position = document.getElementById('editPlayerPosition').value.trim();
+      const image = document.getElementById('editPlayerImage').value.trim();
+
+      // バリデーション
+      if (!name) {
+        alert('選手名は必須です。');
+        return;
+      }
+      if (!number) {
+        alert('背番号は必須です。');
+        return;
+      }
+
+      // 更新データを作成
+      const updatedPlayer = {
+        number: number,
+        name: name,
+        position: position,
+        image: image
+      };
+
+      try {
+        // バックエンドに更新を送信
+        await window.electronAPI.updatePlayer(team, playerIndex, updatedPlayer);
+        
+        // UIを更新
+        await loadData();
+        
+        // モーダルを閉じる
+        closeEditPlayerDialog();
+        
+        alert('選手情報を更新しました。');
+      } catch (error) {
+        console.error('選手情報の更新に失敗しました:', error);
+        alert('選手情報の更新に失敗しました。');
+      }
+    }
+
+    // モーダルを閉じる
+    function closeEditPlayerDialog() {
+      const dialog = document.getElementById('editPlayerDialog');
+      dialog.close();
+    }
+
+    // 画像ファイルを選択
+    async function selectPlayerImage() {
+      try {
+        const result = await window.electronAPI.selectImageFile();
+        if (result && result.filePath) {
+          document.getElementById('editPlayerImage').value = result.filePath;
+        }
+      } catch (error) {
+        console.error('画像ファイルの選択に失敗しました:', error);
+      }
+    }
+
+    // 初期化
+    window.addEventListener('DOMContentLoaded', () => {
+      loadData();
+      setupEventListeners();
+      loadDisplayList();
+      loadChromakeyColor();
+      loadDisplaySizes();
+    });
+
+    // クロマキー色を設定
+    async function setChromakeyColor(color) {
+      try {
+        await window.electronAPI.setChromakeyColor(color);
+        localStorage.setItem('chromakeyColor', color);
+        document.getElementById('currentChromakeyColor').textContent = color;
+        alert(`クロマキー色を ${color} に設定しました。`);
+      } catch (error) {
+        console.error('クロマキー色の設定に失敗しました:', error);
+        alert('クロマキー色の設定に失敗しました。');
+      }
+    }
+
+    // 保存されたクロマキー色を読み込む
+    function loadChromakeyColor() {
+      const savedColor = localStorage.getItem('chromakeyColor') || '#00FF00';
+      document.getElementById('chromakeyColorPicker').value = savedColor;
+      document.getElementById('currentChromakeyColor').textContent = savedColor;
+    }
+
+    // 表示サイズを更新
+    async function updateDisplaySize(key, value) {
+      const floatValue = parseFloat(value);
+      
+      // 表示を更新
+      const displayMap = {
+        'scoreboardLogoSize': { display: 'scoreboardLogoSizeDisplay', unit: 'px' },
+        'scoreboardTeamNameSize': { display: 'scoreboardTeamNameSizeDisplay', unit: 'em' },
+        'scoreboardScoreSize': { display: 'scoreboardScoreSizeDisplay', unit: 'em' },
+        'scoreboardStadiumSize': { display: 'scoreboardStadiumSizeDisplay', unit: 'em' },
+        'displayPlayerSize': { display: 'displayPlayerSizeDisplay', unit: 'em' },
+        'displayGoalSize': { display: 'displayGoalSizeDisplay', unit: 'em' },
+        'displayLogoOpacity': { display: 'displayLogoOpacityDisplay', unit: '%', multiplier: 100 }
+      };
+      
+      const config = displayMap[key];
+      if (config) {
+        const displayValue = config.multiplier ? (floatValue * config.multiplier).toFixed(0) : floatValue;
+        document.getElementById(config.display).textContent = displayValue + config.unit;
+      }
+      
+      // バックエンドに送信
+      try {
+        const settings = { [key]: floatValue };
+        await window.electronAPI.updateDisplaySizes(settings);
+        console.log(`${key}を${value}に更新しました`);
+      } catch (error) {
+        console.error('表示サイズの更新に失敗しました:', error);
+      }
+    }
+
+    // 保存された表示サイズ設定を読み込む
+    function loadDisplaySizes() {
+      // デフォルト値
+      const defaults = {
+        scoreboardLogoSize: 80,
+        scoreboardTeamNameSize: 1.8,
+        scoreboardScoreSize: 5,
+        scoreboardStadiumSize: 1,
+        displayPlayerSize: 2,
+        displayGoalSize: 3,
+        displayLogoOpacity: 0.2
+      };
+      
+      // 各スライダーと表示を初期化
+      Object.keys(defaults).forEach(key => {
+        const slider = document.getElementById(key);
+        if (slider) {
+          slider.value = defaults[key];
+          updateDisplaySize(key, defaults[key]);
+        }
+      });
+    }
+
+    // ディスプレイ一覧を読み込む
+    async function loadDisplayList() {
+      try {
+        const displays = await window.electronAPI.getDisplays();
+        
+        // ディスプレイ情報を表示
+        const displayListDiv = document.getElementById('displayList');
+        displayListDiv.innerHTML = displays.map((d, index) => `
+          <div style="padding: 10px; margin-bottom: 10px; background: white; border-radius: 5px; border: 2px solid ${d.primary ? '#667eea' : '#ddd'};">
+            <strong>ディスプレイ ${index + 1} ${d.primary ? '(メイン)' : ''}</strong><br>
+            <span style="color: #666; font-size: 0.9em;">
+              解像度: ${d.width} × ${d.height} | 位置: (${d.x}, ${d.y})
+            </span>
+          </div>
+        `).join('');
+        
+        // セレクトボックスにオプションを追加
+        const displaySelect = document.getElementById('displayWindowSelect');
+        const scoreboardSelect = document.getElementById('scoreboardWindowSelect');
+        
+        const options = displays.map((d, index) => 
+          `<option value="${index}">ディスプレイ ${index + 1} - ${d.width}×${d.height} ${d.primary ? '(メイン)' : ''}</option>`
+        ).join('');
+        
+        displaySelect.innerHTML = '<option value="">ディスプレイを選択</option>' + options;
+        scoreboardSelect.innerHTML = '<option value="">ディスプレイを選択</option>' + options;
+        
+        // 保存された設定を読み込み
+        const savedDisplayIndex = localStorage.getItem('displayWindowIndex');
+        const savedScoreboardIndex = localStorage.getItem('scoreboardWindowIndex');
+        
+        if (savedDisplayIndex !== null) {
+          displaySelect.value = savedDisplayIndex;
+        }
+        if (savedScoreboardIndex !== null) {
+          scoreboardSelect.value = savedScoreboardIndex;
+        }
+      } catch (error) {
+        console.error('ディスプレイ情報の取得に失敗しました:', error);
+        document.getElementById('displayList').innerHTML = '<p style="color: red;">ディスプレイ情報の取得に失敗しました</p>';
+      }
+    }
+
+    // ディスプレイ設定を適用
+    async function applyDisplaySetting(windowType) {
+      try {
+        let selectElement, storageKey;
+        
+        if (windowType === 'display') {
+          selectElement = document.getElementById('displayWindowSelect');
+          storageKey = 'displayWindowIndex';
+        } else if (windowType === 'scoreboard') {
+          selectElement = document.getElementById('scoreboardWindowSelect');
+          storageKey = 'scoreboardWindowIndex';
+        }
+        
+        const displayIndex = selectElement.value;
+        if (displayIndex === '') {
+          alert('ディスプレイを選択してください。');
+          return;
+        }
+        
+        // 設定を保存
+        localStorage.setItem(storageKey, displayIndex);
+        
+        // バックエンドに設定を送信
+        await window.electronAPI.setDisplayForWindow(windowType, parseInt(displayIndex));
+        
+        alert(`${windowType === 'display' ? 'スタッツ表示画面' : 'スコアボード'}のディスプレイ設定を更新しました。\n次回表示時に適用されます。`);
+      } catch (error) {
+        console.error('ディスプレイ設定の適用に失敗しました:', error);
+        alert('ディスプレイ設定の適用に失敗しました。');
+      }
+    }
+  </script>
+
+  <!-- 選手編集モーダル -->
+  <dialog id="editPlayerDialog">
+    <div class="dialog-header">
+      <h2>選手情報の編集</h2>
+    </div>
+    <div class="dialog-body">
+      <input type="hidden" id="editTeam">
+      <input type="hidden" id="editPlayerIndex">
+      
+      <div class="form-group">
+        <label for="editPlayerNumber">背番号 *</label>
+        <input type="text" id="editPlayerNumber" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="editPlayerName">選手名 *</label>
+        <input type="text" id="editPlayerName" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="editPlayerPosition">ポジション</label>
+        <input type="text" id="editPlayerPosition">
+      </div>
+      
+      <div class="form-group">
+        <label for="editPlayerImage">画像ファイルパス</label>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="editPlayerImage" style="flex: 1;">
+          <button onclick="selectPlayerImage()" style="padding: 10px;">📁 選択</button>
+        </div>
+      </div>
+    </div>
+    <div class="dialog-footer">
+      <button onclick="closeEditPlayerDialog()" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">キャンセル</button>
+      <button onclick="savePlayerEdit()" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">保存</button>
+    </div>
+  </dialog>
+</body>
+</html>
