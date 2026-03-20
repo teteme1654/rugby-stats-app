@@ -46,10 +46,10 @@
     /* 背番号 */
     .jersey-number {
       position: absolute;
-      left: 120px;
-      top: 175px;
+      left: 131px;
+      top: 293px;
       color: white;
-      font-size: 72px;
+      font-size: 111px;
       font-weight: bold;
       z-index: 10;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
@@ -58,10 +58,10 @@
     /* チームロゴ */
     .team-logo {
       position: absolute;
-      left: 55px;
-      top: 280px;
-      width: 110px;
-      height: 110px;
+      left: 41px;
+      top: 500px;
+      width: 200px;
+      height: 200px;
       object-fit: contain;
       z-index: 10;
     }
@@ -69,10 +69,10 @@
     /* 選手名（日本語） */
     .name-jp {
       position: absolute;
-      left: 185px;
-      top: 275px;
+      left: 325px;
+      top: 500px;
       color: white;
-      font-size: 64px;
+      font-size: 100px;
       font-weight: bold;
       z-index: 10;
       letter-spacing: 0.05em;
@@ -81,10 +81,10 @@
     /* 選手名（英語） */
     .name-en {
       position: absolute;
-      left: 185px;
-      top: 345px;
+      left: 318px;
+      top: 600px;
       color: white;
-      font-size: 34px;
+      font-size: 51px;
       font-weight: bold;
       z-index: 10;
     }
@@ -92,10 +92,10 @@
     /* ポジション */
     .position {
       position: absolute;
-      right: 600px;
-      top: 300px;
+      right: 492px;
+      top: 550px;
       color: white;
-      font-size: 44px;
+      font-size: 66px;
       font-weight: bold;
       z-index: 10;
     }
@@ -258,29 +258,29 @@
   <!-- 調整パネル -->
   <div class="adjust-panel" id="adjustPanel" style="display: none;">
     <h3>背番号</h3>
-    <label>左: <input type="range" id="jerseyLeft" min="0" max="500" value="120" oninput="updatePosition()"><input type="number" id="jerseyLeftNum" value="120" onchange="syncSlider('jerseyLeft')">px</label>
-    <label>上: <input type="range" id="jerseyTop" min="0" max="500" value="175" oninput="updatePosition()"><input type="number" id="jerseyTopNum" value="175" onchange="syncSlider('jerseyTop')">px</label>
-    <label>サイズ: <input type="range" id="jerseySize" min="30" max="120" value="72" oninput="updatePosition()"><input type="number" id="jerseySizeNum" value="72" onchange="syncSlider('jerseySize')">px</label>
+    <label>左: <input type="range" id="jerseyLeft" min="0" max="800" value="131" oninput="updatePosition()"><input type="number" id="jerseyLeftNum" value="131" onchange="syncSlider('jerseyLeft')">px</label>
+    <label>上: <input type="range" id="jerseyTop" min="0" max="800" value="293" oninput="updatePosition()"><input type="number" id="jerseyTopNum" value="293" onchange="syncSlider('jerseyTop')">px</label>
+    <label>サイズ: <input type="range" id="jerseySize" min="30" max="150" value="111" oninput="updatePosition()"><input type="number" id="jerseySizeNum" value="111" onchange="syncSlider('jerseySize')">px</label>
 
     <h3>チームロゴ</h3>
-    <label>左: <input type="range" id="logoLeft" min="0" max="500" value="55" oninput="updatePosition()"><input type="number" id="logoLeftNum" value="55" onchange="syncSlider('logoLeft')">px</label>
-    <label>上: <input type="range" id="logoTop" min="0" max="500" value="280" oninput="updatePosition()"><input type="number" id="logoTopNum" value="280" onchange="syncSlider('logoTop')">px</label>
-    <label>サイズ: <input type="range" id="logoSize" min="50" max="200" value="110" oninput="updatePosition()"><input type="number" id="logoSizeNum" value="110" onchange="syncSlider('logoSize')">px</label>
+    <label>左: <input type="range" id="logoLeft" min="0" max="800" value="41" oninput="updatePosition()"><input type="number" id="logoLeftNum" value="41" onchange="syncSlider('logoLeft')">px</label>
+    <label>上: <input type="range" id="logoTop" min="0" max="800" value="500" oninput="updatePosition()"><input type="number" id="logoTopNum" value="500" onchange="syncSlider('logoTop')">px</label>
+    <label>サイズ: <input type="range" id="logoSize" min="50" max="300" value="200" oninput="updatePosition()"><input type="number" id="logoSizeNum" value="200" onchange="syncSlider('logoSize')">px</label>
 
     <h3>選手名（日本語）</h3>
-    <label>左: <input type="range" id="nameJpLeft" min="0" max="800" value="185" oninput="updatePosition()"><input type="number" id="nameJpLeftNum" value="185" onchange="syncSlider('nameJpLeft')">px</label>
-    <label>上: <input type="range" id="nameJpTop" min="0" max="500" value="275" oninput="updatePosition()"><input type="number" id="nameJpTopNum" value="275" onchange="syncSlider('nameJpTop')">px</label>
-    <label>サイズ: <input type="range" id="nameJpSize" min="30" max="100" value="64" oninput="updatePosition()"><input type="number" id="nameJpSizeNum" value="64" onchange="syncSlider('nameJpSize')">px</label>
+    <label>左: <input type="range" id="nameJpLeft" min="0" max="1200" value="325" oninput="updatePosition()"><input type="number" id="nameJpLeftNum" value="325" onchange="syncSlider('nameJpLeft')">px</label>
+    <label>上: <input type="range" id="nameJpTop" min="0" max="800" value="500" oninput="updatePosition()"><input type="number" id="nameJpTopNum" value="500" onchange="syncSlider('nameJpTop')">px</label>
+    <label>サイズ: <input type="range" id="nameJpSize" min="30" max="150" value="100" oninput="updatePosition()"><input type="number" id="nameJpSizeNum" value="100" onchange="syncSlider('nameJpSize')">px</label>
 
     <h3>選手名（英語）</h3>
-    <label>左: <input type="range" id="nameEnLeft" min="0" max="800" value="185" oninput="updatePosition()"><input type="number" id="nameEnLeftNum" value="185" onchange="syncSlider('nameEnLeft')">px</label>
-    <label>上: <input type="range" id="nameEnTop" min="0" max="500" value="345" oninput="updatePosition()"><input type="number" id="nameEnTopNum" value="345" onchange="syncSlider('nameEnTop')">px</label>
-    <label>サイズ: <input type="range" id="nameEnSize" min="20" max="80" value="34" oninput="updatePosition()"><input type="number" id="nameEnSizeNum" value="34" onchange="syncSlider('nameEnSize')">px</label>
+    <label>左: <input type="range" id="nameEnLeft" min="0" max="1200" value="318" oninput="updatePosition()"><input type="number" id="nameEnLeftNum" value="318" onchange="syncSlider('nameEnLeft')">px</label>
+    <label>上: <input type="range" id="nameEnTop" min="0" max="800" value="600" oninput="updatePosition()"><input type="number" id="nameEnTopNum" value="600" onchange="syncSlider('nameEnTop')">px</label>
+    <label>サイズ: <input type="range" id="nameEnSize" min="20" max="100" value="51" oninput="updatePosition()"><input type="number" id="nameEnSizeNum" value="51" onchange="syncSlider('nameEnSize')">px</label>
 
     <h3>ポジション</h3>
-    <label>右: <input type="range" id="posRight" min="400" max="1000" value="600" oninput="updatePosition()"><input type="number" id="posRightNum" value="600" onchange="syncSlider('posRight')">px</label>
-    <label>上: <input type="range" id="posTop" min="0" max="500" value="300" oninput="updatePosition()"><input type="number" id="posTopNum" value="300" onchange="syncSlider('posTop')">px</label>
-    <label>サイズ: <input type="range" id="posSize" min="20" max="80" value="44" oninput="updatePosition()"><input type="number" id="posSizeNum" value="44" onchange="syncSlider('posSize')">px</label>
+    <label>右: <input type="range" id="posRight" min="0" max="1400" value="492" oninput="updatePosition()"><input type="number" id="posRightNum" value="492" onchange="syncSlider('posRight')">px</label>
+    <label>上: <input type="range" id="posTop" min="0" max="800" value="550" oninput="updatePosition()"><input type="number" id="posTopNum" value="550" onchange="syncSlider('posTop')">px</label>
+    <label>サイズ: <input type="range" id="posSize" min="20" max="100" value="66" oninput="updatePosition()"><input type="number" id="posSizeNum" value="66" onchange="syncSlider('posSize')">px</label>
 
     <button onclick="copyCSS()">📋 CSS コピー</button>
     <button onclick="resetPosition()">🔄 リセット</button>
@@ -413,21 +413,21 @@
     }
 
     function resetPosition() {
-      document.getElementById('jerseyLeft').value = 120;
-      document.getElementById('jerseyTop').value = 175;
-      document.getElementById('jerseySize').value = 72;
-      document.getElementById('logoLeft').value = 55;
-      document.getElementById('logoTop').value = 280;
-      document.getElementById('logoSize').value = 110;
-      document.getElementById('nameJpLeft').value = 185;
-      document.getElementById('nameJpTop').value = 275;
-      document.getElementById('nameJpSize').value = 64;
-      document.getElementById('nameEnLeft').value = 185;
-      document.getElementById('nameEnTop').value = 345;
-      document.getElementById('nameEnSize').value = 34;
-      document.getElementById('posRight').value = 600;
-      document.getElementById('posTop').value = 300;
-      document.getElementById('posSize').value = 44;
+      document.getElementById('jerseyLeft').value = 131;
+      document.getElementById('jerseyTop').value = 293;
+      document.getElementById('jerseySize').value = 111;
+      document.getElementById('logoLeft').value = 41;
+      document.getElementById('logoTop').value = 500;
+      document.getElementById('logoSize').value = 200;
+      document.getElementById('nameJpLeft').value = 325;
+      document.getElementById('nameJpTop').value = 500;
+      document.getElementById('nameJpSize').value = 100;
+      document.getElementById('nameEnLeft').value = 318;
+      document.getElementById('nameEnTop').value = 600;
+      document.getElementById('nameEnSize').value = 51;
+      document.getElementById('posRight').value = 492;
+      document.getElementById('posTop').value = 550;
+      document.getElementById('posSize').value = 66;
       updatePosition();
     }
   </script>
