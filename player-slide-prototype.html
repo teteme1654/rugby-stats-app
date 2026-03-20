@@ -43,6 +43,63 @@
 
 
 
+    /* 背番号 */
+    .jersey-number {
+      position: absolute;
+      left: 131px;
+      top: 293px;
+      color: white;
+      font-size: 111px;
+      font-weight: bold;
+      z-index: 10;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    /* チームロゴ */
+    .team-logo {
+      position: absolute;
+      left: 41px;
+      top: 500px;
+      width: 200px;
+      height: 200px;
+      object-fit: contain;
+      z-index: 10;
+    }
+
+    /* 選手名（日本語） */
+    .name-jp {
+      position: absolute;
+      left: 325px;
+      top: 500px;
+      color: white;
+      font-size: 100px;
+      font-weight: bold;
+      z-index: 10;
+      letter-spacing: 0.05em;
+    }
+
+    /* 選手名（英語） */
+    .name-en {
+      position: absolute;
+      left: 318px;
+      top: 600px;
+      color: white;
+      font-size: 51px;
+      font-weight: bold;
+      z-index: 10;
+    }
+
+    /* ポジション */
+    .position {
+      position: absolute;
+      right: 492px;
+      top: 550px;
+      color: white;
+      font-size: 66px;
+      font-weight: bold;
+      z-index: 10;
+    }
+
     /* 選手写真 */
     .player-photo {
       position: absolute;
@@ -51,10 +108,9 @@
       width: 500px;
       height: 700px;
       object-fit: cover;
-      z-index: 5;
+      z-index: 15;
       
-      /* 白背景除去 */
-      mix-blend-mode: multiply;
+      /* mix-blend-mode は使わない（Canvas で透過処理する） */
     }
 
     /* コントロールパネル */
@@ -85,6 +141,84 @@
     .controls button:hover {
       background: #5568d3;
     }
+
+    /* 調整パネル */
+    .adjust-panel {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.9);
+      padding: 20px;
+      border-radius: 10px;
+      z-index: 1000;
+      color: white;
+      max-height: 90vh;
+      overflow-y: auto;
+      font-size: 12px;
+      width: 300px;
+    }
+
+    .adjust-panel h3 {
+      margin: 10px 0 5px 0;
+      font-size: 14px;
+      color: #667eea;
+      border-bottom: 1px solid #667eea;
+      padding-bottom: 5px;
+    }
+
+    .adjust-panel label {
+      display: block;
+      margin: 5px 0;
+      font-size: 11px;
+    }
+
+    .adjust-panel input[type="range"] {
+      width: 100%;
+      margin: 5px 0;
+    }
+
+    .adjust-panel input[type="number"] {
+      width: 60px;
+      padding: 3px;
+      margin-left: 10px;
+      background: #333;
+      color: white;
+      border: 1px solid #666;
+      border-radius: 3px;
+    }
+
+    .adjust-panel button {
+      width: 100%;
+      padding: 8px;
+      margin: 10px 0 5px 0;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .adjust-panel button:hover {
+      background: #5568d3;
+    }
+
+    .toggle-panel {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1001;
+      background: #667eea;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .toggle-panel:hover {
+      background: #5568d3;
+    }
   </style>
 </head>
 <body>
@@ -92,19 +226,255 @@
     <!-- 背景画像 -->
     <img src="stats/images/ui/bg_visitor.jpg" alt="Background" class="background">
 
+    <!-- 背番号 -->
+    <div class="jersey-number" id="jerseyNo">No.1</div>
+
+    <!-- チームロゴ -->
+    <img src="stats/images/logo/サンゴリアス.png" alt="チームロゴ" class="team-logo">
+
+    <!-- 選手名（日本語） -->
+    <div class="name-jp" id="nameJp">平野 叶翔</div>
+
+    <!-- 選手名（英語） -->
+    <div class="name-en" id="nameEn">Kanato Hirano</div>
+
+    <!-- ポジション -->
+    <div class="position" id="position">PR／プロップ</div>
+
     <!-- 選手写真 -->
-    <img src="stats/images/players/1763948510837-_-SB_Bunkei_Kaku_①.jpg" alt="選手写真" class="player-photo" id="playerPhoto">
+    <img src="stats/images/players/1763948510837-_-SB_Bunkei_Kaku_①_nobg.png" alt="選手写真" class="player-photo" id="playerPhoto">
   </div>
 
   <!-- コントロールパネル -->
   <div class="controls">
-    <button onclick="changePlayer('stats/images/players/1763948510837-_-SB_Bunkei_Kaku_①.jpg')">選手1</button>
-    <button onclick="changePlayer('stats/images/players/1763948510837-_-SB_Bunkei_Kaku_①.jpg')">選手2</button>
+    <button onclick="changePlayer('stats/images/players/1763948510837-_-SB_Bunkei_Kaku_①.jpg', '1', '平野 叶翔', 'Kanato Hirano', 'PR／プロップ')">平野 叶翔</button>
+    <button onclick="changePlayer('stats/images/players/1763948510837-_-SB_Bunkei_Kaku_①.jpg', '15', 'テスト 選手', 'Test Player', 'FB／フルバック')">テスト選手</button>
+  </div>
+
+  <!-- 調整パネル表示切替ボタン -->
+  <div class="toggle-panel" onclick="toggleAdjustPanel()">⚙️ 調整パネル</div>
+
+  <!-- 調整パネル -->
+  <div class="adjust-panel" id="adjustPanel" style="display: none;">
+    <h3>背番号</h3>
+    <label>左: <input type="range" id="jerseyLeft" min="0" max="800" value="131" oninput="updatePosition()"><input type="number" id="jerseyLeftNum" value="131" onchange="syncSlider('jerseyLeft')">px</label>
+    <label>上: <input type="range" id="jerseyTop" min="0" max="800" value="293" oninput="updatePosition()"><input type="number" id="jerseyTopNum" value="293" onchange="syncSlider('jerseyTop')">px</label>
+    <label>サイズ: <input type="range" id="jerseySize" min="30" max="150" value="111" oninput="updatePosition()"><input type="number" id="jerseySizeNum" value="111" onchange="syncSlider('jerseySize')">px</label>
+
+    <h3>チームロゴ</h3>
+    <label>左: <input type="range" id="logoLeft" min="0" max="800" value="41" oninput="updatePosition()"><input type="number" id="logoLeftNum" value="41" onchange="syncSlider('logoLeft')">px</label>
+    <label>上: <input type="range" id="logoTop" min="0" max="800" value="500" oninput="updatePosition()"><input type="number" id="logoTopNum" value="500" onchange="syncSlider('logoTop')">px</label>
+    <label>サイズ: <input type="range" id="logoSize" min="50" max="300" value="200" oninput="updatePosition()"><input type="number" id="logoSizeNum" value="200" onchange="syncSlider('logoSize')">px</label>
+
+    <h3>選手名（日本語）</h3>
+    <label>左: <input type="range" id="nameJpLeft" min="0" max="1200" value="325" oninput="updatePosition()"><input type="number" id="nameJpLeftNum" value="325" onchange="syncSlider('nameJpLeft')">px</label>
+    <label>上: <input type="range" id="nameJpTop" min="0" max="800" value="500" oninput="updatePosition()"><input type="number" id="nameJpTopNum" value="500" onchange="syncSlider('nameJpTop')">px</label>
+    <label>サイズ: <input type="range" id="nameJpSize" min="30" max="150" value="100" oninput="updatePosition()"><input type="number" id="nameJpSizeNum" value="100" onchange="syncSlider('nameJpSize')">px</label>
+
+    <h3>選手名（英語）</h3>
+    <label>左: <input type="range" id="nameEnLeft" min="0" max="1200" value="318" oninput="updatePosition()"><input type="number" id="nameEnLeftNum" value="318" onchange="syncSlider('nameEnLeft')">px</label>
+    <label>上: <input type="range" id="nameEnTop" min="0" max="800" value="600" oninput="updatePosition()"><input type="number" id="nameEnTopNum" value="600" onchange="syncSlider('nameEnTop')">px</label>
+    <label>サイズ: <input type="range" id="nameEnSize" min="20" max="100" value="51" oninput="updatePosition()"><input type="number" id="nameEnSizeNum" value="51" onchange="syncSlider('nameEnSize')">px</label>
+
+    <h3>ポジション</h3>
+    <label>右: <input type="range" id="posRight" min="0" max="1400" value="492" oninput="updatePosition()"><input type="number" id="posRightNum" value="492" onchange="syncSlider('posRight')">px</label>
+    <label>上: <input type="range" id="posTop" min="0" max="800" value="550" oninput="updatePosition()"><input type="number" id="posTopNum" value="550" onchange="syncSlider('posTop')">px</label>
+    <label>サイズ: <input type="range" id="posSize" min="20" max="100" value="66" oninput="updatePosition()"><input type="number" id="posSizeNum" value="66" onchange="syncSlider('posSize')">px</label>
+
+    <h3>選手写真</h3>
+    <label>右: <input type="range" id="photoRight" min="0" max="1000" value="100" oninput="updatePosition()"><input type="number" id="photoRightNum" value="100" onchange="syncSlider('photoRight')">px</label>
+    <label>上: <input type="range" id="photoTop" min="0" max="800" value="50" oninput="updatePosition()"><input type="number" id="photoTopNum" value="50" onchange="syncSlider('photoTop')">px</label>
+    <label>幅: <input type="range" id="photoWidth" min="200" max="1000" value="500" oninput="updatePosition()"><input type="number" id="photoWidthNum" value="500" onchange="syncSlider('photoWidth')">px</label>
+    <label>高さ: <input type="range" id="photoHeight" min="200" max="1000" value="700" oninput="updatePosition()"><input type="number" id="photoHeightNum" value="700" onchange="syncSlider('photoHeight')">px</label>
+
+    <button onclick="copyCSS()">📋 CSS コピー</button>
+    <button onclick="resetPosition()">🔄 リセット</button>
   </div>
 
   <script>
-    function changePlayer(photoPath) {
-      document.getElementById('playerPhoto').src = photoPath;
+    // 画像読み込み時の処理
+    window.addEventListener('DOMContentLoaded', function() {
+      // 初期画像は透過PNG を想定（Canvas 処理不要）
+    });
+
+    function changePlayer(photoPath, jerseyNo, nameJp, nameEn, position) {
+      // .jpg/.jpeg/.png を _nobg.png に自動置き換え
+      const nobgPath = photoPath.replace(/\.(jpg|jpeg|png)$/i, '_nobg.png');
+      
+      const photoImg = document.getElementById('playerPhoto');
+      photoImg.src = nobgPath;
+      
+      // 透過PNG を使用するので Canvas 処理は不要
+      // （背景除去済みの画像を直接表示）
+      
+      // 他の情報更新
+      document.getElementById('jerseyNo').textContent = 'No.' + jerseyNo;
+      document.getElementById('nameJp').textContent = nameJp;
+      document.getElementById('nameEn').textContent = nameEn;
+      document.getElementById('position').textContent = position;
+    }
+
+    function toggleAdjustPanel() {
+      const panel = document.getElementById('adjustPanel');
+      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function syncSlider(id) {
+      const slider = document.getElementById(id);
+      const num = document.getElementById(id + 'Num');
+      slider.value = num.value;
+      updatePosition();
+    }
+
+    function updatePosition() {
+      // 背番号
+      const jerseyLeft = document.getElementById('jerseyLeft').value;
+      const jerseyTop = document.getElementById('jerseyTop').value;
+      const jerseySize = document.getElementById('jerseySize').value;
+      document.getElementById('jerseyLeftNum').value = jerseyLeft;
+      document.getElementById('jerseyTopNum').value = jerseyTop;
+      document.getElementById('jerseySizeNum').value = jerseySize;
+      const jersey = document.querySelector('.jersey-number');
+      jersey.style.left = jerseyLeft + 'px';
+      jersey.style.top = jerseyTop + 'px';
+      jersey.style.fontSize = jerseySize + 'px';
+
+      // ロゴ
+      const logoLeft = document.getElementById('logoLeft').value;
+      const logoTop = document.getElementById('logoTop').value;
+      const logoSize = document.getElementById('logoSize').value;
+      document.getElementById('logoLeftNum').value = logoLeft;
+      document.getElementById('logoTopNum').value = logoTop;
+      document.getElementById('logoSizeNum').value = logoSize;
+      const logo = document.querySelector('.team-logo');
+      logo.style.left = logoLeft + 'px';
+      logo.style.top = logoTop + 'px';
+      logo.style.width = logoSize + 'px';
+      logo.style.height = logoSize + 'px';
+
+      // 選手名（日本語）
+      const nameJpLeft = document.getElementById('nameJpLeft').value;
+      const nameJpTop = document.getElementById('nameJpTop').value;
+      const nameJpSize = document.getElementById('nameJpSize').value;
+      document.getElementById('nameJpLeftNum').value = nameJpLeft;
+      document.getElementById('nameJpTopNum').value = nameJpTop;
+      document.getElementById('nameJpSizeNum').value = nameJpSize;
+      const nameJp = document.querySelector('.name-jp');
+      nameJp.style.left = nameJpLeft + 'px';
+      nameJp.style.top = nameJpTop + 'px';
+      nameJp.style.fontSize = nameJpSize + 'px';
+
+      // 選手名（英語）
+      const nameEnLeft = document.getElementById('nameEnLeft').value;
+      const nameEnTop = document.getElementById('nameEnTop').value;
+      const nameEnSize = document.getElementById('nameEnSize').value;
+      document.getElementById('nameEnLeftNum').value = nameEnLeft;
+      document.getElementById('nameEnTopNum').value = nameEnTop;
+      document.getElementById('nameEnSizeNum').value = nameEnSize;
+      const nameEn = document.querySelector('.name-en');
+      nameEn.style.left = nameEnLeft + 'px';
+      nameEn.style.top = nameEnTop + 'px';
+      nameEn.style.fontSize = nameEnSize + 'px';
+
+      // ポジション
+      const posRight = document.getElementById('posRight').value;
+      const posTop = document.getElementById('posTop').value;
+      const posSize = document.getElementById('posSize').value;
+      document.getElementById('posRightNum').value = posRight;
+      document.getElementById('posTopNum').value = posTop;
+      document.getElementById('posSizeNum').value = posSize;
+      const pos = document.querySelector('.position');
+      pos.style.right = posRight + 'px';
+      pos.style.top = posTop + 'px';
+      pos.style.fontSize = posSize + 'px';
+
+      // 選手写真
+      const photoRight = document.getElementById('photoRight').value;
+      const photoTop = document.getElementById('photoTop').value;
+      const photoWidth = document.getElementById('photoWidth').value;
+      const photoHeight = document.getElementById('photoHeight').value;
+      document.getElementById('photoRightNum').value = photoRight;
+      document.getElementById('photoTopNum').value = photoTop;
+      document.getElementById('photoWidthNum').value = photoWidth;
+      document.getElementById('photoHeightNum').value = photoHeight;
+      const photo = document.querySelector('.player-photo');
+      photo.style.right = photoRight + 'px';
+      photo.style.top = photoTop + 'px';
+      photo.style.width = photoWidth + 'px';
+      photo.style.height = photoHeight + 'px';
+    }
+
+    function copyCSS() {
+      const css = `
+/* 背番号 */
+.jersey-number {
+  left: ${document.getElementById('jerseyLeft').value}px;
+  top: ${document.getElementById('jerseyTop').value}px;
+  font-size: ${document.getElementById('jerseySize').value}px;
+}
+
+/* チームロゴ */
+.team-logo {
+  left: ${document.getElementById('logoLeft').value}px;
+  top: ${document.getElementById('logoTop').value}px;
+  width: ${document.getElementById('logoSize').value}px;
+  height: ${document.getElementById('logoSize').value}px;
+}
+
+/* 選手名（日本語） */
+.name-jp {
+  left: ${document.getElementById('nameJpLeft').value}px;
+  top: ${document.getElementById('nameJpTop').value}px;
+  font-size: ${document.getElementById('nameJpSize').value}px;
+}
+
+/* 選手名（英語） */
+.name-en {
+  left: ${document.getElementById('nameEnLeft').value}px;
+  top: ${document.getElementById('nameEnTop').value}px;
+  font-size: ${document.getElementById('nameEnSize').value}px;
+}
+
+/* ポジション */
+.position {
+  right: ${document.getElementById('posRight').value}px;
+  top: ${document.getElementById('posTop').value}px;
+  font-size: ${document.getElementById('posSize').value}px;
+}
+
+/* 選手写真 */
+.player-photo {
+  right: ${document.getElementById('photoRight').value}px;
+  top: ${document.getElementById('photoTop').value}px;
+  width: ${document.getElementById('photoWidth').value}px;
+  height: ${document.getElementById('photoHeight').value}px;
+}`;
+      navigator.clipboard.writeText(css).then(() => {
+        alert('CSSをコピーしました！');
+      });
+    }
+
+    function resetPosition() {
+      document.getElementById('jerseyLeft').value = 131;
+      document.getElementById('jerseyTop').value = 293;
+      document.getElementById('jerseySize').value = 111;
+      document.getElementById('logoLeft').value = 41;
+      document.getElementById('logoTop').value = 500;
+      document.getElementById('logoSize').value = 200;
+      document.getElementById('nameJpLeft').value = 325;
+      document.getElementById('nameJpTop').value = 500;
+      document.getElementById('nameJpSize').value = 100;
+      document.getElementById('nameEnLeft').value = 318;
+      document.getElementById('nameEnTop').value = 600;
+      document.getElementById('nameEnSize').value = 51;
+      document.getElementById('posRight').value = 492;
+      document.getElementById('posTop').value = 550;
+      document.getElementById('posSize').value = 66;
+      document.getElementById('photoRight').value = 100;
+      document.getElementById('photoTop').value = 50;
+      document.getElementById('photoWidth').value = 500;
+      document.getElementById('photoHeight').value = 700;
+      updatePosition();
     }
   </script>
 </body>
