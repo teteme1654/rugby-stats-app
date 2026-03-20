@@ -76,6 +76,12 @@ def remove_background_batch(input_dir="stats/images/players", output_suffix="_no
     """
     指定ディレクトリ配下の画像を再帰的に背景除去＋リネーム
     
+    チームフォルダ内に original/ と nobg/ を作成して分離保存
+    
+    構造例:
+      players/sungoliath/original/元ファイル.jpg
+      players/sungoliath/nobg/選手名_nobg.png
+    
     Args:
         input_dir (str): 入力画像ディレクトリ
         output_suffix (str): 出力ファイル名のサフィックス
@@ -92,8 +98,8 @@ def remove_background_batch(input_dir="stats/images/players", output_suffix="_no
     for ext in ['*.jpg', '*.jpeg', '*.png', '*.JPG', '*.JPEG', '*.PNG']:
         image_files.extend(input_path.rglob(ext))  # rglob で再帰的に検索
     
-    # _nobg.png ファイルは除外
-    image_files = [f for f in image_files if output_suffix not in f.stem]
+    # nobg フォルダ内のファイルと _nobg.png ファイルは除外
+    image_files = [f for f in image_files if 'nobg' not in f.parts and output_suffix not in f.stem]
     
     if not image_files:
         print(f"⚠️  警告: {input_dir} 配下に画像ファイルが見つかりません")
@@ -105,15 +111,34 @@ def remove_background_batch(input_dir="stats/images/players", output_suffix="_no
     success_count = 0
     error_count = 0
     skip_count = 0
+    moved_count = 0
     
     for i, file_path in enumerate(image_files, 1):
         try:
             # 選手名を抽出
             player_name = extract_player_name(file_path.stem)
             
+            # チームフォルダを特定（親ディレクトリ）
+            # players/sungoliath/ファイル.jpg → team_dir = sungoliath/
+            if file_path.parent == input_path:
+                # players/ 直下の場合
+                team_dir = input_path
+            else:
+                # players/チーム名/... の場合、チームフォルダまで遡る
+                # players/チーム名/original/ファイル.jpg の場合も対応
+                team_dir = file_path.parent
+                while team_dir.parent != input_path and team_dir != input_path:
+                    team_dir = team_dir.parent
+            
+            # original/ フォルダと nobg/ フォルダを作成
+            original_dir = team_dir / "original"
+            nobg_dir = team_dir / "nobg"
+            original_dir.mkdir(exist_ok=True)
+            nobg_dir.mkdir(exist_ok=True)
+            
             # 出力ファイル名を生成（リネーム）
             output_filename = f"{player_name}{output_suffix}.png"
-            output_path = file_path.parent / output_filename
+            output_path = nobg_dir / output_filename
             
             # 既に処理済みかチェック
             if output_path.exists():
@@ -132,13 +157,22 @@ def remove_background_batch(input_dir="stats/images/players", output_suffix="_no
             # 背景除去処理
             output_image = remove(input_image)
             
-            # PNG として保存
+            # nobg/ フォルダに PNG として保存
             with open(output_path, 'wb') as output_file:
                 output_file.write(output_image)
             
-            print(f"[{i}/{len(image_files)}] ✅ 完了: {output_filename}")
+            print(f"[{i}/{len(image_files)}] ✅ 完了: nobg/{output_filename}")
             if player_name != file_path.stem:
                 print(f"             📝 リネーム: {file_path.stem} → {player_name}")
+            
+            # 元ファイルが original/ 内にない場合は移動
+            if file_path.parent != original_dir:
+                original_path = original_dir / file_path.name
+                if not original_path.exists():
+                    file_path.rename(original_path)
+                    print(f"             📦 移動: original/{file_path.name}")
+                    moved_count += 1
+            
             success_count += 1
             
         except Exception as e:
@@ -151,9 +185,10 @@ def remove_background_batch(input_dir="stats/images/players", output_suffix="_no
     print("📊 処理結果")
     print("="*50)
     print(f"✅ 成功: {success_count} ファイル")
+    print(f"📦 移動: {moved_count} ファイル（original/ へ）")
     print(f"⏭️  スキップ: {skip_count} ファイル（既に処理済み）")
     print(f"❌ エラー: {error_count} ファイル")
-    print(f"📁 出力先: {input_path.absolute()} 配下")
+    print(f"📁 出力先: 各チームフォルダ内の nobg/")
     print("="*50)
 
 
@@ -181,12 +216,20 @@ if __name__ == "__main__":
     print()
     print("🎉 全ての処理が完了しました！")
     print()
+    print("📁 フォルダ構造:")
+    print("  stats/images/players/")
+    print("  └── チーム名/")
+    print("      ├── original/     # 元ファイル（白背景）")
+    print("      │   └── *.jpg")
+    print("      └── nobg/         # 透過PNG（リネーム済み）")
+    print("          └── 選手名_nobg.png")
+    print()
     print("次のステップ:")
-    print("  1. 生成された *_nobg.png ファイルを確認")
-    print("  2. Ovaly アプリで透過PNG を使用するように設定")
+    print("  1. 各チームの nobg/ フォルダ内のファイルを確認")
+    print("  2. Ovaly アプリで nobg/ 内の透過PNG を使用するように設定")
     print()
     print("💡 Tips:")
-    print("  - 元ファイルはそのまま残っています")
-    print("  - リネームされた透過PNG が各フォルダに生成されています")
-    print("  - 例: Keita_Inagaki_nobg.png")
+    print("  - 元ファイルは original/ フォルダに保管されています")
+    print("  - リネームされた透過PNG が nobg/ フォルダに生成されています")
+    print("  - 例: nobg/Keita_Inagaki_nobg.png")
     print()
