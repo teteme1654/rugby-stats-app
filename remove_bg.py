@@ -4,12 +4,16 @@
 選手写真背景除去＋リネームスクリプト
 
 stats/images/players/ フォルダ配下の全画像を再帰的に処理します。
-- 背景除去した透過PNG を生成
+- 背景除去した透過PNG を生成（人物特化モデル使用）
 - ファイル名を選手名のみにリネーム（例: Keita_Inagaki_nobg.png）
 - 元ファイルはそのまま保持
 
+使用モデル:
+  u2net_human_seg - 人物に特化した高精度モデル
+  髪の毛などの細部も綺麗に切り抜き可能
+
 使い方:
-  1. pip install rembg pillow
+  1. pip install rembg[cpu] pillow
   2. python remove_bg.py
 """
 
@@ -154,8 +158,8 @@ def remove_background_batch(input_dir="stats/images/players", output_suffix="_no
             with open(file_path, 'rb') as input_file:
                 input_image = input_file.read()
             
-            # 背景除去処理
-            output_image = remove(input_image)
+            # 背景除去処理（人物特化モデルを使用）
+            output_image = remove(input_image, model_name='u2net_human_seg')
             
             # nobg/ フォルダに PNG として保存
             with open(output_path, 'wb') as output_file:
