@@ -43,6 +43,63 @@
 
 
 
+    /* 背番号 */
+    .jersey-number {
+      position: absolute;
+      left: 55px;
+      top: 145px;
+      color: white;
+      font-size: 72px;
+      font-weight: bold;
+      z-index: 10;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+
+    /* チームロゴ */
+    .team-logo {
+      position: absolute;
+      left: 25px;
+      top: 245px;
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      z-index: 10;
+    }
+
+    /* 選手名（日本語） */
+    .name-jp {
+      position: absolute;
+      left: 115px;
+      top: 245px;
+      color: white;
+      font-size: 48px;
+      font-weight: bold;
+      z-index: 10;
+      letter-spacing: 0.05em;
+    }
+
+    /* 選手名（英語） */
+    .name-en {
+      position: absolute;
+      left: 115px;
+      top: 295px;
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+      z-index: 10;
+    }
+
+    /* ポジション */
+    .position {
+      position: absolute;
+      right: 650px;
+      top: 265px;
+      color: white;
+      font-size: 36px;
+      font-weight: bold;
+      z-index: 10;
+    }
+
     /* 選手写真 */
     .player-photo {
       position: absolute;
@@ -92,19 +149,38 @@
     <!-- 背景画像 -->
     <img src="stats/images/ui/bg_visitor.jpg" alt="Background" class="background">
 
+    <!-- 背番号 -->
+    <div class="jersey-number" id="jerseyNo">No.1</div>
+
+    <!-- チームロゴ -->
+    <img src="stats/images/logo/サンゴリアス.png" alt="チームロゴ" class="team-logo">
+
+    <!-- 選手名（日本語） -->
+    <div class="name-jp" id="nameJp">平野 叶翔</div>
+
+    <!-- 選手名（英語） -->
+    <div class="name-en" id="nameEn">Kanato Hirano</div>
+
+    <!-- ポジション -->
+    <div class="position" id="position">PR／プロップ</div>
+
     <!-- 選手写真 -->
     <img src="stats/images/players/1763948510837-_-SB_Bunkei_Kaku_①.jpg" alt="選手写真" class="player-photo" id="playerPhoto">
   </div>
 
   <!-- コントロールパネル -->
   <div class="controls">
-    <button onclick="changePlayer('stats/images/players/1763948510837-_-SB_Bunkei_Kaku_①.jpg')">選手1</button>
-    <button onclick="changePlayer('stats/images/players/1763948510837-_-SB_Bunkei_Kaku_①.jpg')">選手2</button>
+    <button onclick="changePlayer('stats/images/players/1763948510837-_-SB_Bunkei_Kaku_①.jpg', '1', '平野 叶翔', 'Kanato Hirano', 'PR／プロップ')">平野 叶翔</button>
+    <button onclick="changePlayer('stats/images/players/1763948510837-_-SB_Bunkei_Kaku_①.jpg', '15', 'テスト 選手', 'Test Player', 'FB／フルバック')">テスト選手</button>
   </div>
 
   <script>
-    function changePlayer(photoPath) {
+    function changePlayer(photoPath, jerseyNo, nameJp, nameEn, position) {
       document.getElementById('playerPhoto').src = photoPath;
+      document.getElementById('jerseyNo').textContent = 'No.' + jerseyNo;
+      document.getElementById('nameJp').textContent = nameJp;
+      document.getElementById('nameEn').textContent = nameEn;
+      document.getElementById('position').textContent = position;
     }
   </script>
 </body>
