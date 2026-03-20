@@ -108,7 +108,7 @@
       width: 500px;
       height: 700px;
       object-fit: cover;
-      z-index: 5;
+      z-index: 15;
       
       /* 白背景除去 */
       mix-blend-mode: multiply;
@@ -282,6 +282,12 @@
     <label>上: <input type="range" id="posTop" min="0" max="800" value="550" oninput="updatePosition()"><input type="number" id="posTopNum" value="550" onchange="syncSlider('posTop')">px</label>
     <label>サイズ: <input type="range" id="posSize" min="20" max="100" value="66" oninput="updatePosition()"><input type="number" id="posSizeNum" value="66" onchange="syncSlider('posSize')">px</label>
 
+    <h3>選手写真</h3>
+    <label>右: <input type="range" id="photoRight" min="0" max="1000" value="100" oninput="updatePosition()"><input type="number" id="photoRightNum" value="100" onchange="syncSlider('photoRight')">px</label>
+    <label>上: <input type="range" id="photoTop" min="0" max="800" value="50" oninput="updatePosition()"><input type="number" id="photoTopNum" value="50" onchange="syncSlider('photoTop')">px</label>
+    <label>幅: <input type="range" id="photoWidth" min="200" max="1000" value="500" oninput="updatePosition()"><input type="number" id="photoWidthNum" value="500" onchange="syncSlider('photoWidth')">px</label>
+    <label>高さ: <input type="range" id="photoHeight" min="200" max="1000" value="700" oninput="updatePosition()"><input type="number" id="photoHeightNum" value="700" onchange="syncSlider('photoHeight')">px</label>
+
     <button onclick="copyCSS()">📋 CSS コピー</button>
     <button onclick="resetPosition()">🔄 リセット</button>
   </div>
@@ -368,6 +374,21 @@
       pos.style.right = posRight + 'px';
       pos.style.top = posTop + 'px';
       pos.style.fontSize = posSize + 'px';
+
+      // 選手写真
+      const photoRight = document.getElementById('photoRight').value;
+      const photoTop = document.getElementById('photoTop').value;
+      const photoWidth = document.getElementById('photoWidth').value;
+      const photoHeight = document.getElementById('photoHeight').value;
+      document.getElementById('photoRightNum').value = photoRight;
+      document.getElementById('photoTopNum').value = photoTop;
+      document.getElementById('photoWidthNum').value = photoWidth;
+      document.getElementById('photoHeightNum').value = photoHeight;
+      const photo = document.querySelector('.player-photo');
+      photo.style.right = photoRight + 'px';
+      photo.style.top = photoTop + 'px';
+      photo.style.width = photoWidth + 'px';
+      photo.style.height = photoHeight + 'px';
     }
 
     function copyCSS() {
@@ -406,6 +427,14 @@
   right: ${document.getElementById('posRight').value}px;
   top: ${document.getElementById('posTop').value}px;
   font-size: ${document.getElementById('posSize').value}px;
+}
+
+/* 選手写真 */
+.player-photo {
+  right: ${document.getElementById('photoRight').value}px;
+  top: ${document.getElementById('photoTop').value}px;
+  width: ${document.getElementById('photoWidth').value}px;
+  height: ${document.getElementById('photoHeight').value}px;
 }`;
       navigator.clipboard.writeText(css).then(() => {
         alert('CSSをコピーしました！');
@@ -428,6 +457,10 @@
       document.getElementById('posRight').value = 492;
       document.getElementById('posTop').value = 550;
       document.getElementById('posSize').value = 66;
+      document.getElementById('photoRight').value = 100;
+      document.getElementById('photoTop').value = 50;
+      document.getElementById('photoWidth').value = 500;
+      document.getElementById('photoHeight').value = 700;
       updatePosition();
     }
   </script>
