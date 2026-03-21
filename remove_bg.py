@@ -177,19 +177,11 @@ def remove_background_batch(input_dir="stats/images/players", output_suffix="_no
                 alpha_matting_erode_size=10              # エッジ侵食サイズ
             )
             
-            # PIL で読み込んでエッジぼかし処理
+            # PIL で読み込み
             img = Image.open(BytesIO(output_image))
             
-            # アルファチャンネル（透明度）を取り出す
-            if img.mode == 'RGBA':
-                r, g, b, alpha = img.split()
-                
-                # アルファチャンネルにガウシアンぼかし（半径3px）をかけて輪郭を自然に
-                from PIL import ImageFilter
-                alpha_blurred = alpha.filter(ImageFilter.GaussianBlur(3))
-                
-                # ぼかしたアルファを戻す
-                img = Image.merge('RGBA', (r, g, b, alpha_blurred))
+            # Alpha Matting で既にエッジ処理済みなので、ぼかしは不要
+            # （必要に応じて軽いぼかし GaussianBlur(1) を追加可能）
             
             # nobg/ フォルダに PNG として保存
             img.save(output_path, 'PNG')
