@@ -159,7 +159,9 @@ def remove_background_batch(input_dir="stats/images/players", output_suffix="_no
                 input_image = input_file.read()
             
             # 背景除去処理（人物特化モデルを使用）
-            output_image = remove(input_image, model_name='u2net_human_seg')
+            from rembg import new_session
+            session = new_session('u2net_human_seg')
+            output_image = remove(input_image, session=session)
             
             # nobg/ フォルダに PNG として保存
             with open(output_path, 'wb') as output_file:
