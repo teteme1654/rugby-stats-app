@@ -175,9 +175,9 @@ def remove_background_batch(input_dir="stats/images/players", output_suffix="_no
             if img.mode == 'RGBA':
                 r, g, b, alpha = img.split()
                 
-                # アルファチャンネルにガウシアンぼかし（半径2px）をかけて輪郭を自然に
+                # アルファチャンネルにガウシアンぼかし（半径3px）をかけて輪郭を自然に
                 from PIL import ImageFilter
-                alpha_blurred = alpha.filter(ImageFilter.GaussianBlur(2))
+                alpha_blurred = alpha.filter(ImageFilter.GaussianBlur(3))
                 
                 # ぼかしたアルファを戻す
                 img = Image.merge('RGBA', (r, g, b, alpha_blurred))
