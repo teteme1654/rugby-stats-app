@@ -5,12 +5,16 @@
 
 stats/images/players/ フォルダ配下の全画像を再帰的に処理します。
 - 背景除去した透過PNG を生成（人物特化モデル使用）
+- エッジにぼかし処理を追加（自然な輪郭に）
 - ファイル名を選手名のみにリネーム（例: Keita_Inagaki_nobg.png）
 - 元ファイルはそのまま保持
 
 使用モデル:
   u2net_human_seg - 人物に特化した高精度モデル
   髪の毛などの細部も綺麗に切り抜き可能
+
+後処理:
+  GaussianBlur(radius=2) - アルファチャンネルにぼかしをかけて輪郭を自然に
 
 使い方:
   1. pip install rembg[cpu] pillow
@@ -24,7 +28,7 @@ from pathlib import Path
 
 try:
     from rembg import remove
-    from PIL import Image
+    from PIL import Image, ImageFilter
 except ImportError:
     print("❌ エラー: 必要なライブラリがインストールされていません")
     print("以下のコマンドを実行してください:")
@@ -160,12 +164,26 @@ def remove_background_batch(input_dir="stats/images/players", output_suffix="_no
             
             # 背景除去処理（人物特化モデルを使用）
             from rembg import new_session
+            from io import BytesIO
             session = new_session('u2net_human_seg')
             output_image = remove(input_image, session=session)
             
+            # PIL で読み込んでエッジぼかし処理
+            img = Image.open(BytesIO(output_image))
+            
+            # アルファチャンネル（透明度）を取り出す
+            if img.mode == 'RGBA':
+                r, g, b, alpha = img.split()
+                
+                # アルファチャンネルにガウシアンぼかし（半径2px）をかけて輪郭を自然に
+                from PIL import ImageFilter
+                alpha_blurred = alpha.filter(ImageFilter.GaussianBlur(2))
+                
+                # ぼかしたアルファを戻す
+                img = Image.merge('RGBA', (r, g, b, alpha_blurred))
+            
             # nobg/ フォルダに PNG として保存
-            with open(output_path, 'wb') as output_file:
-                output_file.write(output_image)
+            img.save(output_path, 'PNG')
             
             print(f"[{i}/{len(image_files)}] ✅ 完了: nobg/{output_filename}")
             if player_name != file_path.stem:
