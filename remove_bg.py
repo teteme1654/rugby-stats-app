@@ -35,49 +35,53 @@ except ImportError:
     print("  pip install rembg pillow")
     sys.exit(1)
 
+# ==========================================
+# 以下の関数は force_rename.py で事前リネーム済み前提のため、現在未使用
+# 将来的に英語名抽出が必要になった場合に備えてコメントアウトで保持
+# ==========================================
 
-def extract_player_name(filename):
-    """
-    ファイル名から選手名を抽出
-    
-    パターン:
-    - 1763948510837-_-SB_Bunkei_Kaku_① → Bunkei_Kaku
-    - 1764239471773-_-UD_045_Ren_Iinuma_① → Ren_Iinuma
-    - 1764152251539-_-SW_008_Keita_Inagaki_1 → Keita_Inagaki
-    
-    Args:
-        filename (str): 元のファイル名（拡張子なし）
-    
-    Returns:
-        str: 抽出された選手名 or 元のファイル名
-    """
-    # "-_-" が含まれていない場合はそのまま返す
-    if "-_-" not in filename:
-        return filename
-    
-    # "-_-" で分割して後半部分を取得
-    parts = filename.split("-_-")
-    if len(parts) < 2:
-        return filename
-    
-    name = parts[1]
-    
-    # 末尾の _① _1 _01 などを削除（柔軟に対応）
-    name = re.sub(r'_[①\d]+$', '', name)
-    
-    # 先頭のチームコード削除（2〜3文字の大文字 + アンダーバー）
-    name = re.sub(r'^[A-Z]{2,3}_', '', name)
-    
-    # 数字のみの管理番号削除（例: _045_）
-    name = re.sub(r'_\d+_', '_', name)
-    
-    # 連続するアンダーバーを1つに統一
-    name = re.sub(r'__+', '_', name)
-    
-    # 前後のアンダーバーを削除
-    name = name.strip('_')
-    
-    return name if name else filename
+# def extract_player_name(filename):
+#     """
+#     ファイル名から選手名を抽出
+#     
+#     パターン:
+#     - 1763948510837-_-SB_Bunkei_Kaku_① → Bunkei_Kaku
+#     - 1764239471773-_-UD_045_Ren_Iinuma_① → Ren_Iinuma
+#     - 1764152251539-_-SW_008_Keita_Inagaki_1 → Keita_Inagaki
+#     
+#     Args:
+#         filename (str): 元のファイル名（拡張子なし）
+#     
+#     Returns:
+#         str: 抽出された選手名 or 元のファイル名
+#     """
+#     # "-_-" が含まれていない場合はそのまま返す
+#     if "-_-" not in filename:
+#         return filename
+#     
+#     # "-_-" で分割して後半部分を取得
+#     parts = filename.split("-_-")
+#     if len(parts) < 2:
+#         return filename
+#     
+#     name = parts[1]
+#     
+#     # 末尾の _① _1 _01 などを削除（柔軟に対応）
+#     name = re.sub(r'_[①\d]+$', '', name)
+#     
+#     # 先頭のチームコード削除（2〜3文字の大文字 + アンダーバー）
+#     name = re.sub(r'^[A-Z]{2,3}_', '', name)
+#     
+#     # 数字のみの管理番号削除（例: _045_）
+#     name = re.sub(r'_\d+_', '_', name)
+#     
+#     # 連続するアンダーバーを1つに統一
+#     name = re.sub(r'__+', '_', name)
+#     
+#     # 前後のアンダーバーを削除
+#     name = name.strip('_')
+#     
+#     return name if name else filename
 
 
 def remove_background_batch(input_dir="stats/images/players", output_suffix="_nobg"):
@@ -123,8 +127,8 @@ def remove_background_batch(input_dir="stats/images/players", output_suffix="_no
     
     for i, file_path in enumerate(image_files, 1):
         try:
-            # 選手名を抽出
-            player_name = extract_player_name(file_path.stem)
+            # ファイル名をそのまま使用（force_rename.py で既にリネーム済み前提）
+            player_name = file_path.stem
             
             # チームフォルダを特定（親ディレクトリ）
             # players/sungoliath/ファイル.jpg → team_dir = sungoliath/
@@ -187,8 +191,6 @@ def remove_background_batch(input_dir="stats/images/players", output_suffix="_no
             img.save(output_path, 'PNG')
             
             print(f"[{i}/{len(image_files)}] ✅ 完了: nobg/{output_filename}")
-            if player_name != file_path.stem:
-                print(f"             📝 リネーム: {file_path.stem} → {player_name}")
             
             # 元ファイルが original/ 内にない場合は移動
             if file_path.parent != original_dir:
