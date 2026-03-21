@@ -166,7 +166,16 @@ def remove_background_batch(input_dir="stats/images/players", output_suffix="_no
             from rembg import new_session
             from io import BytesIO
             session = new_session('u2net_human_seg')
-            output_image = remove(input_image, session=session)
+            
+            # Alpha Matting で高精度エッジ処理（ハロー効果を削減）
+            output_image = remove(
+                input_image, 
+                session=session,
+                alpha_matting=True,                      # 精密マット処理ON
+                alpha_matting_foreground_threshold=240,  # 前景閾値（高いほど厳格）
+                alpha_matting_background_threshold=10,   # 背景閾値（低いほど厳格）
+                alpha_matting_erode_size=10              # エッジ侵食サイズ
+            )
             
             # PIL で読み込んでエッジぼかし処理
             img = Image.open(BytesIO(output_image))
