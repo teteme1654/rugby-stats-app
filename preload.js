@@ -126,6 +126,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // ============================================================
   
   // 選手画像パスを自動解決（優先順位: 完全一致 → スペースなし → _nobg.png → デフォルト）
-  resolvePlayerImage: (playerName, teamDir) => ipcRenderer.invoke('resolve-player-image', playerName, teamDir)
+  resolvePlayerImage: (playerName, teamDir) => ipcRenderer.invoke('resolve-player-image', playerName, teamDir),
+  
+  // ============================================================
+  // レイアウト設定の保存/読み込み
+  // ============================================================
+  
+  // レイアウト設定を保存（visitor or home）
+  saveLayoutConfig: (layoutType, config) => ipcRenderer.invoke('save-layout-config', layoutType, config),
+  
+  // レイアウト設定を読み込み（visitor or home）
+  loadLayoutConfig: (layoutType) => ipcRenderer.invoke('load-layout-config', layoutType)
 });
 

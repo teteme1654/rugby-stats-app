@@ -1266,3 +1266,59 @@ ipcMain.handle('resolve-player-image', async (event, playerName, teamDir) => {
     return path.join(__dirname, 'assets', 'images', 'no_image.png');
   }
 });
+
+// ============================================================
+// レイアウト設定の保存/読み込み
+// ============================================================
+
+/**
+ * レイアウト設定を保存
+ * @param {string} layoutType - 'visitor' or 'home'
+ * @param {object} config - レイアウト設定オブジェクト
+ */
+ipcMain.handle('save-layout-config', async (event, layoutType, config) => {
+  try {
+    const configDir = path.join(__dirname, 'config');
+    
+    // config/ フォルダがなければ作成
+    if (!fs.existsSync(configDir)) {
+      fs.mkdirSync(configDir, { recursive: true });
+    }
+    
+    const configPath = path.join(configDir, `${layoutType}_layout.json`);
+    fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
+    
+    console.log(`✅ レイアウト設定を保存しました: ${configPath}`);
+    return { success: true };
+    
+  } catch (error) {
+    console.error('レイアウト設定保存エラー:', error);
+    throw error;
+  }
+});
+
+/**
+ * レイアウト設定を読み込み
+ * @param {string} layoutType - 'visitor' or 'home'
+ * @returns {object|null} - レイアウト設定オブジェクト or null
+ */
+ipcMain.handle('load-layout-config', async (event, layoutType) => {
+  try {
+    const configPath = path.join(__dirname, 'config', `${layoutType}_layout.json`);
+    
+    if (!fs.existsSync(configPath)) {
+      console.log(`⚠️ 設定ファイルが見つかりません: ${configPath}`);
+      return null;
+    }
+    
+    const content = fs.readFileSync(configPath, 'utf-8');
+    const config = JSON.parse(content);
+    
+    console.log(`✅ レイアウト設定を読み込みました: ${configPath}`);
+    return config;
+    
+  } catch (error) {
+    console.error('レイアウト設定読み込みエラー:', error);
+    return null;
+  }
+});

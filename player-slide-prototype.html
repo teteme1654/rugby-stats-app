@@ -292,6 +292,8 @@
 
     <button onclick="copyCSS()">📋 CSS コピー</button>
     <button onclick="resetPosition()">🔄 リセット</button>
+    <button onclick="saveLayout()">💾 設定を保存</button>
+    <button onclick="loadLayout()">📂 設定を読み込み</button>
   </div>
 
   <script>
@@ -518,6 +520,142 @@
       document.getElementById('photoHeight').value = 700;
       updatePosition();
     }
+
+    /**
+     * レイアウト設定を保存
+     * Electron 環境: config/visitor_layout.json に保存
+     * ブラウザ単体: localStorage に保存
+     */
+    function saveLayout() {
+      const config = {
+        jerseyNumber: {
+          left: parseInt(document.getElementById('jerseyLeft').value),
+          top: parseInt(document.getElementById('jerseyTop').value),
+          size: parseInt(document.getElementById('jerseySize').value)
+        },
+        teamLogo: {
+          left: parseInt(document.getElementById('logoLeft').value),
+          top: parseInt(document.getElementById('logoTop').value),
+          size: parseInt(document.getElementById('logoSize').value)
+        },
+        nameJp: {
+          left: parseInt(document.getElementById('nameJpLeft').value),
+          top: parseInt(document.getElementById('nameJpTop').value),
+          size: parseInt(document.getElementById('nameJpSize').value)
+        },
+        nameEn: {
+          left: parseInt(document.getElementById('nameEnLeft').value),
+          top: parseInt(document.getElementById('nameEnTop').value),
+          size: parseInt(document.getElementById('nameEnSize').value)
+        },
+        position: {
+          right: parseInt(document.getElementById('posRight').value),
+          top: parseInt(document.getElementById('posTop').value),
+          size: parseInt(document.getElementById('posSize').value)
+        },
+        playerPhoto: {
+          right: parseInt(document.getElementById('photoRight').value),
+          top: parseInt(document.getElementById('photoTop').value),
+          width: parseInt(document.getElementById('photoWidth').value),
+          height: parseInt(document.getElementById('photoHeight').value)
+        }
+      };
+
+      // Electron 環境の場合
+      if (window.electronAPI && window.electronAPI.saveLayoutConfig) {
+        window.electronAPI.saveLayoutConfig('visitor', config)
+          .then(() => alert('✅ 設定を保存しました！'))
+          .catch(err => alert('❌ 保存失敗: ' + err));
+      } else {
+        // ブラウザ単体の場合は localStorage に保存
+        localStorage.setItem('visitor_layout', JSON.stringify(config));
+        alert('✅ 設定を保存しました（localStorage）');
+      }
+    }
+
+    /**
+     * レイアウト設定を読み込み
+     * Electron 環境: config/visitor_layout.json から読み込み
+     * ブラウザ単体: localStorage から読み込み
+     */
+    function loadLayout() {
+      // Electron 環境の場合
+      if (window.electronAPI && window.electronAPI.loadLayoutConfig) {
+        window.electronAPI.loadLayoutConfig('visitor')
+          .then(config => {
+            if (config) {
+              applyLayoutConfig(config);
+              alert('✅ 設定を読み込みました！');
+            } else {
+              alert('⚠️ 保存された設定がありません');
+            }
+          })
+          .catch(err => alert('❌ 読み込み失敗: ' + err));
+      } else {
+        // ブラウザ単体の場合は localStorage から読み込み
+        const saved = localStorage.getItem('visitor_layout');
+        if (saved) {
+          const config = JSON.parse(saved);
+          applyLayoutConfig(config);
+          alert('✅ 設定を読み込みました（localStorage）');
+        } else {
+          alert('⚠️ 保存された設定がありません');
+        }
+      }
+    }
+
+    /**
+     * レイアウト設定を UI に反映
+     */
+    function applyLayoutConfig(config) {
+      if (config.jerseyNumber) {
+        document.getElementById('jerseyLeft').value = config.jerseyNumber.left;
+        document.getElementById('jerseyTop').value = config.jerseyNumber.top;
+        document.getElementById('jerseySize').value = config.jerseyNumber.size;
+      }
+      if (config.teamLogo) {
+        document.getElementById('logoLeft').value = config.teamLogo.left;
+        document.getElementById('logoTop').value = config.teamLogo.top;
+        document.getElementById('logoSize').value = config.teamLogo.size;
+      }
+      if (config.nameJp) {
+        document.getElementById('nameJpLeft').value = config.nameJp.left;
+        document.getElementById('nameJpTop').value = config.nameJp.top;
+        document.getElementById('nameJpSize').value = config.nameJp.size;
+      }
+      if (config.nameEn) {
+        document.getElementById('nameEnLeft').value = config.nameEn.left;
+        document.getElementById('nameEnTop').value = config.nameEn.top;
+        document.getElementById('nameEnSize').value = config.nameEn.size;
+      }
+      if (config.position) {
+        document.getElementById('posRight').value = config.position.right;
+        document.getElementById('posTop').value = config.position.top;
+        document.getElementById('posSize').value = config.position.size;
+      }
+      if (config.playerPhoto) {
+        document.getElementById('photoRight').value = config.playerPhoto.right;
+        document.getElementById('photoTop').value = config.playerPhoto.top;
+        document.getElementById('photoWidth').value = config.playerPhoto.width;
+        document.getElementById('photoHeight').value = config.playerPhoto.height;
+      }
+      updatePosition();
+    }
+
+    // ページ読み込み時に設定を自動復元
+    window.addEventListener('DOMContentLoaded', function() {
+      // localStorage に保存されている設定があれば自動読み込み
+      const saved = localStorage.getItem('visitor_layout');
+      if (saved) {
+        try {
+          const config = JSON.parse(saved);
+          applyLayoutConfig(config);
+          console.log('✅ 保存された設定を自動復元しました');
+        } catch (e) {
+          console.error('設定の復元に失敗:', e);
+        }
+      }
+    });
   </script>
 </body>
 </html>
