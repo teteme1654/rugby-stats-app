@@ -247,8 +247,11 @@
 
   <!-- コントロールパネル -->
   <div class="controls">
-    <button onclick="changePlayer('stats/images/players/1763948510837-_-SB_Bunkei_Kaku_①.jpg', '1', '平野 叶翔', 'Kanato Hirano', 'PR／プロップ')">平野 叶翔</button>
-    <button onclick="changePlayer('stats/images/players/1763948510837-_-SB_Bunkei_Kaku_①.jpg', '15', 'テスト 選手', 'Test Player', 'FB／フルバック')">テスト選手</button>
+    <button onclick="changePlayer('stats/images/players/1763948510837-_-SB_Bunkei_Kaku_①.jpg', '1', '平野 叶翔', 'Kanato Hirano', 'PR／プロップ')">平野 叶翔（旧形式）</button>
+    <button onclick="changePlayer('stats/images/players/1763948510837-_-SB_Bunkei_Kaku_①.jpg', '15', 'テスト 選手', 'Test Player', 'FB／フルバック')">テスト選手（旧形式）</button>
+    <br>
+    <button onclick="changePlayer('ピーター・ショルツ', '11', 'ピーター・ショルツ', 'Peter Scholtz', 'FB／フルバック')">ピーター・ショルツ（Fuzzy Match）</button>
+    <button onclick="changePlayer('淺岡俊亮', '2', '淺岡 俊亮', 'Shunsuke Asaoka', 'HO／フッカー')">淺岡俊亮（Fuzzy Match）</button>
   </div>
 
   <!-- 調整パネル表示切替ボタン -->
@@ -297,12 +300,51 @@
       // 初期画像は透過PNG を想定（Canvas 処理不要）
     });
 
-    function changePlayer(photoPath, jerseyNo, nameJp, nameEn, position) {
-      // .jpg/.jpeg/.png を _nobg.png に自動置き換え
-      const nobgPath = photoPath.replace(/\.(jpg|jpeg|png)$/i, '_nobg.png');
+    /**
+     * 選手画像パスを自動解決（Fuzzy Match）
+     * 優先順位：
+     *   1. [Name].png (完全一致)
+     *   2. [Name(スペースなし)].png (スペース削除)
+     *   3. [Name(スペースなし)]_nobg.png (透過PNG)
+     *   4. デフォルト画像 (no_image.png)
+     * 
+     * @param {string} playerName - 選手名（日本語）
+     * @param {string} teamDir - チームディレクトリ（例: "stats/images/players/静岡BR"）
+     * @returns {Promise<string>} - 解決された画像パス
+     */
+    async function resolvePlayerImage(playerName, teamDir = 'stats/images/players/test_team') {
+      // Electron 環境の場合
+      if (window.electronAPI && window.electronAPI.resolvePlayerImage) {
+        return await window.electronAPI.resolvePlayerImage(playerName, teamDir);
+      }
+      
+      // ブラウザ単体の場合（プロトタイプ用）
+      const nameNoSpace = playerName.replace(/\s+/g, '');
+      
+      const candidates = [
+        `${teamDir}/${playerName}.png`,
+        `${teamDir}/${nameNoSpace}.png`,
+        `${teamDir}/nobg/${nameNoSpace}_nobg.png`,
+        'assets/images/no_image.png'
+      ];
+      
+      // 実際の存在チェックはできないので、3番目を返す（透過PNG想定）
+      return candidates[2];
+    }
+
+    async function changePlayer(photoPathOrName, jerseyNo, nameJp, nameEn, position) {
+      let photoPath = photoPathOrName;
+      
+      // 日本語名が渡された場合は Fuzzy Match で解決
+      if (!photoPathOrName.includes('/') && !photoPathOrName.includes('.')) {
+        photoPath = await resolvePlayerImage(photoPathOrName, 'stats/images/players/静岡BR');
+      } else {
+        // パスが渡された場合は .jpg/.jpeg/.png を _nobg.png に自動置き換え
+        photoPath = photoPathOrName.replace(/\.(jpg|jpeg|png)$/i, '_nobg.png');
+      }
       
       const photoImg = document.getElementById('playerPhoto');
-      photoImg.src = nobgPath;
+      photoImg.src = photoPath;
       
       // 透過PNG を使用するので Canvas 処理は不要
       // （背景除去済みの画像を直接表示）

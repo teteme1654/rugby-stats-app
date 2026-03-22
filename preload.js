@@ -119,6 +119,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getDisplaySizes: () => ipcRenderer.invoke('get-display-sizes'),
   
   // 表示サイズ設定更新イベントのリスナー
-  onUpdateDisplaySizes: (callback) => ipcRenderer.on('update-display-sizes', (event, settings) => callback(settings))
+  onUpdateDisplaySizes: (callback) => ipcRenderer.on('update-display-sizes', (event, settings) => callback(settings)),
+  
+  // ============================================================
+  // 選手画像パス解決機能（Fuzzy Match）
+  // ============================================================
+  
+  // 選手画像パスを自動解決（優先順位: 完全一致 → スペースなし → _nobg.png → デフォルト）
+  resolvePlayerImage: (playerName, teamDir) => ipcRenderer.invoke('resolve-player-image', playerName, teamDir)
 });
 

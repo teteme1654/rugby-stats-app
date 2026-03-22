@@ -1219,3 +1219,50 @@ ipcMain.handle('get-preset-list', async (event) => {
     return [];
   }
 });
+
+// ============================================================
+// 選手画像パス解決機能（Fuzzy Match）
+// ============================================================
+
+/**
+ * 選手画像のパスを自動解決する
+ * 優先順位：
+ *   1. [Name].png (完全一致)
+ *   2. [Name(スペースなし)].png (スペース削除)
+ *   3. [Name(スペースなし)]_nobg.png (透過PNG)
+ *   4. デフォルト画像 (no_image.png)
+ * 
+ * @param {string} playerName - CSV の Name 列（日本語名）
+ * @param {string} teamDir - チームディレクトリ（例: "stats/images/players/静岡BR"）
+ * @returns {string} - 解決された画像パス
+ */
+ipcMain.handle('resolve-player-image', async (event, playerName, teamDir) => {
+  try {
+    // スペースを削除した名前
+    const nameNoSpace = playerName.replace(/\s+/g, '');
+    
+    // 探索候補リスト
+    const candidates = [
+      path.join(__dirname, teamDir, `${playerName}.png`),           // 完全一致
+      path.join(__dirname, teamDir, `${nameNoSpace}.png`),          // スペースなし
+      path.join(__dirname, teamDir, 'nobg', `${nameNoSpace}_nobg.png`), // 透過PNG
+      path.join(__dirname, 'assets', 'images', 'no_image.png')     // デフォルト
+    ];
+    
+    // 存在するファイルを探す
+    for (const candidate of candidates) {
+      if (fs.existsSync(candidate)) {
+        console.log(`[Fuzzy Match] ${playerName} → ${candidate}`);
+        return candidate;
+      }
+    }
+    
+    // 見つからない場合はデフォルト
+    console.warn(`[Fuzzy Match] ${playerName} の画像が見つかりません。デフォルト画像を使用します。`);
+    return candidates[candidates.length - 1]; // no_image.png
+    
+  } catch (error) {
+    console.error('画像パス解決エラー:', error);
+    return path.join(__dirname, 'assets', 'images', 'no_image.png');
+  }
+});
