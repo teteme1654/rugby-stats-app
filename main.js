@@ -94,7 +94,7 @@ function createMainWindow() {
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js')
     },
-    title: 'Rugby Stats - 管理画面'
+    title: 'Ovaly - 管理画面'
   });
 
   mainWindow.loadFile('control.html');
@@ -132,7 +132,7 @@ function createDisplayWindow() {
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js')
     },
-    title: 'Rugby Stats - 表示画面'
+    title: 'Ovaly - 表示画面'
   });
 
   displayWindow.loadFile('display.html');
@@ -176,7 +176,7 @@ function createScoreboardWindow() {
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js')
     },
-    title: 'Rugby Stats - 透過スコアボード'
+    title: 'Ovaly - 透過スコアボード'
   });
 
   scoreboardWindow.loadFile('scoreboard.html');
@@ -219,7 +219,7 @@ function createScoreboardChromakeyWindow() {
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js')
     },
-    title: 'Rugby Stats - クロマキースコアボード'
+    title: 'Ovaly - クロマキースコアボード'
   });
 
   scoreboardChromakeyWindow.loadFile('scoreboard-chromakey.html');
