@@ -626,16 +626,6 @@
     </div>
 
 
-    <!-- クイックアクション -->
-    <div class="control-panel">
-      <h2 class="section-title">クイックアクション</h2>
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px;">
-        <button onclick="toggleDisplayWindow()" style="padding: 15px; font-size: 1em; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">📺 表示画面</button>
-        <button onclick="toggleScoreboardWindow()" style="padding: 15px; font-size: 1em; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">🎬 スコアボード</button>
-        <button onclick="toggleScoreboardChromakeyWindow()" style="padding: 15px; font-size: 1em; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">🎥 クロマキー</button>
-        <button onclick="resetMatch()" style="padding: 15px; font-size: 1em; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">🔄 試合リセット</button>
-      </div>
-    </div>
     <!-- 選手情報 -->
     <div class="control-panel">
       <h2 class="section-title">選手情報管理</h2>
@@ -695,6 +685,16 @@
           </select>
           <button onclick="applyDisplaySetting('scoreboard')" style="margin-top: 10px; width: 100%;">適用</button>
         </div>
+      </div>
+    </div>
+
+    <!-- クイックアクション -->
+    <div class="control-panel">
+      <h2 class="section-title">クイックアクション</h2>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+        <button id="btn-display" onclick="toggleDisplayWindow()" style="padding: 15px; font-size: 1em; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">📺 表示画面</button>
+        <button id="btn-chromakey" onclick="toggleScoreboardChromakeyWindow()" style="padding: 15px; font-size: 1em; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">🎥 スコア表示</button>
+        <button onclick="resetMatch()" style="padding: 15px; font-size: 1em; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">🔄 試合リセット</button>
       </div>
     </div>
 
@@ -1340,19 +1340,37 @@
       });
     }
 
-    // 表示画面の開閉
-    async function toggleDisplayWindow() {
-      await window.electronAPI.toggleDisplay();
+    // ボタンの表示状態を更新
+    function setWindowButtonState(btnId, isOpen, label) {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      if (isOpen) {
+        btn.style.background = '#28a745';
+        btn.dataset.label = btn.dataset.label || btn.textContent;
+        btn.textContent = btn.dataset.label + ' 表示中';
+      } else {
+        btn.style.background = '#667eea';
+        if (btn.dataset.label) btn.textContent = btn.dataset.label;
+      }
     }
 
-    // スコアボードの開閉
-    async function toggleScoreboardWindow() {
-      await window.electronAPI.toggleScoreboard();
+    // 表示画面の開閉
+    async function toggleDisplayWindow() {
+      const isOpen = await window.electronAPI.toggleDisplay();
+      setWindowButtonState('btn-display', isOpen, '📺 表示画面');
     }
 
     // クロマキースコアボードの開閉
     async function toggleScoreboardChromakeyWindow() {
-      await window.electronAPI.toggleScoreboardChromakey();
+      const isOpen = await window.electronAPI.toggleScoreboardChromakey();
+      setWindowButtonState('btn-chromakey', isOpen, '🎥 スコア表示');
+    }
+
+    // 起動時にウィンドウ状態を同期
+    async function syncWindowButtonStates() {
+      const states = await window.electronAPI.getWindowStates();
+      setWindowButtonState('btn-display', states.display, '📺 表示画面');
+      setWindowButtonState('btn-chromakey', states.chromakey, '🎥 スコア表示');
     }
 
     // マッパーウィンドウを開く
@@ -1495,6 +1513,7 @@
       loadDisplayList();
       loadChromakeyColor();
       loadDisplaySizes();
+      syncWindowButtonStates();
     });
 
     // クロマキー色を設定
@@ -1549,8 +1568,7 @@
     }
 
     // 保存された表示サイズ設定を読み込む
-    function loadDisplaySizes() {
-      // デフォルト値
+    async function loadDisplaySizes() {
       const defaults = {
         scoreboardLogoSize: 80,
         scoreboardTeamNameSize: 1.8,
@@ -1560,13 +1578,21 @@
         displayGoalSize: 3,
         displayLogoOpacity: 0.2
       };
-      
-      // 各スライダーと表示を初期化
+
+      let saved = {};
+      try {
+        saved = await window.electronAPI.getDisplaySizes() || {};
+      } catch (e) {
+        console.warn('表示サイズ設定の読み込みに失敗しました:', e);
+      }
+
+      const sizes = { ...defaults, ...saved };
+
       Object.keys(defaults).forEach(key => {
         const slider = document.getElementById(key);
         if (slider) {
-          slider.value = defaults[key];
-          updateDisplaySize(key, defaults[key]);
+          slider.value = sizes[key];
+          updateDisplaySize(key, sizes[key]);
         }
       });
     }

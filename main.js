@@ -27,6 +27,40 @@ let displaySettings = {
 
 // 設定ファイルのパス
 const settingsPath = path.join(app.getPath('userData'), 'display-settings.json');
+const teamConfigPath = path.join(app.getPath('userData'), 'team-config.json');
+
+// チーム設定を保存する
+function saveTeamConfig() {
+  try {
+    const config = {
+      hostTeam: matchData.hostTeam,
+      awayTeam: matchData.awayTeam,
+      stadiumName: matchData.stadiumName,
+      players: matchData.players,
+    };
+    fs.writeFileSync(teamConfigPath, JSON.stringify(config, null, 2));
+    console.log('チーム設定を保存しました');
+  } catch (error) {
+    console.error('チーム設定の保存に失敗しました:', error);
+  }
+}
+
+// チーム設定を読み込む
+function loadTeamConfig() {
+  try {
+    if (fs.existsSync(teamConfigPath)) {
+      const data = fs.readFileSync(teamConfigPath, 'utf8');
+      const config = JSON.parse(data);
+      if (config.hostTeam) matchData.hostTeam = config.hostTeam;
+      if (config.awayTeam) matchData.awayTeam = config.awayTeam;
+      if (config.stadiumName) matchData.stadiumName = config.stadiumName;
+      if (config.players) matchData.players = config.players;
+      console.log('チーム設定を読み込みました');
+    }
+  } catch (error) {
+    console.error('チーム設定の読み込みに失敗しました:', error);
+  }
+}
 
 // 設定を読み込む
 function loadDisplaySettings() {
@@ -98,7 +132,7 @@ function createMainWindow() {
   });
 
   mainWindow.loadFile('control.html');
-  mainWindow.webContents.openDevTools(); // 開発者ツールを開く（デバッグ用に一時的に有効化）
+  // mainWindow.webContents.openDevTools(); // 開発者ツールを開く（デバッグ用に一時的に有効化）
   mainWindow.on('closed', () => {
     mainWindow = null;
     if (displayWindow) {
@@ -240,6 +274,7 @@ function createScoreboardChromakeyWindow() {
 
 app.whenReady().then(() => {
   loadDisplaySettings(); // ディスプレイ設定を読み込む
+  loadTeamConfig();      // チーム設定を読み込む
   createMainWindow();
   createDisplayWindow();
 });
@@ -306,6 +341,7 @@ ipcMain.handle('update-half-stats', (event, half, team, stat, value) => {
 ipcMain.handle('update-team', (event, team, field, value) => {
   matchData[team][field] = value;
   updateDisplay();
+  saveTeamConfig();
   return matchData;
 });
 
@@ -313,6 +349,7 @@ ipcMain.handle('update-team', (event, team, field, value) => {
 ipcMain.handle('update-stadium-name', (event, value) => {
   matchData.stadiumName = value;
   updateDisplay();
+  saveTeamConfig();
   return matchData;
 });
 
@@ -366,6 +403,7 @@ ipcMain.handle('load-logo', async (event, team) => {
     matchData[team].logo = dataUri;
     console.log(`ロゴ設定完了: ${team} -> Data URI (${base64Image.length} bytes)`);
     updateDisplay();
+    saveTeamConfig();
     return dataUri;
   } catch (error) {
     console.error('ロゴ読み込みエラー:', error);
@@ -448,7 +486,8 @@ ipcMain.handle('load-csv', async (event, team) => {
     matchData.players[team] = players;  // players は 'host' / 'away' キー
     
     updateDisplay();
-    
+    saveTeamConfig();
+
     console.log(`✅ CSV読み込み完了: ${players.length}名, チーム名: ${teamName}, ロゴ更新: ${logoUpdated}`);
     
     return { 
@@ -535,7 +574,8 @@ ipcMain.handle('update-player', (event, team, playerIndex, updatedPlayer) => {
     
     // 表示画面を更新
     updateDisplay();
-    
+    saveTeamConfig();
+
     console.log(`選手情報を更新しました: ${team} [${playerIndex}]`, updatedPlayer);
     return { success: true, player: players[playerIndex] };
   } catch (error) {
@@ -646,8 +686,10 @@ ipcMain.handle('toggle-display', () => {
   if (displayWindow && !displayWindow.isDestroyed()) {
     displayWindow.close();
     displayWindow = null;
+    return false;
   } else {
     createDisplayWindow();
+    return true;
   }
 });
 
@@ -666,9 +708,19 @@ ipcMain.handle('toggle-scoreboard-chromakey', () => {
   if (scoreboardChromakeyWindow && !scoreboardChromakeyWindow.isDestroyed()) {
     scoreboardChromakeyWindow.close();
     scoreboardChromakeyWindow = null;
+    return false;
   } else {
     createScoreboardChromakeyWindow();
+    return true;
   }
+});
+
+// ウィンドウの表示状態を取得
+ipcMain.handle('get-window-states', () => {
+  return {
+    display: !!(displayWindow && !displayWindow.isDestroyed()),
+    chromakey: !!(scoreboardChromakeyWindow && !scoreboardChromakeyWindow.isDestroyed()),
+  };
 });
 
 // スコアボードを閉じる

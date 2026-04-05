@@ -136,6 +136,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   saveLayoutConfig: (layoutType, config) => ipcRenderer.invoke('save-layout-config', layoutType, config),
   
   // レイアウト設定を読み込み（visitor or home）
-  loadLayoutConfig: (layoutType) => ipcRenderer.invoke('load-layout-config', layoutType)
+  loadLayoutConfig: (layoutType) => ipcRenderer.invoke('load-layout-config', layoutType),
+
+  // ウィンドウの表示状態を取得
+  getWindowStates: () => ipcRenderer.invoke('get-window-states'),
 });
 
