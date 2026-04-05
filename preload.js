@@ -119,6 +119,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getDisplaySizes: () => ipcRenderer.invoke('get-display-sizes'),
   
   // 表示サイズ設定更新イベントのリスナー
-  onUpdateDisplaySizes: (callback) => ipcRenderer.on('update-display-sizes', (event, settings) => callback(settings))
+  onUpdateDisplaySizes: (callback) => ipcRenderer.on('update-display-sizes', (event, settings) => callback(settings)),
+
+  // ウィンドウの表示状態を取得
+  getWindowStates: () => ipcRenderer.invoke('get-window-states')
 });
 
