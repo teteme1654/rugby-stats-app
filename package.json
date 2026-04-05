@@ -1,7 +1,7 @@
 {
-  "name": "rugby-stats-board",
+  "name": "ovaly",
   "version": "1.0.0",
-  "description": "Rugby Statistics Board with Dual Display Support",
+  "description": "Ovaly - Rugby Statistics Board with Dual Display Support",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -16,8 +16,8 @@
     "electron-builder": "^24.9.1"
   },
   "build": {
-    "appId": "com.rugby.statsboard",
-    "productName": "Rugby Stats Board",
+    "appId": "com.ovaly.app",
+    "productName": "Ovaly",
     "directories": {
       "output": "dist"
     },
