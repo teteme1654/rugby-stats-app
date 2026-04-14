@@ -38,6 +38,9 @@
       --score-size: 3.2em;
       --team-name-size: 1.6em;
       --team-name-height: 75%;
+      --scoreboard-x: 0vw;
+      --scoreboard-y: 0vh;
+      --scoreboard-scale: 1;
     }
 
     /* 外枠は高さを持たず、各ボックスが独自の高さを持つ */
@@ -45,6 +48,8 @@
       display: flex;
       align-items: center;  /* 全ボックスを縦中央揃え */
       -webkit-app-region: no-drag;
+      transform: translate(var(--scoreboard-x), var(--scoreboard-y)) scale(var(--scoreboard-scale));
+      transform-origin: center center;
     }
 
     /* ロゴ枕: サイズスライダーに比例してスケール（正方形） */
@@ -303,6 +308,10 @@
         ? settings.scoreboardTeamNameHeight : 75;
       const teamNameHeightPx = Math.round(logoBoxSize * heightPct / 100);
       root.style.setProperty('--team-name-height', teamNameHeightPx + 'px');
+
+      if (settings.scoreboardX !== undefined) root.style.setProperty('--scoreboard-x', settings.scoreboardX + 'vw');
+      if (settings.scoreboardY !== undefined) root.style.setProperty('--scoreboard-y', settings.scoreboardY + 'vh');
+      if (settings.scoreboardScale !== undefined) root.style.setProperty('--scoreboard-scale', settings.scoreboardScale);
     }
 
     window.electronAPI.onUpdateDisplaySizes((settings) => {

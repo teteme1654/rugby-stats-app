@@ -25,12 +25,20 @@
       -webkit-app-region: drag;
     }
 
+    :root {
+      --scoreboard-x: 0vw;
+      --scoreboard-y: 0vh;
+      --scoreboard-scale: 1;
+    }
+
     .scoreboard-wrapper {
       display: flex;
       flex-direction: column;
       align-items: center;
       width: 90%;
       max-width: 1000px;
+      transform: translate(var(--scoreboard-x), var(--scoreboard-y)) scale(var(--scoreboard-scale));
+      transform-origin: center center;
     }
 
     .scoreboard-container {
@@ -326,7 +334,12 @@
           stadiumEl.style.fontSize = settings.scoreboardStadiumSize + 'em';
         }
       }
-      
+
+      const root = document.documentElement;
+      if (settings.scoreboardX !== undefined) root.style.setProperty('--scoreboard-x', settings.scoreboardX + 'vw');
+      if (settings.scoreboardY !== undefined) root.style.setProperty('--scoreboard-y', settings.scoreboardY + 'vh');
+      if (settings.scoreboardScale !== undefined) root.style.setProperty('--scoreboard-scale', settings.scoreboardScale);
+
       console.log('表示サイズ設定を適用しました:', settings);
     }
 

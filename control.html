@@ -821,6 +821,40 @@
         </div>
       </div>
 
+      <!-- 位置・スケール -->
+      <h3 style="margin: 20px 0 15px; color: #667eea;">━━━ スコアボード 位置・スケール ━━━</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 10px;">
+        <div class="form-group">
+          <label>水平位置:</label>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <input type="range" id="scoreboardX" min="-50" max="50" value="0" step="1"
+                   onchange="updateDisplaySize('scoreboardX', this.value)"
+                   style="flex: 1; cursor: pointer;">
+            <span id="scoreboardXDisplay" style="min-width: 60px; font-weight: bold; text-align: right;">0vw</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>垂直位置:</label>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <input type="range" id="scoreboardY" min="-50" max="50" value="0" step="1"
+                   onchange="updateDisplaySize('scoreboardY', this.value)"
+                   style="flex: 1; cursor: pointer;">
+            <span id="scoreboardYDisplay" style="min-width: 60px; font-weight: bold; text-align: right;">0vh</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>全体スケール:</label>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <input type="range" id="scoreboardScale" min="0.3" max="2.0" value="1.0" step="0.05"
+                   onchange="updateDisplaySize('scoreboardScale', this.value)"
+                   style="flex: 1; cursor: pointer;">
+            <span id="scoreboardScaleDisplay" style="min-width: 60px; font-weight: bold; text-align: right;">1.0x</span>
+          </div>
+        </div>
+      </div>
+
       <!-- スタッツ表示画面 -->
       <h3 style="margin-bottom: 15px; color: #667eea;">━━━ スタッツ表示画面 ━━━</h3>
       <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
@@ -1648,6 +1682,9 @@
         'scoreboardScoreSize': { display: 'scoreboardScoreSizeDisplay', unit: 'em' },
         'scoreboardStadiumSize': { display: 'scoreboardStadiumSizeDisplay', unit: 'em' },
         'scoreboardTeamNameHeight': { display: 'scoreboardTeamNameHeightDisplay', unit: '%' },
+        'scoreboardX': { display: 'scoreboardXDisplay', unit: 'vw' },
+        'scoreboardY': { display: 'scoreboardYDisplay', unit: 'vh' },
+        'scoreboardScale': { display: 'scoreboardScaleDisplay', unit: 'x' },
         'displayPlayerSize': { display: 'displayPlayerSizeDisplay', unit: 'em' },
         'displayGoalSize': { display: 'displayGoalSizeDisplay', unit: 'em' },
         'displayLogoOpacity': { display: 'displayLogoOpacityDisplay', unit: '%', multiplier: 100 }
@@ -1670,25 +1707,34 @@
     }
 
     // 保存された表示サイズ設定を読み込む
-    function loadDisplaySizes() {
-      // デフォルト値
+    async function loadDisplaySizes() {
       const defaults = {
         scoreboardLogoSize: 80,
         scoreboardTeamNameSize: 1.8,
         scoreboardScoreSize: 5,
         scoreboardStadiumSize: 1,
         scoreboardTeamNameHeight: 75,
+        scoreboardX: 0,
+        scoreboardY: 0,
+        scoreboardScale: 1.0,
         displayPlayerSize: 2,
         displayGoalSize: 3,
         displayLogoOpacity: 0.2
       };
-      
-      // 各スライダーと表示を初期化
+
+      let saved = {};
+      try {
+        saved = (await window.electronAPI.getDisplaySizes()) || {};
+      } catch (e) {
+        console.error('表示サイズ設定の読み込みに失敗:', e);
+      }
+
+      const settings = Object.assign({}, defaults, saved);
       Object.keys(defaults).forEach(key => {
         const slider = document.getElementById(key);
         if (slider) {
-          slider.value = defaults[key];
-          updateDisplaySize(key, defaults[key]);
+          slider.value = settings[key];
+          updateDisplaySize(key, settings[key]);
         }
       });
     }

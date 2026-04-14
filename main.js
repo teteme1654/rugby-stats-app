@@ -28,7 +28,12 @@ let displaySettings = {
   scoreboardDesign: 'scoreboard-chromakey.html', // デザインファイル名
 
   // デザインB専用設定
-  scoreboardTeamNameHeight: 75  // チーム名枕の高さ（%）
+  scoreboardTeamNameHeight: 75,  // チーム名枕の高さ（%）
+
+  // スコアボード位置・スケール
+  scoreboardX: 0,      // 水平オフセット（vw）
+  scoreboardY: 0,      // 垂直オフセット（vh）
+  scoreboardScale: 1.0 // 全体スケール
 };
 
 // 設定ファイルのパス
