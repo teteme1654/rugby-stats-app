@@ -362,6 +362,17 @@
               <input type="color" id="hostTeamColorPicker" style="width: 60px; height: 40px; border: 2px solid #ddd; border-radius: 5px; cursor: pointer;">
               <input type="text" id="hostTeamColor" placeholder="#FF0000" style="flex: 1;">
             </div>
+            <label style="display: flex; align-items: center; gap: 8px; margin-top: 8px; cursor: pointer; font-size: 0.9em; color: #555;">
+              <input type="checkbox" id="hostUseScoreColor" onchange="toggleScoreColor('host')">
+              スコアボードの表示色を独立させる
+            </label>
+            <div id="hostScoreColorArea" style="display: none; margin-top: 8px; flex-direction: column; gap: 4px;">
+              <label style="font-size: 0.85em; color: #777;">スコアボード表示色:</label>
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <input type="color" id="hostScoreColorPicker" style="width: 60px; height: 40px; border: 2px solid #ddd; border-radius: 5px; cursor: pointer;">
+                <input type="text" id="hostScoreColor" placeholder="#FF0000" style="flex: 1;">
+              </div>
+            </div>
           </div>
         </div>
 
@@ -392,6 +403,17 @@
             <div style="display: flex; gap: 10px; align-items: center;">
               <input type="color" id="awayTeamColorPicker" style="width: 60px; height: 40px; border: 2px solid #ddd; border-radius: 5px; cursor: pointer;">
               <input type="text" id="awayTeamColor" placeholder="#0000FF" style="flex: 1;">
+            </div>
+            <label style="display: flex; align-items: center; gap: 8px; margin-top: 8px; cursor: pointer; font-size: 0.9em; color: #555;">
+              <input type="checkbox" id="awayUseScoreColor" onchange="toggleScoreColor('away')">
+              スコアボードの表示色を独立させる
+            </label>
+            <div id="awayScoreColorArea" style="display: none; margin-top: 8px; flex-direction: column; gap: 4px;">
+              <label style="font-size: 0.85em; color: #777;">スコアボード表示色:</label>
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <input type="color" id="awayScoreColorPicker" style="width: 60px; height: 40px; border: 2px solid #ddd; border-radius: 5px; cursor: pointer;">
+                <input type="text" id="awayScoreColor" placeholder="#0000FF" style="flex: 1;">
+              </div>
             </div>
           </div>
         </div>
@@ -693,7 +715,13 @@
       <h2 class="section-title">クイックアクション</h2>
       <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
         <button id="btn-display" onclick="toggleDisplayWindow()" style="padding: 15px; font-size: 1em; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">📺 表示画面</button>
-        <button id="btn-chromakey" onclick="toggleScoreboardChromakeyWindow()" style="padding: 15px; font-size: 1em; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">🎥 スコア表示</button>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <select id="scoreboardDesignSelect" onchange="saveScoreboardDesign(this.value)" style="padding: 6px 10px; border: 2px solid #ddd; border-radius: 5px; font-size: 0.85em;">
+            <option value="scoreboard-chromakey.html">デザインA（現行）</option>
+            <option value="scoreboard-chromakey-b.html">デザインB（白枠）</option>
+          </select>
+          <button id="btn-chromakey" onclick="toggleScoreboardChromakeyWindow()" style="padding: 10px; font-size: 1em; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">🎥 スコア表示</button>
+        </div>
         <button onclick="resetMatch()" style="padding: 15px; font-size: 1em; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">🔄 試合リセット</button>
       </div>
     </div>
@@ -765,14 +793,24 @@
         <div class="form-group">
           <label>スタジアム名サイズ:</label>
           <div style="display: flex; align-items: center; gap: 10px;">
-            <input type="range" id="scoreboardStadiumSize" min="0.5" max="2" value="1" step="0.1" 
-                   onchange="updateDisplaySize('scoreboardStadiumSize', this.value)" 
+            <input type="range" id="scoreboardStadiumSize" min="0.5" max="2" value="1" step="0.1"
+                   onchange="updateDisplaySize('scoreboardStadiumSize', this.value)"
                    style="flex: 1; cursor: pointer;">
             <span id="scoreboardStadiumSizeDisplay" style="min-width: 60px; font-weight: bold; text-align: right;">1em</span>
           </div>
         </div>
+
+        <div class="form-group">
+          <label>チーム名枕の高さ <span style="font-size:0.8em; color:#999;">（デザインB）</span>:</label>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <input type="range" id="scoreboardTeamNameHeight" min="40" max="100" value="75" step="5"
+                   onchange="updateDisplaySize('scoreboardTeamNameHeight', this.value)"
+                   style="flex: 1; cursor: pointer;">
+            <span id="scoreboardTeamNameHeightDisplay" style="min-width: 60px; font-weight: bold; text-align: right;">75%</span>
+          </div>
+        </div>
       </div>
-      
+
       <!-- スタッツ表示画面 -->
       <h3 style="margin-bottom: 15px; color: #667eea;">━━━ スタッツ表示画面 ━━━</h3>
       <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
@@ -974,6 +1012,15 @@
       document.getElementById('hostTeamLogo').value = currentData.hostTeam.logo;
       document.getElementById('hostTeamColor').value = currentData.hostTeam.color;
       document.getElementById('hostTeamColorPicker').value = currentData.hostTeam.color;
+
+      // スコアカラー独立設定の復元（ホーム）
+      const hostUseScoreColor = !!currentData.hostTeam.useScoreColor;
+      document.getElementById('hostUseScoreColor').checked = hostUseScoreColor;
+      document.getElementById('hostScoreColorArea').style.display = hostUseScoreColor ? 'flex' : 'none';
+      if (currentData.hostTeam.scoreColor) {
+        document.getElementById('hostScoreColor').value = currentData.hostTeam.scoreColor;
+        document.getElementById('hostScoreColorPicker').value = currentData.hostTeam.scoreColor;
+      }
       document.getElementById('hostScoreDisplay').textContent = currentData.score.host;
       
       // ボタン上部のカウント表示を更新（前半/後半別）
@@ -996,6 +1043,16 @@
       document.getElementById('awayTeamLogo').value = currentData.awayTeam.logo;
       document.getElementById('awayTeamColor').value = currentData.awayTeam.color;
       document.getElementById('awayTeamColorPicker').value = currentData.awayTeam.color;
+
+      // スコアカラー独立設定の復元（アウェイ）
+      const awayUseScoreColor = !!currentData.awayTeam.useScoreColor;
+      document.getElementById('awayUseScoreColor').checked = awayUseScoreColor;
+      document.getElementById('awayScoreColorArea').style.display = awayUseScoreColor ? 'flex' : 'none';
+      if (currentData.awayTeam.scoreColor) {
+        document.getElementById('awayScoreColor').value = currentData.awayTeam.scoreColor;
+        document.getElementById('awayScoreColorPicker').value = currentData.awayTeam.scoreColor;
+      }
+
       document.getElementById('awayScoreDisplay').textContent = currentData.score.away;
       
       // ボタン上部のカウント表示を更新（前半/後半別）
@@ -1142,6 +1199,35 @@
         document.getElementById('awayTeamColor').value = e.target.value;
         window.electronAPI.updateTeam('awayTeam', 'color', e.target.value);
       });
+
+      // スコアカラー（テキスト入力）
+      document.getElementById('hostScoreColor').addEventListener('input', (e) => {
+        document.getElementById('hostScoreColorPicker').value = e.target.value;
+        window.electronAPI.updateTeam('hostTeam', 'scoreColor', e.target.value);
+      });
+      document.getElementById('awayScoreColor').addEventListener('input', (e) => {
+        document.getElementById('awayScoreColorPicker').value = e.target.value;
+        window.electronAPI.updateTeam('awayTeam', 'scoreColor', e.target.value);
+      });
+
+      // スコアカラー（カラーピッカー）
+      document.getElementById('hostScoreColorPicker').addEventListener('input', (e) => {
+        document.getElementById('hostScoreColor').value = e.target.value;
+        window.electronAPI.updateTeam('hostTeam', 'scoreColor', e.target.value);
+      });
+      document.getElementById('awayScoreColorPicker').addEventListener('input', (e) => {
+        document.getElementById('awayScoreColor').value = e.target.value;
+        window.electronAPI.updateTeam('awayTeam', 'scoreColor', e.target.value);
+      });
+    }
+
+    // スコアカラー独立フラグの切り替え
+    function toggleScoreColor(side) {
+      const checked = document.getElementById(`${side}UseScoreColor`).checked;
+      const area = document.getElementById(`${side}ScoreColorArea`);
+      area.style.display = checked ? 'flex' : 'none';
+      const team = side === 'host' ? 'hostTeam' : 'awayTeam';
+      window.electronAPI.updateTeam(team, 'useScoreColor', checked);
     }
 
     // ロゴ画像読み込み
@@ -1514,7 +1600,30 @@
       loadChromakeyColor();
       loadDisplaySizes();
       syncWindowButtonStates();
+      loadScoreboardDesign();
     });
+
+    // スコアボードデザインを保存
+    async function saveScoreboardDesign(design) {
+      try {
+        await window.electronAPI.updateDisplaySizes({ scoreboardDesign: design });
+      } catch (e) {
+        console.error('デザイン設定の保存に失敗しました:', e);
+      }
+    }
+
+    // 保存済みのデザイン選択を復元
+    async function loadScoreboardDesign() {
+      try {
+        const settings = await window.electronAPI.getDisplaySizes();
+        if (settings && settings.scoreboardDesign) {
+          const select = document.getElementById('scoreboardDesignSelect');
+          if (select) select.value = settings.scoreboardDesign;
+        }
+      } catch (e) {
+        console.error('デザイン設定の読み込みに失敗しました:', e);
+      }
+    }
 
     // クロマキー色を設定
     async function setChromakeyColor(color) {
@@ -1546,6 +1655,7 @@
         'scoreboardTeamNameSize': { display: 'scoreboardTeamNameSizeDisplay', unit: 'em' },
         'scoreboardScoreSize': { display: 'scoreboardScoreSizeDisplay', unit: 'em' },
         'scoreboardStadiumSize': { display: 'scoreboardStadiumSizeDisplay', unit: 'em' },
+        'scoreboardTeamNameHeight': { display: 'scoreboardTeamNameHeightDisplay', unit: '%' },
         'displayPlayerSize': { display: 'displayPlayerSizeDisplay', unit: 'em' },
         'displayGoalSize': { display: 'displayGoalSizeDisplay', unit: 'em' },
         'displayLogoOpacity': { display: 'displayLogoOpacityDisplay', unit: '%', multiplier: 100 }
@@ -1574,6 +1684,7 @@
         scoreboardTeamNameSize: 1.8,
         scoreboardScoreSize: 5,
         scoreboardStadiumSize: 1,
+        scoreboardTeamNameHeight: 75,
         displayPlayerSize: 2,
         displayGoalSize: 3,
         displayLogoOpacity: 0.2
