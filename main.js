@@ -22,7 +22,13 @@ let displaySettings = {
   // スタッツ表示画面のサイズ設定
   displayPlayerSize: 2,        // 選手テロップサイズ（em）
   displayGoalSize: 3,          // ゴール数テロップサイズ（em）
-  displayLogoOpacity: 0.2      // 背景ロゴ透明度（0.0-1.0）
+  displayLogoOpacity: 0.2,     // 背景ロゴ透明度（0.0-1.0）
+
+  // スコアボードデザイン
+  scoreboardDesign: 'scoreboard-chromakey.html', // デザインファイル名
+
+  // デザインB専用設定
+  scoreboardTeamNameHeight: 75  // チーム名枕の高さ（%）
 };
 
 // 設定ファイルのパス
@@ -222,7 +228,8 @@ function createScoreboardChromakeyWindow() {
     title: 'Ovaly - クロマキースコアボード'
   });
 
-  scoreboardChromakeyWindow.loadFile('scoreboard-chromakey.html');
+  const designFile = displaySettings.scoreboardDesign || 'scoreboard-chromakey.html';
+  scoreboardChromakeyWindow.loadFile(designFile);
   // scoreboardChromakeyWindow.webContents.openDevTools(); // 開発者ツールを開く（本番では無効化）
   
   // ページ読み込み完了後にクロマキー色を設定

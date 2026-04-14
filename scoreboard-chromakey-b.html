@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ovaly - スコアボード デザインB</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial Black', 'Arial', sans-serif;
+      background: transparent;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      -webkit-app-region: drag;
+    }
+
+    /*
+     * --logo-size      : ロゴ画像サイズ (px)
+     * --logo-box-size  : ロゴ枕の幅・高さ = ロゴサイズ + パディング (自動計算)
+     * --score-box-width: スコア枕の幅 (スコアフォントに比例して JS で計算)
+     * --score-size     : スコアフォントサイズ (em)
+     * --team-name-size : チーム名フォントサイズ (em)
+     * --team-name-height: チーム名枕の高さ (%)
+     */
+    :root {
+      --logo-size: 65px;
+      --logo-box-size: calc(var(--logo-size) + 26px);
+      --score-box-width: 112px; /* 3.2em × 32 + 10 */
+      --score-size: 3.2em;
+      --team-name-size: 1.6em;
+      --team-name-height: 75%;
+    }
+
+    /* 外枠は高さを持たず、各ボックスが独自の高さを持つ */
+    .scoreboard {
+      display: flex;
+      align-items: center;  /* 全ボックスを縦中央揃え */
+      -webkit-app-region: no-drag;
+    }
+
+    /* ロゴ枕: サイズスライダーに比例してスケール（正方形） */
+    .logo-box {
+      width: var(--logo-box-size);
+      height: var(--logo-box-size);
+      background: linear-gradient(180deg,
+        #b8b8b8 0%,
+        #e8e8e8 25%,
+        #f8f8f8 50%,
+        #d8d8d8 75%,
+        #b0b0b0 100%
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 13px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .team-logo {
+      width: var(--logo-size);
+      height: var(--logo-size);
+      object-fit: contain;
+    }
+
+    /* スコア枕: スコアサイズに比例してスケール、ロゴと同じ高さ */
+    .score-box {
+      width: var(--score-box-width);
+      height: var(--logo-box-size);
+      background: linear-gradient(180deg,
+        #b8b8b8 0%,
+        #e8e8e8 25%,
+        #f8f8f8 50%,
+        #d8d8d8 75%,
+        #b0b0b0 100%
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-left: 1px solid #999;
+      border-right: 1px solid #999;
+      flex-shrink: 0;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .score {
+      font-size: var(--score-size);
+      font-weight: 900;
+      color: #1a1a1a;
+      text-align: center;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+    }
+
+    .separator-box {
+      width: 32px;
+      height: var(--logo-box-size);
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .separator {
+      font-size: 2em;
+      font-weight: 900;
+      color: #555;
+    }
+
+    /* チーム名枕: 高さを独立して制御（外枠と無関係） */
+    .team-name-box {
+      padding: 0 22px;
+      height: var(--team-name-height);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 120px;
+      background:
+        linear-gradient(180deg,
+          rgba(255,255,255,0.35) 0%,
+          rgba(255,255,255,0.10) 30%,
+          rgba(255,255,255,0.00) 50%,
+          rgba(0,0,0,0.10) 75%,
+          rgba(0,0,0,0.25) 100%
+        ),
+        var(--host-color, #d32f2f);
+      flex-shrink: 0;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .team-name-box.away {
+      background:
+        linear-gradient(180deg,
+          rgba(255,255,255,0.35) 0%,
+          rgba(255,255,255,0.10) 30%,
+          rgba(255,255,255,0.00) 50%,
+          rgba(0,0,0,0.10) 75%,
+          rgba(0,0,0,0.25) 100%
+        ),
+        var(--away-color, #1976d2);
+    }
+
+    .team-name {
+      font-size: var(--team-name-size);
+      font-weight: 900;
+      color: var(--host-text-color, white);
+      text-shadow: var(--host-text-shadow, 1px 1px 4px rgba(0, 0, 0, 0.5));
+      white-space: nowrap;
+      letter-spacing: 1px;
+    }
+
+    .team-name-box.away .team-name {
+      color: var(--away-text-color, white);
+      text-shadow: var(--away-text-shadow, 1px 1px 4px rgba(0, 0, 0, 0.5));
+    }
+  </style>
+</head>
+<body>
+  <div class="scoreboard">
+    <!-- ホームチーム -->
+    <div class="logo-box">
+      <img src="" alt="" class="team-logo" id="hostLogo" onerror="this.style.display='none'">
+    </div>
+    <div class="team-name-box host">
+      <div class="team-name" id="hostName">HOME</div>
+    </div>
+
+    <!-- スコア -->
+    <div class="score-box">
+      <div class="score" id="hostScore">0</div>
+    </div>
+    <div class="separator-box">
+      <div class="separator">-</div>
+    </div>
+    <div class="score-box">
+      <div class="score" id="awayScore">0</div>
+    </div>
+
+    <!-- アウェイチーム -->
+    <div class="team-name-box away">
+      <div class="team-name" id="awayName">AWAY</div>
+    </div>
+    <div class="logo-box">
+      <img src="" alt="" class="team-logo" id="awayLogo" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <script>
+    let currentData = null;
+    let displaySizeSettings = null;
+
+    async function loadData() {
+      try {
+        currentData = await window.electronAPI.getMatchData();
+        updateDisplay(currentData);
+      } catch (error) {
+        console.error('データ読み込みエラー:', error);
+      }
+    }
+
+    window.electronAPI.onUpdateData((data) => {
+      currentData = data;
+      updateDisplay(data);
+    });
+
+    // カラーコードから知覚輝度を計算し、明るい色なら黒・暗い色なら白を返す
+    function getTextColor(hex) {
+      const clean = (hex || '').replace('#', '');
+      if (clean.length !== 6) return { color: 'white', shadow: '1px 1px 4px rgba(0,0,0,0.5)' };
+      const r = parseInt(clean.slice(0, 2), 16);
+      const g = parseInt(clean.slice(2, 4), 16);
+      const b = parseInt(clean.slice(4, 6), 16);
+      const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+      return brightness > 140
+        ? { color: '#1a1a1a', shadow: '0 1px 2px rgba(255,255,255,0.4)' }
+        : { color: 'white',   shadow: '1px 1px 4px rgba(0,0,0,0.5)' };
+    }
+
+    function updateDisplay(data) {
+      if (!data) return;
+
+      const hostColor = data.hostTeam.color || '#d32f2f';
+      const awayColor = data.awayTeam.color || '#1976d2';
+      document.documentElement.style.setProperty('--host-color', hostColor);
+      document.documentElement.style.setProperty('--away-color', awayColor);
+
+      // スコアボード上のチームカラー（独立設定があればそちらを優先）
+      const hostDisplayColor = (data.hostTeam.useScoreColor && data.hostTeam.scoreColor)
+        ? data.hostTeam.scoreColor : hostColor;
+      const awayDisplayColor = (data.awayTeam.useScoreColor && data.awayTeam.scoreColor)
+        ? data.awayTeam.scoreColor : awayColor;
+      document.documentElement.style.setProperty('--host-color', hostDisplayColor);
+      document.documentElement.style.setProperty('--away-color', awayDisplayColor);
+
+      // 表示色でテキストコントラストを計算
+      const hostText = getTextColor(hostDisplayColor);
+      document.documentElement.style.setProperty('--host-text-color', hostText.color);
+      document.documentElement.style.setProperty('--host-text-shadow', hostText.shadow);
+
+      const awayText = getTextColor(awayDisplayColor);
+      document.documentElement.style.setProperty('--away-text-color', awayText.color);
+      document.documentElement.style.setProperty('--away-text-shadow', awayText.shadow);
+
+      document.getElementById('hostName').textContent = data.hostTeam.name.toUpperCase();
+      document.getElementById('hostScore').textContent = data.score.host;
+      document.getElementById('awayScore').textContent = data.score.away;
+
+      const hostLogo = document.getElementById('hostLogo');
+      if (data.hostTeam.logo) {
+        hostLogo.src = data.hostTeam.logo;
+        hostLogo.style.display = 'block';
+      }
+
+      document.getElementById('awayName').textContent = data.awayTeam.name.toUpperCase();
+
+      const awayLogo = document.getElementById('awayLogo');
+      if (data.awayTeam.logo) {
+        awayLogo.src = data.awayTeam.logo;
+        awayLogo.style.display = 'block';
+      }
+
+      if (displaySizeSettings) {
+        applyDisplaySizes(displaySizeSettings);
+      }
+    }
+
+    function applyDisplaySizes(settings) {
+      if (!settings) return;
+      displaySizeSettings = settings;
+
+      const root = document.documentElement;
+
+      // ロゴサイズ → ロゴ枕はCSS calc()で自動スケール
+      if (settings.scoreboardLogoSize) {
+        root.style.setProperty('--logo-size', settings.scoreboardLogoSize + 'px');
+      }
+
+      // スコアサイズ → 3桁対応の幅で計算（係数40で余裕を持たせる）
+      if (settings.scoreboardScoreSize) {
+        root.style.setProperty('--score-size', settings.scoreboardScoreSize + 'em');
+        const boxWidth = Math.round(settings.scoreboardScoreSize * 32 + 10);
+        root.style.setProperty('--score-box-width', boxWidth + 'px');
+      }
+
+      if (settings.scoreboardTeamNameSize) {
+        root.style.setProperty('--team-name-size', settings.scoreboardTeamNameSize + 'em');
+      }
+
+      // チーム名枕の高さ: ロゴ枕サイズ × % をpxで計算
+      // → 外枠がないので隙間は透過になり、キー色が露出しない
+      const logoSize = settings.scoreboardLogoSize || 65;
+      const logoBoxSize = logoSize + 26;
+      const heightPct = settings.scoreboardTeamNameHeight !== undefined
+        ? settings.scoreboardTeamNameHeight : 75;
+      const teamNameHeightPx = Math.round(logoBoxSize * heightPct / 100);
+      root.style.setProperty('--team-name-height', teamNameHeightPx + 'px');
+    }
+
+    window.electronAPI.onUpdateDisplaySizes((settings) => {
+      applyDisplaySizes(settings);
+    });
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const savedSettings = await window.electronAPI.getDisplaySizes();
+        if (savedSettings) applyDisplaySizes(savedSettings);
+      } catch (error) {
+        console.error('設定の読み込みに失敗:', error);
+      }
+      loadData();
+    });
+  </script>
+</body>
+</html>
