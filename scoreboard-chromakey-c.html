@@ -63,7 +63,19 @@
       justify-content: center;
       padding: 13px;
       flex-shrink: 0;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    /* ホーム側: 影を右へ／アウェイ側: 影を左へ */
+    .scoreboard .logo-box:first-child {
+      position: relative;
+      z-index: 2;
+      box-shadow: 10px 0 18px rgba(0, 0, 0, 0.45);
+    }
+
+    .scoreboard .logo-box:last-child {
+      position: relative;
+      z-index: 2;
+      box-shadow: -10px 0 18px rgba(0, 0, 0, 0.45);
     }
 
     .team-logo {
