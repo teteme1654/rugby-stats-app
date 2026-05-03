@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Ovaly - 選手交代スライド</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #000;
+      font-family: 'Arial Black', 'Arial', sans-serif;
+      color: white;
+    }
+
+    .standby-indicator {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.25);
+      letter-spacing: 0.1em;
+      z-index: 100;
+      user-select: none;
+    }
+
+    .slide-overlay {
+      position: fixed;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.7s ease;
+      pointer-events: none;
+    }
+
+    .slide-overlay.active {
+      opacity: 1;
+    }
+
+    .bg-image {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .bg-color-overlay {
+      position: absolute;
+      inset: 0;
+    }
+
+    .bg-team-logo {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 55%;
+      height: 70%;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      opacity: 0.3;
+    }
+
+    .content {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: stretch;
+    }
+
+    .player-card {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .change-label {
+      position: absolute;
+      top: 40px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 2.8em;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+      padding: 8px 40px;
+      border-radius: 4px;
+      z-index: 2;
+    }
+
+    .out-card .change-label {
+      color: #fff;
+      background: rgba(220, 50, 50, 0.75);
+    }
+
+    .in-card .change-label {
+      color: #fff;
+      background: rgba(40, 180, 80, 0.75);
+    }
+
+    /* 写真は絶対配置で背後に表示 */
+    .player-photo-wrap {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 1;
+    }
+
+    .player-photo {
+      height: 90vh;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      object-position: bottom;
+      filter: drop-shadow(0 8px 30px rgba(0,0,0,0.9));
+    }
+
+    .player-photo-placeholder {
+      height: 90vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5em;
+      opacity: 0.2;
+    }
+
+    /* テロップは各要素を絶対配置で固定 → 名前の長さに関係なく両カードで揃う */
+    .player-info {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 30px;
+      text-align: center;
+      z-index: 2;
+      background: rgba(0, 0, 0, 0.55);
+      padding: 16px 20px 20px;
+    }
+
+    .player-number {
+      font-size: 2.6em;
+      font-weight: 900;
+      opacity: 0.9;
+      letter-spacing: 0.05em;
+    }
+
+    .player-name {
+      font-size: 2.2em;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      margin-top: 4px;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 0 20px;
+    }
+
+    .player-position {
+      font-size: 1.3em;
+      font-weight: 700;
+      opacity: 0.8;
+      margin-top: 6px;
+      letter-spacing: 0.1em;
+    }
+
+    .divider {
+      width: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5em;
+      opacity: 0.5;
+      flex-shrink: 0;
+      z-index: 2;
+    }
+  </style>
+</head>
+<body>
+  <div class="standby-indicator" id="standbyIndicator">STANDBY</div>
+
+  <div class="slide-overlay" id="slideOverlay">
+    <div class="bg-image" id="bgImage"></div>
+    <div class="bg-color-overlay" id="bgColorOverlay"></div>
+    <div class="bg-team-logo" id="bgTeamLogo"></div>
+
+    <div class="content">
+      <div class="player-card out-card">
+        <div class="change-label">OUT</div>
+        <div class="player-photo-wrap" id="outPhotoWrap">
+          <div class="player-photo-placeholder">?</div>
+        </div>
+        <div class="player-info">
+          <div class="player-number" id="outNumber">#</div>
+          <div class="player-name" id="outName">-</div>
+        </div>
+      </div>
+
+      <div class="divider">→</div>
+
+      <div class="player-card in-card">
+        <div class="change-label">IN</div>
+        <div class="player-photo-wrap" id="inPhotoWrap">
+          <div class="player-photo-placeholder">?</div>
+        </div>
+        <div class="player-info">
+          <div class="player-number" id="inNumber">#</div>
+          <div class="player-name" id="inName">-</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function hexToRgba(hex, alpha) {
+      const safeHex = (hex || '#333333').replace('#', '');
+      const r = parseInt(safeHex.slice(0, 2), 16) || 50;
+      const g = parseInt(safeHex.slice(2, 4), 16) || 50;
+      const b = parseInt(safeHex.slice(4, 6), 16) || 50;
+      return `rgba(${r},${g},${b},${alpha})`;
+    }
+
+    window.electronAPI.onSubstitutionSlidePrepare((data) => {
+      const bgImage = document.getElementById('bgImage');
+      if (data.backgroundImage) {
+        bgImage.style.backgroundImage = `url("${data.backgroundImage}")`;
+      } else {
+        bgImage.style.background = '#1a1a2e';
+      }
+
+      document.getElementById('bgColorOverlay').style.background = hexToRgba(data.teamColor, 0.45);
+
+      const bgLogo = document.getElementById('bgTeamLogo');
+      if (data.teamLogo) {
+        bgLogo.style.backgroundImage = `url("${data.teamLogo}")`;
+      }
+
+      document.getElementById('outNumber').textContent = 'No.' + data.outPlayer.number;
+      document.getElementById('outName').textContent = data.outPlayer.name;
+      const outWrap = document.getElementById('outPhotoWrap');
+      outWrap.innerHTML = data.outPlayer.image
+        ? `<img class="player-photo" src="${data.outPlayer.image}">`
+        : `<div class="player-photo-placeholder">?</div>`;
+
+      document.getElementById('inNumber').textContent = 'No.' + data.inPlayer.number;
+      document.getElementById('inName').textContent = data.inPlayer.name;
+      const inWrap = document.getElementById('inPhotoWrap');
+      inWrap.innerHTML = data.inPlayer.image
+        ? `<img class="player-photo" src="${data.inPlayer.image}">`
+        : `<div class="player-photo-placeholder">?</div>`;
+
+      const ind = document.getElementById('standbyIndicator');
+      ind.textContent = `STANDBY: #${data.outPlayer.number} ${data.outPlayer.name} → #${data.inPlayer.number} ${data.inPlayer.name}`;
+      ind.style.display = 'block';
+    });
+
+    window.electronAPI.onSubstitutionSlideTrigger(() => {
+      document.getElementById('slideOverlay').classList.add('active');
+      document.getElementById('standbyIndicator').style.display = 'none';
+    });
+
+    window.electronAPI.onSubstitutionSlideReset(() => {
+      document.getElementById('slideOverlay').classList.remove('active');
+      const ind = document.getElementById('standbyIndicator');
+      ind.style.display = 'block';
+      ind.textContent = 'STANDBY';
+    });
+  </script>
+</body>
+</html>
