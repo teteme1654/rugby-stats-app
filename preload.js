@@ -152,6 +152,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // substitution-slide.html 向けリスナー
   onSubstitutionSlidePrepare: (cb) => ipcRenderer.on('substitution-slide-prepare', (_, data) => cb(data)),
   onSubstitutionSlideTrigger: (cb) => ipcRenderer.on('substitution-slide-trigger', () => cb()),
-  onSubstitutionSlideReset: (cb) => ipcRenderer.on('substitution-slide-reset', () => cb())
+  onSubstitutionSlideReset: (cb) => ipcRenderer.on('substitution-slide-reset', () => cb()),
+
+  // ============================================================
+  // Multi-PC (Main/Slave) 機能
+  // ============================================================
+  getMode: () => ipcRenderer.invoke('get-mode'),
+  setMode: (mode) => ipcRenderer.invoke('set-mode', mode),
+  getLocalIp: () => ipcRenderer.invoke('get-local-ip'),
+  broadcastSubstitutionEntry: (entry) => ipcRenderer.invoke('broadcast-substitution-entry', entry),
+  getWsClientCount: () => ipcRenderer.invoke('get-ws-client-count')
 });
 

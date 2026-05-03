@@ -667,6 +667,35 @@
       </div>
     </div>
 
+    <!-- Multi-PC設定 -->
+    <div class="control-panel">
+      <h2 class="section-title">Multi-PC設定</h2>
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+        <label style="font-weight: bold; min-width: 60px;">モード</label>
+        <select id="appModeSelect" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+          <option value="main">Main（サーバー）</option>
+          <option value="slave">Slave（クライアント）</option>
+        </select>
+        <button onclick="applyAppMode()" style="background: #667eea; color: white; padding: 8px 16px; border: none; border-radius: 5px; font-size: 0.9em; cursor: pointer;">適用（要再起動）</button>
+      </div>
+
+      <!-- Main mode 表示 -->
+      <div id="mainModeInfo" style="background: #f0f4ff; border-radius: 6px; padding: 10px 14px; font-size: 0.9em; display: none;">
+        <div>WebSocket IP: <strong id="localIpDisplay">-</strong> : <strong>8765</strong></div>
+        <div style="margin-top: 4px;">接続中Slave: <span id="wsClientCount" style="font-weight: bold;">0</span> 台</div>
+      </div>
+
+      <!-- Slave mode 表示 -->
+      <div id="slaveModeInfo" style="display: none;">
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <input id="masterIpInput" type="text" placeholder="Master IP（例: 192.168.1.100）"
+                 style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 0.95em;">
+          <button onclick="connectToMaster()" style="background: #4CAF50; color: white; padding: 8px 16px; border: none; border-radius: 5px; font-size: 0.9em; font-weight: bold; cursor: pointer;">接続</button>
+        </div>
+        <div id="wsStatus" style="margin-top: 8px; font-size: 0.9em; color: #999;">未接続</div>
+      </div>
+    </div>
+
     </div><!-- /tab-display -->
 
     <!-- ========== Tab 3: スコア制御 ========== -->
@@ -980,6 +1009,70 @@
   </div><!-- /container -->
 
   <script>
+    // ========== Multi-PC (Main/Slave) ==========
+    let appMode = 'main';
+    let wsConnection = null;
+
+    async function initAppMode() {
+      appMode = await window.electronAPI.getMode();
+      const select = document.getElementById('appModeSelect');
+      if (select) select.value = appMode;
+
+      if (appMode === 'main') {
+        document.getElementById('mainModeInfo').style.display = 'block';
+        const ip = await window.electronAPI.getLocalIp();
+        document.getElementById('localIpDisplay').textContent = ip;
+        setInterval(async () => {
+          const count = await window.electronAPI.getWsClientCount();
+          document.getElementById('wsClientCount').textContent = count;
+        }, 2000);
+      } else {
+        document.getElementById('slaveModeInfo').style.display = 'block';
+        // Slaveモード: スライド制御タブのみ表示
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+          if (!btn.classList.contains('tab-btn-slide')) btn.style.display = 'none';
+        });
+        switchTab('tab-slide');
+      }
+    }
+
+    async function applyAppMode() {
+      const mode = document.getElementById('appModeSelect').value;
+      await window.electronAPI.setMode(mode);
+      alert(`モードを「${mode === 'main' ? 'Main' : 'Slave'}」に変更しました。再起動してください。`);
+    }
+
+    function connectToMaster() {
+      const ip = document.getElementById('masterIpInput').value.trim();
+      if (!ip) { alert('IPアドレスを入力してください'); return; }
+
+      const statusEl = document.getElementById('wsStatus');
+      if (wsConnection) wsConnection.close();
+
+      wsConnection = new WebSocket(`ws://${ip}:8765`);
+      wsConnection.onopen = () => {
+        statusEl.textContent = `接続中 ✓  ${ip}:8765`;
+        statusEl.style.color = '#2e7d32';
+        statusEl.style.fontWeight = 'bold';
+      };
+      wsConnection.onclose = () => {
+        statusEl.textContent = '切断されました';
+        statusEl.style.color = '#c62828';
+        statusEl.style.fontWeight = 'normal';
+      };
+      wsConnection.onerror = () => {
+        statusEl.textContent = '接続エラー（IPを確認してください）';
+        statusEl.style.color = '#c62828';
+      };
+      wsConnection.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'substitution-history-add') {
+          substitutionHistory.push(msg.entry);
+          updateSubstitutionHistoryButtons();
+        }
+      };
+    }
+
     // ========== タブ切り替え ==========
     function switchTab(tabId) {
       const tabIds = ['tab-prep', 'tab-display', 'tab-score', 'tab-slide'];
@@ -1483,7 +1576,9 @@
           const preOut = prePlayers.find(p => p.number === sub.out);
           const preIn = prePlayers.find(p => p.number === sub.in);
           if (preOut && preIn) {
-            substitutionHistory.push({ team, teamName: preData[tk].name, outPlayer: preOut, inPlayer: preIn });
+            const entry = { team, teamName: preData[tk].name, outPlayer: preOut, inPlayer: preIn };
+            substitutionHistory.push(entry);
+            if (appMode === 'main') window.electronAPI.broadcastSubstitutionEntry(entry);
           }
         }
         updateSubstitutionHistoryButtons();
@@ -1893,6 +1988,7 @@
       loadDisplaySizes();
       syncWindowButtonStates();
       loadScoreboardDesign();
+      initAppMode();
     });
 
     // スコアボードデザインを保存

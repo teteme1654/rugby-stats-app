@@ -27,11 +27,15 @@
       "!node_modules"
     ],
     "win": {
-      "target": ["nsis", "portable"],
+      "target": [
+        "nsis",
+        "portable"
+      ],
       "sign": null
     }
   },
   "dependencies": {
+    "ws": "^8.20.0",
     "xlsx": "^0.18.5"
   }
 }

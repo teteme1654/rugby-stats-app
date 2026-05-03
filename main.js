@@ -1,9 +1,45 @@
 const { app, BrowserWindow, ipcMain, dialog, screen } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { WebSocketServer } = require('ws');
+const os = require('os');
 
 let mainWindow = null;
 let displayWindow = null;
+
+// ============================================================
+// WebSocket Main/Slave 基盤
+// ============================================================
+let wss = null;
+
+function getLocalIp() {
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+  return '127.0.0.1';
+}
+
+function startWsServer() {
+  if (wss) return;
+  wss = new WebSocketServer({ port: 8765 });
+  wss.on('connection', (ws) => {
+    console.log('Slave connected:', ws._socket.remoteAddress);
+  });
+  console.log(`WebSocket server listening on ${getLocalIp()}:8765`);
+}
+
+function broadcastToSlaves(data) {
+  if (!wss) return;
+  const msg = JSON.stringify(data);
+  wss.clients.forEach(client => {
+    if (client.readyState === 1) client.send(msg);
+  });
+}
 let scoreboardWindow = null;
 let scoreboardChromakeyWindow = null;
 let substitutionSlideWindow = null;
@@ -38,7 +74,10 @@ let displaySettings = {
 
   // 選手交代スライド設定
   playerImagesBasePath: '',  // 選手画像フォルダのベースパス
-  substitutionBgImage: ''    // スライド背景画像（base64）
+  substitutionBgImage: '',   // スライド背景画像（base64）
+
+  // Multi-PC設定
+  appMode: 'main',           // 'main' or 'slave'
 };
 
 // 設定ファイルのパス
@@ -320,6 +359,7 @@ function createSubstitutionSlideWindow() {
 app.whenReady().then(() => {
   loadDisplaySettings(); // ディスプレイ設定を読み込む
   loadTeamConfig();      // チーム設定を読み込む
+  if ((displaySettings.appMode || 'main') === 'main') startWsServer();
   createMainWindow();
   createDisplayWindow();
 });
@@ -1431,3 +1471,24 @@ ipcMain.handle('set-substitution-bg-image', async () => {
     return null;
   }
 });
+
+// ============================================================
+// Multi-PC (Main/Slave) IPC
+// ============================================================
+
+ipcMain.handle('get-mode', () => displaySettings.appMode || 'main');
+
+ipcMain.handle('set-mode', (_, mode) => {
+  displaySettings.appMode = mode;
+  saveDisplaySettings();
+  return { success: true };
+});
+
+ipcMain.handle('get-local-ip', () => getLocalIp());
+
+ipcMain.handle('broadcast-substitution-entry', (_, entry) => {
+  broadcastToSlaves({ type: 'substitution-history-add', entry });
+  return { success: true };
+});
+
+ipcMain.handle('get-ws-client-count', () => (wss ? wss.clients.size : 0));
