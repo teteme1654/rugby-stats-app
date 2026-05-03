@@ -445,7 +445,7 @@
         .replace(/[\u3041-\u3096]/g, (match) => {
           return String.fromCharCode(match.charCodeAt(0) + 0x60);
         })
-        .replace(/[\u30a1-\u30f6]/g, (match) => {
+        .replace(/[\u30a1-\u30fc]/g, (match) => {
           const kanaMap = {
             'ァ':'ｧ','ア':'ｱ','ィ':'ｨ','イ':'ｲ','ゥ':'ｩ','ウ':'ｳ','ェ':'ｪ','エ':'ｴ','ォ':'ｫ','オ':'ｵ',
             'カ':'ｶ','ガ':'ｶﾞ','キ':'ｷ','ギ':'ｷﾞ','ク':'ｸ','グ':'ｸﾞ','ケ':'ｹ','ゲ':'ｹﾞ','コ':'ｺ','ゴ':'ｺﾞ',
@@ -600,7 +600,7 @@
 
       container.innerHTML = onFieldPlayers.map(p => {
         // 名前が13文字以上の場合は半角カナに変換
-        const displayName = p.name.length > 13 ? toHalfWidthKana(p.name) : p.name;
+        const displayName = p.name.length > 12 ? toHalfWidthKana(p.name) : p.name;
         
         return `
           <div class="player-item">

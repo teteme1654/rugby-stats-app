@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ovaly - スコアボード デザインC</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial Black', 'Arial', sans-serif;
+      background: transparent;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      -webkit-app-region: drag;
+    }
+
+    /*
+     * --logo-size      : ロゴ画像サイズ (px)
+     * --logo-box-size  : ロゴ枕の幅・高さ = ロゴサイズ + パディング (自動計算)
+     * --score-box-width: スコア枕の幅 (スコアフォントに比例して JS で計算)
+     * --score-size     : スコアフォントサイズ (em)
+     */
+    :root {
+      --logo-size: 65px;
+      --logo-box-size: calc(var(--logo-size) + 26px);
+      --score-box-width: 112px;
+      --score-size: 3.2em;
+      --scoreboard-x: 0vw;
+      --scoreboard-y: 0vh;
+      --scoreboard-scale: 1;
+    }
+
+    .scoreboard {
+      display: flex;
+      align-items: center;
+      -webkit-app-region: no-drag;
+      transform: translate(var(--scoreboard-x), var(--scoreboard-y)) scale(var(--scoreboard-scale));
+      transform-origin: center center;
+    }
+
+    /* ロゴ枕 */
+    .logo-box {
+      width: var(--logo-box-size);
+      height: var(--logo-box-size);
+      background: linear-gradient(180deg,
+        #b8b8b8 0%,
+        #e8e8e8 25%,
+        #f8f8f8 50%,
+        #d8d8d8 75%,
+        #b0b0b0 100%
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 13px;
+      flex-shrink: 0;
+    }
+
+    /* ホーム側: 影を右へ／アウェイ側: 影を左へ */
+    .scoreboard .logo-box:first-child {
+      position: relative;
+      z-index: 2;
+      box-shadow: 10px 0 18px rgba(0, 0, 0, 0.45);
+    }
+
+    .scoreboard .logo-box:last-child {
+      position: relative;
+      z-index: 2;
+      box-shadow: -10px 0 18px rgba(0, 0, 0, 0.45);
+    }
+
+    .team-logo {
+      width: var(--logo-size);
+      height: var(--logo-size);
+      object-fit: contain;
+    }
+
+    /* スコア枕 */
+    .score-box {
+      width: var(--score-box-width);
+      height: var(--logo-box-size);
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-left: 1px solid #ddd;
+      border-right: 1px solid #ddd;
+      flex-shrink: 0;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .score {
+      font-size: var(--score-size);
+      font-weight: 900;
+      color: #111111;
+      text-align: center;
+      text-shadow: none;
+    }
+
+    .separator-box {
+      width: 32px;
+      height: var(--logo-box-size);
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .separator {
+      font-size: 2em;
+      font-weight: 900;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="scoreboard">
+    <!-- ホームチーム -->
+    <div class="logo-box">
+      <img src="" alt="" class="team-logo" id="hostLogo" onerror="this.style.display='none'">
+    </div>
+
+    <!-- スコア -->
+    <div class="score-box">
+      <div class="score" id="hostScore">0</div>
+    </div>
+    <div class="separator-box">
+      <div class="separator">-</div>
+    </div>
+    <div class="score-box">
+      <div class="score" id="awayScore">0</div>
+    </div>
+
+    <!-- アウェイチーム -->
+    <div class="logo-box">
+      <img src="" alt="" class="team-logo" id="awayLogo" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <script>
+    let currentData = null;
+    let displaySizeSettings = null;
+
+    async function loadData() {
+      try {
+        currentData = await window.electronAPI.getMatchData();
+        updateDisplay(currentData);
+      } catch (error) {
+        console.error('データ読み込みエラー:', error);
+      }
+    }
+
+    window.electronAPI.onUpdateData((data) => {
+      currentData = data;
+      updateDisplay(data);
+    });
+
+    function updateDisplay(data) {
+      if (!data) return;
+
+      document.getElementById('hostScore').textContent = data.score.host;
+      document.getElementById('awayScore').textContent = data.score.away;
+
+      const hostLogo = document.getElementById('hostLogo');
+      if (data.hostTeam.logo) {
+        hostLogo.src = data.hostTeam.logo;
+        hostLogo.style.display = 'block';
+      }
+
+      const awayLogo = document.getElementById('awayLogo');
+      if (data.awayTeam.logo) {
+        awayLogo.src = data.awayTeam.logo;
+        awayLogo.style.display = 'block';
+      }
+
+      if (displaySizeSettings) {
+        applyDisplaySizes(displaySizeSettings);
+      }
+    }
+
+    function applyDisplaySizes(settings) {
+      if (!settings) return;
+      displaySizeSettings = settings;
+
+      const root = document.documentElement;
+
+      if (settings.scoreboardLogoSize) {
+        root.style.setProperty('--logo-size', settings.scoreboardLogoSize + 'px');
+      }
+
+      if (settings.scoreboardScoreSize) {
+        root.style.setProperty('--score-size', settings.scoreboardScoreSize + 'em');
+        const boxWidth = Math.round(settings.scoreboardScoreSize * 32 + 10);
+        root.style.setProperty('--score-box-width', boxWidth + 'px');
+      }
+
+      if (settings.scoreboardX !== undefined) root.style.setProperty('--scoreboard-x', settings.scoreboardX + 'vw');
+      if (settings.scoreboardY !== undefined) root.style.setProperty('--scoreboard-y', settings.scoreboardY + 'vh');
+      if (settings.scoreboardScale !== undefined) root.style.setProperty('--scoreboard-scale', settings.scoreboardScale);
+    }
+
+    window.electronAPI.onUpdateDisplaySizes((settings) => {
+      applyDisplaySizes(settings);
+    });
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const savedSettings = await window.electronAPI.getDisplaySizes();
+        if (savedSettings) applyDisplaySizes(savedSettings);
+      } catch (error) {
+        console.error('設定の読み込みに失敗:', error);
+      }
+      loadData();
+    });
+  </script>
+</body>
+</html>

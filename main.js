@@ -6,6 +6,7 @@ let mainWindow = null;
 let displayWindow = null;
 let scoreboardWindow = null;
 let scoreboardChromakeyWindow = null;
+let substitutionSlideWindow = null;
 
 // ディスプレイ設定を保存
 let displaySettings = {
@@ -28,7 +29,16 @@ let displaySettings = {
   scoreboardDesign: 'scoreboard-chromakey.html', // デザインファイル名
 
   // デザインB専用設定
-  scoreboardTeamNameHeight: 75  // チーム名枕の高さ（%）
+  scoreboardTeamNameHeight: 75,  // チーム名枕の高さ（%）
+
+  // スコアボード位置・スケール
+  scoreboardX: 0,      // 水平オフセット（vw）
+  scoreboardY: 0,      // 垂直オフセット（vh）
+  scoreboardScale: 1.0, // 全体スケール
+
+  // 選手交代スライド設定
+  playerImagesBasePath: '',  // 選手画像フォルダのベースパス
+  substitutionBgImage: ''    // スライド背景画像（base64）
 };
 
 // 設定ファイルのパス
@@ -276,6 +286,34 @@ function createScoreboardChromakeyWindow() {
   
   scoreboardChromakeyWindow.on('closed', () => {
     scoreboardChromakeyWindow = null;
+  });
+}
+
+function createSubstitutionSlideWindow() {
+  const displays = screen.getAllDisplays();
+  let targetDisplay;
+  if (displaySettings.displayWindowIndex !== null && displays[displaySettings.displayWindowIndex]) {
+    targetDisplay = displays[displaySettings.displayWindowIndex];
+  } else {
+    targetDisplay = displays.find(d => d.bounds.x !== 0 || d.bounds.y !== 0) || displays[0];
+  }
+
+  substitutionSlideWindow = new BrowserWindow({
+    x: targetDisplay.bounds.x,
+    y: targetDisplay.bounds.y,
+    fullscreen: true,
+    frame: false,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js')
+    },
+    title: 'Ovaly - 選手交代スライド'
+  });
+
+  substitutionSlideWindow.loadFile('substitution-slide.html');
+  substitutionSlideWindow.on('closed', () => {
+    substitutionSlideWindow = null;
   });
 }
 
@@ -727,6 +765,7 @@ ipcMain.handle('get-window-states', () => {
   return {
     display: !!(displayWindow && !displayWindow.isDestroyed()),
     chromakey: !!(scoreboardChromakeyWindow && !scoreboardChromakeyWindow.isDestroyed()),
+    substitutionSlide: !!(substitutionSlideWindow && !substitutionSlideWindow.isDestroyed()),
   };
 });
 
@@ -1268,7 +1307,7 @@ ipcMain.handle('get-preset-list', async (event) => {
     if (!fs.existsSync(presetsDir)) {
       return [];
     }
-    
+
     const files = fs.readdirSync(presetsDir);
     return files
       .filter(f => f.endsWith('.json'))
@@ -1280,104 +1319,115 @@ ipcMain.handle('get-preset-list', async (event) => {
 });
 
 // ============================================================
-// 選手画像パス解決機能（Fuzzy Match）
+// 選手交代スライド機能
 // ============================================================
 
-/**
- * 選手画像のパスを自動解決する
- * 優先順位：
- *   1. [Name].png (完全一致)
- *   2. [Name(スペースなし)].png (スペース削除)
- *   3. [Name(スペースなし)]_nobg.png (透過PNG)
- *   4. デフォルト画像 (no_image.png)
- * 
- * @param {string} playerName - CSV の Name 列（日本語名）
- * @param {string} teamDir - チームディレクトリ（例: "stats/images/players/静岡BR"）
- * @returns {string} - 解決された画像パス
- */
-ipcMain.handle('resolve-player-image', async (event, playerName, teamDir) => {
-  try {
-    // スペースを削除した名前
-    const nameNoSpace = playerName.replace(/\s+/g, '');
-    
-    // 探索候補リスト
-    const candidates = [
-      path.join(__dirname, teamDir, `${playerName}.png`),           // 完全一致
-      path.join(__dirname, teamDir, `${nameNoSpace}.png`),          // スペースなし
-      path.join(__dirname, teamDir, 'nobg', `${nameNoSpace}_nobg.png`), // 透過PNG
-      path.join(__dirname, 'assets', 'images', 'no_image.png')     // デフォルト
-    ];
-    
-    // 存在するファイルを探す
-    for (const candidate of candidates) {
-      if (fs.existsSync(candidate)) {
-        console.log(`[Fuzzy Match] ${playerName} → ${candidate}`);
-        return candidate;
+// 選手交代スライドの待機準備
+ipcMain.handle('prepare-substitution-slide', async (event, slideData) => {
+  const storedPath = displaySettings.playerImagesBasePath || '';
+  // 相対パスで保存されている場合は絶対パスに解決する
+  const basePath = storedPath ? path.resolve(__dirname, storedPath) : '';
+
+  function loadPlayerImage(teamName, playerName) {
+    if (!basePath) return null;
+    const imgPath = path.join(basePath, teamName, 'nobg', `${playerName}_nobg.png`);
+    if (fs.existsSync(imgPath)) {
+      try {
+        const buf = fs.readFileSync(imgPath);
+        return `data:image/png;base64,${buf.toString('base64')}`;
+      } catch (e) {
+        console.warn('選手画像読み込みエラー:', imgPath, e.message);
+        return null;
       }
     }
-    
-    // 見つからない場合はデフォルト
-    console.warn(`[Fuzzy Match] ${playerName} の画像が見つかりません。デフォルト画像を使用します。`);
-    return candidates[candidates.length - 1]; // no_image.png
-    
-  } catch (error) {
-    console.error('画像パス解決エラー:', error);
-    return path.join(__dirname, 'assets', 'images', 'no_image.png');
+    return null;
   }
+
+  const enrichedData = {
+    ...slideData,
+    backgroundImage: displaySettings.substitutionBgImage || null,
+    outPlayer: {
+      ...slideData.outPlayer,
+      image: loadPlayerImage(slideData.teamName, slideData.outPlayer.name)
+    },
+    inPlayer: {
+      ...slideData.inPlayer,
+      image: loadPlayerImage(slideData.teamName, slideData.inPlayer.name)
+    }
+  };
+
+  if (!substitutionSlideWindow || substitutionSlideWindow.isDestroyed()) {
+    createSubstitutionSlideWindow();
+    substitutionSlideWindow.webContents.on('did-finish-load', () => {
+      substitutionSlideWindow.webContents.send('substitution-slide-prepare', enrichedData);
+    });
+  } else {
+    substitutionSlideWindow.webContents.send('substitution-slide-prepare', enrichedData);
+  }
+
+  return { success: true };
 });
 
-// ============================================================
-// レイアウト設定の保存/読み込み
-// ============================================================
-
-/**
- * レイアウト設定を保存
- * @param {string} layoutType - 'visitor' or 'home'
- * @param {object} config - レイアウト設定オブジェクト
- */
-ipcMain.handle('save-layout-config', async (event, layoutType, config) => {
-  try {
-    const configDir = path.join(__dirname, 'config');
-    
-    // config/ フォルダがなければ作成
-    if (!fs.existsSync(configDir)) {
-      fs.mkdirSync(configDir, { recursive: true });
-    }
-    
-    const configPath = path.join(configDir, `${layoutType}_layout.json`);
-    fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
-    
-    console.log(`✅ レイアウト設定を保存しました: ${configPath}`);
-    return { success: true };
-    
-  } catch (error) {
-    console.error('レイアウト設定保存エラー:', error);
-    throw error;
+// スライド送出（表示）
+ipcMain.handle('trigger-substitution-slide', () => {
+  if (substitutionSlideWindow && !substitutionSlideWindow.isDestroyed()) {
+    substitutionSlideWindow.webContents.send('substitution-slide-trigger');
   }
+  return { success: true };
 });
 
-/**
- * レイアウト設定を読み込み
- * @param {string} layoutType - 'visitor' or 'home'
- * @returns {object|null} - レイアウト設定オブジェクト or null
- */
-ipcMain.handle('load-layout-config', async (event, layoutType) => {
+// スライドリセット（待機状態へ戻す）
+ipcMain.handle('reset-substitution-slide', () => {
+  if (substitutionSlideWindow && !substitutionSlideWindow.isDestroyed()) {
+    substitutionSlideWindow.webContents.send('substitution-slide-reset');
+  }
+  return { success: true };
+});
+
+// スライドウィンドウを閉じる
+ipcMain.handle('close-substitution-slide', () => {
+  if (substitutionSlideWindow && !substitutionSlideWindow.isDestroyed()) {
+    substitutionSlideWindow.close();
+  }
+  return { success: true };
+});
+
+// 選手画像フォルダパスを設定
+ipcMain.handle('set-player-images-path', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openDirectory'],
+    title: '選手画像フォルダを選択'
+  });
+  if (result.canceled) return null;
+  // 相対パスに変換して保存（同ドライブなら相対、クロスドライブなら絶対のまま）
+  const relativePath = path.relative(__dirname, result.filePaths[0]);
+  displaySettings.playerImagesBasePath = relativePath;
+  saveDisplaySettings();
+  return relativePath;
+});
+
+// 選手画像フォルダパスを取得
+ipcMain.handle('get-player-images-path', () => {
+  return displaySettings.playerImagesBasePath || '';
+});
+
+// スライド背景画像を設定
+ipcMain.handle('set-substitution-bg-image', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ['openFile'],
+    filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg'] }],
+    title: 'スライド背景画像を選択'
+  });
+  if (result.canceled) return null;
   try {
-    const configPath = path.join(__dirname, 'config', `${layoutType}_layout.json`);
-    
-    if (!fs.existsSync(configPath)) {
-      console.log(`⚠️ 設定ファイルが見つかりません: ${configPath}`);
-      return null;
-    }
-    
-    const content = fs.readFileSync(configPath, 'utf-8');
-    const config = JSON.parse(content);
-    
-    console.log(`✅ レイアウト設定を読み込みました: ${configPath}`);
-    return config;
-    
-  } catch (error) {
-    console.error('レイアウト設定読み込みエラー:', error);
+    const buf = fs.readFileSync(result.filePaths[0]);
+    const ext = path.extname(result.filePaths[0]).toLowerCase();
+    const mime = (ext === '.jpg' || ext === '.jpeg') ? 'image/jpeg' : 'image/png';
+    displaySettings.substitutionBgImage = `data:${mime};base64,${buf.toString('base64')}`;
+    saveDisplaySettings();
+    return path.basename(result.filePaths[0]);
+  } catch (e) {
+    console.error('背景画像読み込みエラー:', e);
     return null;
   }
 });

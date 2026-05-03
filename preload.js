@@ -120,25 +120,38 @@ contextBridge.exposeInMainWorld('electronAPI', {
   
   // 表示サイズ設定更新イベントのリスナー
   onUpdateDisplaySizes: (callback) => ipcRenderer.on('update-display-sizes', (event, settings) => callback(settings)),
-  
-  // ============================================================
-  // 選手画像パス解決機能（Fuzzy Match）
-  // ============================================================
-  
-  // 選手画像パスを自動解決（優先順位: 完全一致 → スペースなし → _nobg.png → デフォルト）
-  resolvePlayerImage: (playerName, teamDir) => ipcRenderer.invoke('resolve-player-image', playerName, teamDir),
-  
-  // ============================================================
-  // レイアウト設定の保存/読み込み
-  // ============================================================
-  
-  // レイアウト設定を保存（visitor or home）
-  saveLayoutConfig: (layoutType, config) => ipcRenderer.invoke('save-layout-config', layoutType, config),
-  
-  // レイアウト設定を読み込み（visitor or home）
-  loadLayoutConfig: (layoutType) => ipcRenderer.invoke('load-layout-config', layoutType),
 
   // ウィンドウの表示状態を取得
   getWindowStates: () => ipcRenderer.invoke('get-window-states'),
+
+  // ============================================================
+  // 選手交代スライド機能
+  // ============================================================
+
+  // スライド待機準備
+  prepareSubstitutionSlide: (slideData) => ipcRenderer.invoke('prepare-substitution-slide', slideData),
+
+  // スライド送出
+  triggerSubstitutionSlide: () => ipcRenderer.invoke('trigger-substitution-slide'),
+
+  // スライドリセット（待機状態へ）
+  resetSubstitutionSlide: () => ipcRenderer.invoke('reset-substitution-slide'),
+
+  // スライドウィンドウを閉じる
+  closeSubstitutionSlide: () => ipcRenderer.invoke('close-substitution-slide'),
+
+  // 選手画像フォルダを設定
+  setPlayerImagesPath: () => ipcRenderer.invoke('set-player-images-path'),
+
+  // 選手画像フォルダパスを取得
+  getPlayerImagesPath: () => ipcRenderer.invoke('get-player-images-path'),
+
+  // スライド背景画像を設定
+  setSubstitutionBgImage: () => ipcRenderer.invoke('set-substitution-bg-image'),
+
+  // substitution-slide.html 向けリスナー
+  onSubstitutionSlidePrepare: (cb) => ipcRenderer.on('substitution-slide-prepare', (_, data) => cb(data)),
+  onSubstitutionSlideTrigger: (cb) => ipcRenderer.on('substitution-slide-trigger', () => cb()),
+  onSubstitutionSlideReset: (cb) => ipcRenderer.on('substitution-slide-reset', () => cb())
 });
 
