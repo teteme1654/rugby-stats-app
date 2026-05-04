@@ -161,6 +161,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setMode: (mode) => ipcRenderer.invoke('set-mode', mode),
   getLocalIp: () => ipcRenderer.invoke('get-local-ip'),
   broadcastSubstitutionEntry: (entry) => ipcRenderer.invoke('broadcast-substitution-entry', entry),
-  getWsClientCount: () => ipcRenderer.invoke('get-ws-client-count')
+  getWsClientCount: () => ipcRenderer.invoke('get-ws-client-count'),
+  saveMatchDataFromSlave: (data) => ipcRenderer.invoke('save-match-data-from-slave', data)
 });
 

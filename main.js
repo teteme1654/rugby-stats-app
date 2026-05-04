@@ -29,6 +29,8 @@ function startWsServer() {
   wss = new WebSocketServer({ port: 8765 });
   wss.on('connection', (ws) => {
     console.log('Slave connected:', ws._socket.remoteAddress);
+    // 接続直後にmatchDataを送信
+    ws.send(JSON.stringify({ type: 'match-data-sync', data: matchData }));
   });
   console.log(`WebSocket server listening on ${getLocalIp()}:8765`);
 }
@@ -1492,3 +1494,24 @@ ipcMain.handle('broadcast-substitution-entry', (_, entry) => {
 });
 
 ipcMain.handle('get-ws-client-count', () => (wss ? wss.clients.size : 0));
+
+ipcMain.handle('save-match-data-from-slave', (_, data) => {
+  try {
+    const config = {
+      hostTeam: data.hostTeam,
+      awayTeam: data.awayTeam,
+      stadiumName: data.stadiumName,
+      players: data.players,
+    };
+    fs.writeFileSync(teamConfigPath, JSON.stringify(config, null, 2));
+    // メモリにも反映
+    matchData.hostTeam = data.hostTeam;
+    matchData.awayTeam = data.awayTeam;
+    matchData.stadiumName = data.stadiumName;
+    matchData.players = data.players;
+    return { success: true };
+  } catch (e) {
+    console.error('Slave matchData保存エラー:', e);
+    return { success: false };
+  }
+});
