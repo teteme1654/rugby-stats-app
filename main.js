@@ -29,17 +29,19 @@ function startWsServer() {
   wss = new WebSocketServer({ port: 8765 });
   wss.on('connection', (ws) => {
     console.log('Slave connected:', ws._socket.remoteAddress);
-    // 接続直後にmatchDataとサイズ設定を送信
-    const sizeSettings = {
-      scoreboardLogoSize:     displaySettings.scoreboardLogoSize,
-      scoreboardTeamNameSize: displaySettings.scoreboardTeamNameSize,
-      scoreboardScoreSize:    displaySettings.scoreboardScoreSize,
-      scoreboardStadiumSize:  displaySettings.scoreboardStadiumSize,
-      displayPlayerSize:      displaySettings.displayPlayerSize,
-      displayGoalSize:        displaySettings.displayGoalSize,
-      displayLogoOpacity:     displaySettings.displayLogoOpacity,
-    };
-    ws.send(JSON.stringify({ type: 'match-data-sync', data: matchData, sizeSettings }));
+    // 接続直後にmatchDataとサイズ設定を送信（少し待ってから送信）
+    setTimeout(() => {
+      const sizeSettings = {
+        scoreboardLogoSize:     displaySettings.scoreboardLogoSize,
+        scoreboardTeamNameSize: displaySettings.scoreboardTeamNameSize,
+        scoreboardScoreSize:    displaySettings.scoreboardScoreSize,
+        scoreboardStadiumSize:  displaySettings.scoreboardStadiumSize,
+        displayPlayerSize:      displaySettings.displayPlayerSize,
+        displayGoalSize:        displaySettings.displayGoalSize,
+        displayLogoOpacity:     displaySettings.displayLogoOpacity,
+      };
+      ws.send(JSON.stringify({ type: 'match-data-sync', data: matchData, sizeSettings }));
+    }, 500);
   });
   console.log(`WebSocket server listening on ${getLocalIp()}:8765`);
 }

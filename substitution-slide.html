@@ -173,12 +173,12 @@
     }
 
     .divider {
-      width: 60px;
+      width: 400px;
       display: flex;
+      flex-direction: row;
       align-items: center;
       justify-content: center;
-      font-size: 3.5em;
-      opacity: 0.5;
+      gap: 0;
       flex-shrink: 0;
       z-index: 2;
     }
@@ -204,7 +204,11 @@
         </div>
       </div>
 
-      <div class="divider">→</div>
+      <div class="divider">
+        <img src="assets/arrow.svg" style="width:120px;height:100px;display:block;margin-left:-55px;">
+        <img src="assets/arrow.svg" style="width:120px;height:100px;display:block;margin-left:-55px;">
+        <img src="assets/arrow.svg" style="width:120px;height:100px;display:block;margin-left:-55px;">
+      </div>
 
       <div class="player-card in-card">
         <div class="change-label">IN</div>
