@@ -133,35 +133,56 @@
       opacity: 0.2;
     }
 
-    /* テロップは各要素を絶対配置で固定 → 名前の長さに関係なく両カードで揃う */
-    .player-info {
-      position: absolute;
+    /* 画面全幅名前バー */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
       left: 0;
       right: 0;
-      bottom: 30px;
-      text-align: center;
-      z-index: 2;
-      background: rgba(0, 0, 0, 0.55);
-      padding: 16px 20px 20px;
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.65);
+      padding: 24px 40px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .bottom-player {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .bottom-divider {
+      width: 2px;
+      height: 60px;
+      background: rgba(255,255,255,0.3);
+      flex-shrink: 0;
     }
 
     .player-number {
-      font-size: 2.6em;
+      font-size: 3.5em;
       font-weight: 900;
       opacity: 0.9;
       letter-spacing: 0.05em;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .player-name {
-      font-size: 2.2em;
+      font-size: 3.5em;
       font-weight: 900;
       letter-spacing: 0.04em;
-      margin-top: 4px;
       line-height: 1.2;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      padding: 0 20px;
+      min-width: 0;
     }
 
     .player-position {
@@ -198,10 +219,6 @@
         <div class="player-photo-wrap" id="outPhotoWrap">
           <div class="player-photo-placeholder">?</div>
         </div>
-        <div class="player-info">
-          <div class="player-number" id="outNumber">#</div>
-          <div class="player-name" id="outName">-</div>
-        </div>
       </div>
 
       <div class="divider">
@@ -215,15 +232,42 @@
         <div class="player-photo-wrap" id="inPhotoWrap">
           <div class="player-photo-placeholder">?</div>
         </div>
-        <div class="player-info">
-          <div class="player-number" id="inNumber">#</div>
-          <div class="player-name" id="inName">-</div>
-        </div>
+      </div>
+    </div>
+
+    <!-- 画面全幅の名前バー -->
+    <div class="bottom-bar">
+      <div class="bottom-player">
+        <div class="player-number" id="outNumber">#</div>
+        <div class="player-name" id="outName">-</div>
+      </div>
+      <div class="bottom-divider"></div>
+      <div class="bottom-player">
+        <div class="player-number" id="inNumber">#</div>
+        <div class="player-name" id="inName">-</div>
       </div>
     </div>
   </div>
 
   <script>
+
+
+    function fitText(el, maxSize = 3.5, minSize = 2.5) {
+      const len = el.textContent.length;
+      const size = len <= 6  ? maxSize
+                 : len <= 9  ? maxSize - 0.4
+                 : len <= 12 ? maxSize - 0.9
+                 : minSize;
+      el.style.fontSize = size + 'em';
+
+      // 13文字以上は枕の横paddingを広げる
+      const infoEl = el.closest('.player-info');
+      if (infoEl) {
+        infoEl.style.paddingLeft  = len >= 13 ? '8px' : '32px';
+        infoEl.style.paddingRight = len >= 13 ? '8px' : '32px';
+      }
+    }
+
     function hexToRgba(hex, alpha) {
       const safeHex = (hex || '#333333').replace('#', '');
       const r = parseInt(safeHex.slice(0, 2), 16) || 50;
@@ -248,14 +292,18 @@
       }
 
       document.getElementById('outNumber').textContent = 'No.' + data.outPlayer.number;
-      document.getElementById('outName').textContent = data.outPlayer.name;
+      const outNameEl = document.getElementById('outName');
+      outNameEl.textContent = data.outPlayer.name;
+      fitText(outNameEl);
       const outWrap = document.getElementById('outPhotoWrap');
       outWrap.innerHTML = data.outPlayer.image
         ? `<img class="player-photo" src="${data.outPlayer.image}">`
         : `<div class="player-photo-placeholder">?</div>`;
 
       document.getElementById('inNumber').textContent = 'No.' + data.inPlayer.number;
-      document.getElementById('inName').textContent = data.inPlayer.name;
+      const inNameEl = document.getElementById('inName');
+      inNameEl.textContent = data.inPlayer.name;
+      fitText(inNameEl);
       const inWrap = document.getElementById('inPhotoWrap');
       inWrap.innerHTML = data.inPlayer.image
         ? `<img class="player-photo" src="${data.inPlayer.image}">`
