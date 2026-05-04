@@ -1028,9 +1028,10 @@
         }, 2000);
       } else {
         document.getElementById('slaveModeInfo').style.display = 'block';
-        // Slaveモード: スライド制御タブのみ表示
+        // Slaveモード: 事前準備・スコア制御タブを非表示（ディスプレイ設定は残す）
         document.querySelectorAll('.tab-btn').forEach(btn => {
-          if (!btn.classList.contains('tab-btn-slide')) btn.style.display = 'none';
+          const label = btn.textContent;
+          if (label.includes('事前準備') || label.includes('スコア制御')) btn.style.display = 'none';
         });
         switchTab('tab-slide');
       }
