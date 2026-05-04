@@ -29,8 +29,17 @@ function startWsServer() {
   wss = new WebSocketServer({ port: 8765 });
   wss.on('connection', (ws) => {
     console.log('Slave connected:', ws._socket.remoteAddress);
-    // 接続直後にmatchDataを送信
-    ws.send(JSON.stringify({ type: 'match-data-sync', data: matchData }));
+    // 接続直後にmatchDataとサイズ設定を送信
+    const sizeSettings = {
+      scoreboardLogoSize:     displaySettings.scoreboardLogoSize,
+      scoreboardTeamNameSize: displaySettings.scoreboardTeamNameSize,
+      scoreboardScoreSize:    displaySettings.scoreboardScoreSize,
+      scoreboardStadiumSize:  displaySettings.scoreboardStadiumSize,
+      displayPlayerSize:      displaySettings.displayPlayerSize,
+      displayGoalSize:        displaySettings.displayGoalSize,
+      displayLogoOpacity:     displaySettings.displayLogoOpacity,
+    };
+    ws.send(JSON.stringify({ type: 'match-data-sync', data: matchData, sizeSettings }));
   });
   console.log(`WebSocket server listening on ${getLocalIp()}:8765`);
 }
@@ -1495,7 +1504,7 @@ ipcMain.handle('broadcast-substitution-entry', (_, entry) => {
 
 ipcMain.handle('get-ws-client-count', () => (wss ? wss.clients.size : 0));
 
-ipcMain.handle('save-match-data-from-slave', (_, data) => {
+ipcMain.handle('save-match-data-from-slave', (_, data, sizeSettings) => {
   try {
     const config = {
       hostTeam: data.hostTeam,
@@ -1509,6 +1518,11 @@ ipcMain.handle('save-match-data-from-slave', (_, data) => {
     matchData.awayTeam = data.awayTeam;
     matchData.stadiumName = data.stadiumName;
     matchData.players = data.players;
+    // サイズ設定をマージ（Slave固有の設定は上書きしない）
+    if (sizeSettings) {
+      Object.assign(displaySettings, sizeSettings);
+      saveDisplaySettings();
+    }
     return { success: true };
   } catch (e) {
     console.error('Slave matchData保存エラー:', e);

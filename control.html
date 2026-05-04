@@ -1072,7 +1072,7 @@
           updateSubstitutionHistoryButtons();
         } else if (msg.type === 'match-data-sync') {
           currentData = msg.data;
-          window.electronAPI.saveMatchDataFromSlave(msg.data);
+          window.electronAPI.saveMatchDataFromSlave(msg.data, msg.sizeSettings);
         }
       };
     }
