@@ -1072,6 +1072,7 @@
           updateSubstitutionHistoryButtons();
         } else if (msg.type === 'match-data-sync') {
           currentData = msg.data;
+          console.log('sizeSettings received:', msg.sizeSettings);
           await window.electronAPI.saveMatchDataFromSlave(msg.data, msg.sizeSettings);
           if (msg.sizeSettings) loadDisplaySizes();
         }
