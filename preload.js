@@ -162,6 +162,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getLocalIp: () => ipcRenderer.invoke('get-local-ip'),
   broadcastSubstitutionEntry: (entry) => ipcRenderer.invoke('broadcast-substitution-entry', entry),
   getWsClientCount: () => ipcRenderer.invoke('get-ws-client-count'),
+  getTeamList: () => ipcRenderer.invoke('get-team-list'),
+  getLogoForTeam: (teamName) => ipcRenderer.invoke('get-logo-for-team', teamName),
+  getHostImageAdjust: () => ipcRenderer.invoke('get-host-image-adjust'),
+  setHostImageAdjust: (offsetY, scale) => ipcRenderer.invoke('set-host-image-adjust', offsetY, scale),
   saveMatchDataFromSlave: (data, sizeSettings) => ipcRenderer.invoke('save-match-data-from-slave', data, sizeSettings)
 });
 

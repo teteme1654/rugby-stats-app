@@ -295,9 +295,12 @@
       const outNameEl = document.getElementById('outName');
       outNameEl.textContent = data.outPlayer.name;
       fitText(outNameEl);
+      const adjust = data.imageAdjust || { offsetY: 0, scale: 1.0 };
+      const adjustStyle = `transform: scale(${adjust.scale}) translateY(${adjust.offsetY}px); transform-origin: bottom center;`;
+
       const outWrap = document.getElementById('outPhotoWrap');
       outWrap.innerHTML = data.outPlayer.image
-        ? `<img class="player-photo" src="${data.outPlayer.image}">`
+        ? `<img class="player-photo" src="${data.outPlayer.image}" style="${adjustStyle}">`
         : `<div class="player-photo-placeholder">?</div>`;
 
       document.getElementById('inNumber').textContent = 'No.' + data.inPlayer.number;
@@ -306,7 +309,7 @@
       fitText(inNameEl);
       const inWrap = document.getElementById('inPhotoWrap');
       inWrap.innerHTML = data.inPlayer.image
-        ? `<img class="player-photo" src="${data.inPlayer.image}">`
+        ? `<img class="player-photo" src="${data.inPlayer.image}" style="${adjustStyle}">`
         : `<div class="player-photo-placeholder">?</div>`;
 
       const ind = document.getElementById('standbyIndicator');

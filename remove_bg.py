@@ -84,7 +84,7 @@ except ImportError:
 #     return name if name else filename
 
 
-def remove_background_batch(input_dir="stats/images/players", output_suffix="_nobg"):
+def remove_background_batch(input_dir="assets/teams", output_suffix="_nobg"):
     """
     指定ディレクトリ配下の画像を再帰的に背景除去＋リネーム
     
@@ -227,13 +227,13 @@ if __name__ == "__main__":
     
     # カレントディレクトリを確認
     current_dir = Path.cwd()
-    expected_dir = current_dir / "stats" / "images" / "players"
-    
+    expected_dir = current_dir / "assets" / "teams"
+
     if not expected_dir.exists():
-        print("⚠️  警告: stats/images/players/ が見つかりません")
+        print("⚠️  警告: assets/teams/ が見つかりません")
         print(f"現在のディレクトリ: {current_dir}")
         print()
-        print("このスクリプトはプロジェクトルート（webapp/）で実行してください")
+        print("このスクリプトはプロジェクトルート（Ovaly-Dev/）で実行してください")
         print()
         sys.exit(1)
     

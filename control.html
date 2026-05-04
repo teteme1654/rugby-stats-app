@@ -364,7 +364,9 @@
           <h3 style="margin-bottom: 15px; color: #333;">ホームチーム</h3>
           <div class="form-group">
             <label>チーム名:</label>
-            <input type="text" id="hostTeamName" placeholder="チーム名を入力">
+            <select id="hostTeamName" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 1em;">
+              <option value="">-- チームを選択 --</option>
+            </select>
           </div>
           <div class="form-group">
             <label>チーム名サイズ:</label>
@@ -406,7 +408,9 @@
           <h3 style="margin-bottom: 15px; color: #333;">アウェイチーム</h3>
           <div class="form-group">
             <label>チーム名:</label>
-            <input type="text" id="awayTeamName" placeholder="チーム名を入力">
+            <select id="awayTeamName" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 1em;">
+              <option value="">-- チームを選択 --</option>
+            </select>
           </div>
           <div class="form-group">
             <label>チーム名サイズ:</label>
@@ -996,12 +1000,36 @@
       </div>
 
       <!-- アセット設定 -->
-      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-        <button onclick="setPlayerImagesPath()" style="background: #17a2b8; color: white; padding: 8px 14px; border: none; border-radius: 5px; font-size: 0.9em; cursor: pointer;">📁 選手画像フォルダ</button>
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px;">
+        <button onclick="setPlayerImagesPath()" style="background: #17a2b8; color: white; padding: 8px 14px; border: none; border-radius: 5px; font-size: 0.9em; cursor: pointer;">📁 HOST選手画像フォルダ</button>
         <span id="playerImagesPathLabel" style="font-size: 0.85em; color: #666;">未設定</span>
         <button onclick="setSubstitutionBgImage()" style="background: #17a2b8; color: white; padding: 8px 14px; border: none; border-radius: 5px; font-size: 0.9em; cursor: pointer; margin-left: 10px;">🖼 背景画像</button>
         <span id="substitutionBgLabel" style="font-size: 0.85em; color: #666;">未設定</span>
       </div>
+
+      <!-- HOST選手画像調整 -->
+      <div style="font-size: 0.85em; color: #555; font-weight: bold; margin-bottom: 8px;">HOST選手画像調整</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div>
+          <div style="font-size: 0.8em; color: #666; margin-bottom: 4px;">縦オフセット（px）</div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="range" id="hostImageOffsetY" min="-300" max="300" value="0" step="5"
+                   oninput="document.getElementById('hostImageOffsetYVal').textContent = this.value + 'px'"
+                   style="flex: 1; cursor: pointer;">
+            <span id="hostImageOffsetYVal" style="min-width: 48px; font-weight: bold; text-align: right;">0px</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size: 0.8em; color: #666; margin-bottom: 4px;">スケール</div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="range" id="hostImageScale" min="0.5" max="2.0" value="1.0" step="0.05"
+                   oninput="document.getElementById('hostImageScaleVal').textContent = parseFloat(this.value).toFixed(2)"
+                   style="flex: 1; cursor: pointer;">
+            <span id="hostImageScaleVal" style="min-width: 48px; font-weight: bold; text-align: right;">1.00</span>
+          </div>
+        </div>
+      </div>
+      <button onclick="applyHostImageAdjust()" style="margin-top: 10px; background: #667eea; color: white; padding: 8px 20px; border: none; border-radius: 5px; font-size: 0.9em; cursor: pointer;">適用</button>
     </div>
 
     </div><!-- /tab-slide -->
@@ -1403,11 +1431,15 @@
       });
       
       // チーム名
-      document.getElementById('hostTeamName').addEventListener('change', (e) => {
-        window.electronAPI.updateTeam('hostTeam', 'name', e.target.value);
+      document.getElementById('hostTeamName').addEventListener('change', async (e) => {
+        const name = e.target.value;
+        window.electronAPI.updateTeam('hostTeam', 'name', name);
+        await autoLoadLogoForTeam('hostTeam', name);
       });
-      document.getElementById('awayTeamName').addEventListener('change', (e) => {
-        window.electronAPI.updateTeam('awayTeam', 'name', e.target.value);
+      document.getElementById('awayTeamName').addEventListener('change', async (e) => {
+        const name = e.target.value;
+        window.electronAPI.updateTeam('awayTeam', 'name', name);
+        await autoLoadLogoForTeam('awayTeam', name);
       });
 
       // ロゴURL
@@ -1469,6 +1501,15 @@
     }
 
     // ロゴ画像読み込み
+    async function autoLoadLogoForTeam(team, teamName) {
+      if (!teamName) return;
+      const dataUri = await window.electronAPI.getLogoForTeam(teamName);
+      if (!dataUri) return;
+      const inputId = team === 'hostTeam' ? 'hostTeamLogo' : 'awayTeamLogo';
+      document.getElementById(inputId).value = dataUri;
+      await window.electronAPI.updateTeam(team, 'logo', dataUri);
+    }
+
     async function loadTeamLogo(team) {
       try {
         console.log(`=== ロゴ読み込み開始: ${team} ===`);
@@ -1794,12 +1835,23 @@
       }
     }
 
+    async function applyHostImageAdjust() {
+      const offsetY = parseFloat(document.getElementById('hostImageOffsetY').value);
+      const scale   = parseFloat(document.getElementById('hostImageScale').value);
+      await window.electronAPI.setHostImageAdjust(offsetY, scale);
+    }
+
     // 起動時に設定を反映
     window.addEventListener('DOMContentLoaded', async () => {
       const imgPath = await window.electronAPI.getPlayerImagesPath();
       if (imgPath) {
         document.getElementById('playerImagesPathLabel').textContent = imgPath;
       }
+      const adjust = await window.electronAPI.getHostImageAdjust();
+      document.getElementById('hostImageOffsetY').value = adjust.offsetY;
+      document.getElementById('hostImageOffsetYVal').textContent = adjust.offsetY + 'px';
+      document.getElementById('hostImageScale').value = adjust.scale;
+      document.getElementById('hostImageScaleVal').textContent = parseFloat(adjust.scale).toFixed(2);
     });
 
     // セレクトボックスにイベントリスナーを追加
@@ -1985,7 +2037,8 @@
     }
 
     // 初期化
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
+      await loadTeamSelectOptions();
       loadData();
       setupEventListeners();
       loadDisplayList();
@@ -1995,6 +2048,15 @@
       loadScoreboardDesign();
       initAppMode();
     });
+
+    async function loadTeamSelectOptions() {
+      const teams = await window.electronAPI.getTeamList();
+      const options = teams.map(t => `<option value="${t}">${t}</option>`).join('');
+      ['hostTeamName', 'awayTeamName'].forEach(id => {
+        const sel = document.getElementById(id);
+        sel.innerHTML = '<option value="">-- チームを選択 --</option>' + options;
+      });
+    }
 
     // スコアボードデザインを保存
     async function saveScoreboardDesign(design) {

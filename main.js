@@ -91,6 +91,10 @@ let displaySettings = {
 
   // Multi-PC設定
   appMode: 'main',           // 'main' or 'slave'
+
+  // HOSTチーム選手画像調整
+  hostPlayerImageOffsetY: 0,   // 縦オフセット（px）
+  hostPlayerImageScale: 1.0,   // スケール
 };
 
 // 設定ファイルのパス
@@ -1381,24 +1385,39 @@ ipcMain.handle('prepare-substitution-slide', async (event, slideData) => {
   // 相対パスで保存されている場合は絶対パスに解決する
   const basePath = storedPath ? path.resolve(__dirname, storedPath) : '';
 
+  // アプリ内フォールバックパス
+  const assetsTeamsPath = path.join(__dirname, 'assets', 'teams');
+
   function loadPlayerImage(teamName, playerName) {
-    if (!basePath) return null;
-    const imgPath = path.join(basePath, teamName, 'nobg', `${playerName}_nobg.png`);
-    if (fs.existsSync(imgPath)) {
-      try {
-        const buf = fs.readFileSync(imgPath);
-        return `data:image/png;base64,${buf.toString('base64')}`;
-      } catch (e) {
-        console.warn('選手画像読み込みエラー:', imgPath, e.message);
-        return null;
+    const candidates = [];
+    // 外部フォルダが設定されていれば優先
+    if (basePath) candidates.push(path.join(basePath, teamName, 'nobg', `${playerName}_nobg.png`));
+    // フォールバック: assets/teams/
+    candidates.push(path.join(assetsTeamsPath, teamName, 'nobg', `${playerName}_nobg.png`));
+
+    for (const imgPath of candidates) {
+      if (fs.existsSync(imgPath)) {
+        try {
+          const buf = fs.readFileSync(imgPath);
+          return `data:image/png;base64,${buf.toString('base64')}`;
+        } catch (e) {
+          console.warn('選手画像読み込みエラー:', imgPath, e.message);
+        }
       }
     }
     return null;
   }
 
+  const isHost = slideData.team === 'host';
+  const imageAdjust = isHost ? {
+    offsetY: displaySettings.hostPlayerImageOffsetY || 0,
+    scale:   displaySettings.hostPlayerImageScale   || 1.0,
+  } : { offsetY: 0, scale: 1.0 };
+
   const enrichedData = {
     ...slideData,
     backgroundImage: displaySettings.substitutionBgImage || null,
+    imageAdjust,
     outPlayer: {
       ...slideData.outPlayer,
       image: loadPlayerImage(slideData.teamName, slideData.outPlayer.name)
@@ -1505,6 +1524,50 @@ ipcMain.handle('broadcast-substitution-entry', (_, entry) => {
 });
 
 ipcMain.handle('get-ws-client-count', () => (wss ? wss.clients.size : 0));
+
+ipcMain.handle('get-team-list', () => {
+  const teamsPath = path.join(__dirname, 'assets', 'teams');
+  try {
+    return fs.readdirSync(teamsPath).filter(name =>
+      fs.statSync(path.join(teamsPath, name)).isDirectory()
+    );
+  } catch (e) {
+    return [];
+  }
+});
+
+ipcMain.handle('get-logo-for-team', (event, teamName) => {
+  const logosPath = path.join(__dirname, 'assets', 'logos');
+  const exts = ['.png', '.jpg', '.jpeg', '.svg', '.gif'];
+  for (const ext of exts) {
+    const filePath = path.join(logosPath, teamName + ext);
+    if (fs.existsSync(filePath)) {
+      try {
+        const buf = fs.readFileSync(filePath);
+        const mime = ext === '.svg' ? 'image/svg+xml'
+                   : ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg'
+                   : ext === '.gif' ? 'image/gif'
+                   : 'image/png';
+        return `data:${mime};base64,${buf.toString('base64')}`;
+      } catch (e) {
+        console.warn('ロゴ読み込みエラー:', filePath, e.message);
+      }
+    }
+  }
+  return null;
+});
+
+ipcMain.handle('get-host-image-adjust', () => ({
+  offsetY: displaySettings.hostPlayerImageOffsetY || 0,
+  scale:   displaySettings.hostPlayerImageScale   || 1.0,
+}));
+
+ipcMain.handle('set-host-image-adjust', (_, offsetY, scale) => {
+  displaySettings.hostPlayerImageOffsetY = offsetY;
+  displaySettings.hostPlayerImageScale   = scale;
+  saveDisplaySettings();
+  return { success: true };
+});
 
 ipcMain.handle('save-match-data-from-slave', (_, data, sizeSettings) => {
   try {
