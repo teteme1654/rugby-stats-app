@@ -1065,14 +1065,15 @@
         statusEl.textContent = '接続エラー（IPを確認してください）';
         statusEl.style.color = '#c62828';
       };
-      wsConnection.onmessage = (event) => {
+      wsConnection.onmessage = async (event) => {
         const msg = JSON.parse(event.data);
         if (msg.type === 'substitution-history-add') {
           substitutionHistory.push(msg.entry);
           updateSubstitutionHistoryButtons();
         } else if (msg.type === 'match-data-sync') {
           currentData = msg.data;
-          window.electronAPI.saveMatchDataFromSlave(msg.data, msg.sizeSettings);
+          await window.electronAPI.saveMatchDataFromSlave(msg.data, msg.sizeSettings);
+          if (msg.sizeSettings) loadDisplaySizes();
         }
       };
     }
